@@ -1,0 +1,30 @@
+
+CC ?= gcc
+CPP ?= cpp
+AR ?= ar
+
+DEPS = hellomake.h
+OBJ = hellomake.o hellofunc.o 
+
+OBLIVC_PATH=../obliv-c
+
+
+OBLIVCC = $(OBLIVC_PATH)/bin/oblivcc
+OBLIVCH = $(OBLIVC_PATH)/src/ext/oblivc
+OBLIVCA = $(OBLIVC_PATH)/_build/libobliv.a
+CFLAGS=-I.
+#CFLAGS+= -O3 -march=native -I/usr/include -I . -I $(SRC_PATH) -std=c99 -fopenmp
+LDFLAGS += -lm -lgomp -lgcrypt
+
+
+ACK_PATH=../absentminded-crypto-kit/src/
+libacka= $(ACK_PATH)/build/lib/liback.a
+
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $*.c -o $*.o -I $(OBLIVCH)
+	$(CPP) -MM $(CFLAGS) $*.c -I $(OBLIVCH) > $*.d
+
+
+hellomake: $(OBJ)
+	$(CC) -o $@ $^ $(CFLAGS)
