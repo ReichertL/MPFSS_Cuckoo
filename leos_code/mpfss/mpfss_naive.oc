@@ -1,4 +1,46 @@
 #include <obliv.oh>
 #include "mpfss_naive.h"
 
+#include <fss.h>
+//#include <oram_fsslfss.oh>
 
+void mpfss_naive(void* args){
+
+    
+
+    protocolIO *io = (protocolIO*) args;
+
+    size_t size=10;
+    size_t blockmultiple=1;
+    uint32_t truncated_levels=0;
+
+    
+    /* Creates new FSS instance
+    	size_t size: size of input field
+	size_t blockmultiple: ? -> 1 should be sufficient
+	uint32_t truncated_levels:  The same as start level -> 0 should be a good value
+		(only needed for fss_new , not for fss_cprg_new)
+    */
+    
+    fss *my_fss;
+    my_fss= fss_new(size, blockmultiple, truncated_levels);
+
+
+
+    /*Calls fss gen and eval
+		active_block_delta: value of point function at point i
+		local_output:
+		local_bit_output: Will be 1 at corresponding index
+		fss: instance of fss
+		index: index where point function =/= 0
+	*/
+   /* fss_cprg_getblockvector(    obliv uint8_t * active_block_delta, 
+                                uint8_t * local_output, 
+                                bool * local_bit_output, 
+                                fss_cprg * fss, 
+                                obliv size_t index);
+
+
+*/
+
+}
