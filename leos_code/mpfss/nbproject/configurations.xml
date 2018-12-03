@@ -82,6 +82,13 @@
         <cTool flags="0">
         </cTool>
       </item>
+      <folder path="0">
+        <cTool>
+          <incDir>
+            <pElem>../../absentminded-crypto-kit/src/oram_fssl</pElem>
+          </incDir>
+        </cTool>
+      </folder>
       <folder path="oram_fssl">
         <cTool>
           <incDir>

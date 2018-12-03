@@ -2,7 +2,7 @@
 #include "mpfss_naive.h"
 
 #include <fss.h>
-//#include <oram_fsslfss.oh>
+#include <fss.oh>
 
 void mpfss_naive(void* args){
 
