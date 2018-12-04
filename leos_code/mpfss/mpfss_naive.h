@@ -10,7 +10,8 @@ double lap;
 int cp;
 
 typedef struct {
-    int n; // number of data points
+    int m; // number of points in mpfss
+    int n; //size of input field
     
     int r; // seed
 } protocolIO;

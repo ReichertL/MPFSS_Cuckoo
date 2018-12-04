@@ -15,7 +15,8 @@ INCLUDE=-I$(ACKLIB_FFSL)
 LOADFILES= util.c 
 
 ACKLIB_PATH=../../absentminded-crypto-kit/build/lib/liback.a 
-LOADLIBES=$(ACKLIB_PATH) 
+#-lgomp flag is very important. Otherwise linking will fail. Does some kind of parallelization.
+LOADLIBES=-fopenmp $(ACKLIB_PATH) 
 
 
 ./a.out: $(testName).oc $(testName).c $(RUNTIME)
