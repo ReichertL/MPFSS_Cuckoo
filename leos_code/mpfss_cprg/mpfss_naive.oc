@@ -50,8 +50,8 @@ void mpfss_naive(void* args){
 
    	//obliv size_t index= i_1^i_2;
 
-	obliv size_t index=2;
-// size_t index=0;
+	//obliv size_t index=0;
+ size_t index=1;
 
   	/* "Finally, you'll have noticed that there's no input for beta. That's because
 	the final, correction stage of the FSS has not been performed, which means
@@ -92,14 +92,6 @@ void mpfss_naive(void* args){
 	}
 	printf(" \n");
 
-
-    printf(" local_output_bits: Party %d \n", io->party);
-    for(int i = 0; i <size ; i++) {
-    
-        printf("%d ", local_bit_output[i]);  
-  }
-  printf("\n");
-
     obliv uint8_t *v1= calloc(size, BLOCKSIZE*scale*blockmultiple);
     obliv uint8_t *v2= calloc(size, BLOCKSIZE*scale*blockmultiple);
 
@@ -117,6 +109,7 @@ void mpfss_naive(void* args){
     /*	Xor both local output vectors to generate an obliv vector*/
     *dpf_obliv=*v1 ^ *v2;
 
+    //hier müssste noch size uint8_t berücksichigt wreden
     uint8_t *dpf= calloc(size, BLOCKSIZE*blockmultiple);
     
 
