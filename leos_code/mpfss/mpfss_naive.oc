@@ -111,7 +111,7 @@ void mpfss_naive(void* args){
   feedOblivBoolArray(v1, local_bit_output, size, 1);
   feedOblivBoolArray(v2, local_bit_output, size, 2);
 
-  bool *v1_non_obliv= calloc(size, sizeof( bool));
+/*  bool *v1_non_obliv= calloc(size, sizeof( bool));
   bool *v2_non_obliv= calloc(size, sizeof( bool));
 
   revealOblivBoolArray(v1_non_obliv, v1, size, 0);
@@ -125,12 +125,17 @@ void mpfss_naive(void* args){
   for(int i = 0; i <size ; i++) {
     printf("%d ", v2_non_obliv[i]);  
   }
-  printf(" \n");  
+  printf(" \n"); */ 
 
-    obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
-    /*	Xor both local output vectors to generate an obliv vector*/
-    *dpf_obliv=*v1 ^ *v2;
-    bool *dpf= calloc(size, sizeof(bool));
+  obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+
+  /*	Xor both local output vectors to generate an obliv vector*/
+
+  for(int i = 0; i <size ; i++) {
+    dpf_obliv[i]=v1[i]^v2[i]; 
+  }
+  
+  bool *dpf= calloc(size, sizeof(bool));
     
 
     /* bool revealObliv<Tname>(tname* dest, obliv tname src, int party)
