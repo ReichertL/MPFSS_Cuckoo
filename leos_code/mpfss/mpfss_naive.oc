@@ -1,18 +1,15 @@
 #include <obliv.oh>
 #include "mpfss_naive.h"
 
-#include <fss.oh>
+//#include <fss.oh>
+#include <fss_cprg.oh>
 
 
-void mpfss_naive(void* args){
+void dpf( size_t size, int input_for_index, int party){
 
-    protocolIO *io = (protocolIO*) args;
-    size_t size=io->size;
 
     /*one block: 16 byte -> Blockmultiple allow longer */
     size_t blockmultiple=1;
-    uint32_t truncated_levels=0;
-
     
     /* Creates new FSS instance
     	size_t size: size of input field
@@ -20,9 +17,10 @@ void mpfss_naive(void* args){
 		uint32_t truncated_levels:  The same as start level -> 0 should be a good value
 		(only needed for fss_new , not for fss_cprg_new)
     */
-    fss *my_fss;
-    my_fss= fss_new(size, blockmultiple, truncated_levels);
-	
+    fss_cprg *my_fss;
+   // my_fss= fss_new(size, blockmultiple, truncated_levels);
+	  my_fss= fss_cprg_new(size, blockmultiple);
+
 	
     /*	The 'fss_getblockvector' function takes the
 		value a as "index", and writes y^1 and y^2 as output into the location
@@ -45,13 +43,12 @@ void mpfss_naive(void* args){
   	The 'fss_getblockvector' function takes the value a as "index".
   	TODO: Should be a random number!
    	*/
-   	int input_for_index=io->input; 
  	obliv int i_1=feedOblivInt(input_for_index, 1);
  	obliv int i_2=feedOblivInt(input_for_index, 2);
 
    	//obliv size_t index= i_1^i_2;
 
-	obliv size_t index=2;
+	obliv size_t index=input_for_index;
 
   	/* "Finally, you'll have noticed that there's no input for beta. That's because
 	the final, correction stage of the FSS has not been performed, which means
@@ -78,13 +75,14 @@ void mpfss_naive(void* args){
 		fss * fss: instance of fss
 		obliv size_t index: index where point function =/= 0
 	*/
-    fss_getblockvector( 	active_block_delta, 
+    fss_cprg_getblockvector( 	active_block_delta, 
                             local_output, 
                             local_bit_output, 
                             my_fss, 
                            	index);
+
   // For debugging
-  obliv int index_int= (obliv int) index;
+  /*obliv int index_int= (obliv int) index;
   int index_non_obliv;
   revealOblivInt(&index_non_obliv, index_int, 0);
   printf("Index %d\n", index_non_obliv );
@@ -94,47 +92,26 @@ void mpfss_naive(void* args){
         printf("%d ", local_bit_output[i]);  
   }
 	printf(" \n");
-
+  */
 
   obliv bool *v1= calloc(size, sizeof(obliv bool));
   obliv bool *v2= calloc(size, sizeof(obliv bool));
 
 
-
-
     /* 	feedObliv<Typename>(typename v, int party)
     	Send obliv values to all parties.
     	tname can be: bool, char, int, short, long, long long, or float
-
     	==> void  feedOblivBoolArray(obliv bool  dest[],const bool  src[],size_t n, int party);;
     */
   feedOblivBoolArray(v1, local_bit_output, size, 1);
   feedOblivBoolArray(v2, local_bit_output, size, 2);
 
-/*  bool *v1_non_obliv= calloc(size, sizeof( bool));
-  bool *v2_non_obliv= calloc(size, sizeof( bool));
-
-  revealOblivBoolArray(v1_non_obliv, v1, size, 0);
-  revealOblivBoolArray(v2_non_obliv, v2, size, 0);
-
-  for(int i = 0; i <size ; i++) {
-    printf("%d ", v1_non_obliv[i]);  
-  }
-  printf(" \n");  
-
-  for(int i = 0; i <size ; i++) {
-    printf("%d ", v2_non_obliv[i]);  
-  }
-  printf(" \n"); */ 
-
   obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
 
   /*	Xor both local output vectors to generate an obliv vector*/
-
   for(int i = 0; i <size ; i++) {
     dpf_obliv[i]=v1[i]^v2[i]; 
   }
-  
   bool *dpf= calloc(size, sizeof(bool));
     
 
@@ -142,7 +119,6 @@ void mpfss_naive(void* args){
 		Revealing oblive values to specified parties.
 		Returns true if successful.
 		When party=0: All parties will receive this value.
-   
 		==>bool  revealOblivBoolArray(bool dest[],  obliv bool src[],  size_t n,
                int party);
     */
@@ -159,63 +135,6 @@ void mpfss_naive(void* args){
 	printf("activ_value %d\n", activ_value );
 
 
-  /*--------------------------------------------------------------*/
-
-  /*  int *temp_v= calloc(size, BLOCKSIZE*sizeof(int)*blockmultiple);
-    for(int i = 0; i <size ; i++) {
-    		int temp=(int) local_output[i];
-	      	temp_v[i]=temp;
-
-	}
-
-    obliv int *v1_int= calloc(size, BLOCKSIZE*sizeof(obliv int)*blockmultiple);
-    obliv int *v2_int= calloc(size, BLOCKSIZE*sizeof(obliv int)*blockmultiple);
-
-    feedOblivIntArray(v1_int, temp_v, size*BLOCKSIZE*blockmultiple, 1);
-   	feedOblivIntArray(v2_int, temp_v, size*BLOCKSIZE*blockmultiple, 2);
-
-    obliv uint8_t *dpf_obliv_int= calloc(size, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
-    *dpf_obliv_int=*v1 ^ *v2;
-
-
-    uint8_t *dpf_int= calloc(size, BLOCKSIZE*blockmultiple);
-
-    revealOblivCharArray(dpf_int, dpf_obliv_int, size*BLOCKSIZE*blockmultiple, 0);
-	for(int i = 0; i <size; i++) {
-	      printf("%zu ", dpf[i]);	
-	}
-	printf(" \n");	
-*/
-
-
-/*----------------------------------------------------------------*/
-
-
-
-
-
-
-
-
-
-   	/*
-	Does not seem to reveal the actual b value. Acual value in active_block_delta.
-   	int b_value_hidden=local_output[a_value];
- 
- 	obliv int y1_x=feedOblivInt(local_output[b_value_hidden], 1);
- 	obliv int y2_x=feedOblivInt(local_output[b_value_hidden], 2);
-
- 	// Xor in C: "^"
- 	obliv b_value_obliv= y1_x^y2_x;
-
-  
-  	int b_value=0;
-  	int *b_value_ptr=&b_value;
-	revealOblivInt(b_value_ptr, b_value_obliv, 0);
-	printf("b_value %d\n", b_value )*/
-
-
-
     /* Freeing the allocated space.
     */
     free(active_block_delta);
@@ -223,16 +142,26 @@ void mpfss_naive(void* args){
     free(local_bit_output);
     free(v1);
     free(v2);
-    
-    //free(v1_int);
-    //free(v2_int);
-   
-     free(dpf);
-     free(dpf_obliv);
+    free(dpf);
+    free(dpf_obliv);
+    fss_cprg_free(my_fss);
+}
 
 
 
-    
+void mpfss_naive(void* args){
 
+  protocolIO *io = (protocolIO*) args;
+  size_t size=io->size;
+  int t=io->t;
+  int party=io->party;
+  int input;
+  printf("t %d\n", t );
+
+  for (int j=0; j<t;j++){
+      input =(j+party) % (int) size;
+      printf(" input %d\n", input );
+      dpf(size,input,party); 
+  }
 
 }

@@ -51,7 +51,8 @@ int main(int argc, char *argv[]) {
         size_t size=10;
         strcpy(&io.size,&size);
         strcpy(&io.party, &cp);
-
+        int t= 5;
+		strcpy(&io.t, &t);
 
         lap = wallClock();        
          // Execute Yao's protocol and cleanup
