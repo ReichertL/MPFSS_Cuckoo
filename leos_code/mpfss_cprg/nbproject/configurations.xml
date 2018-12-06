@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <df root="." name="0">
+      <in>dbg.h</in>
+      <in>mpfss_naive.c</in>
+      <in>mpfss_naive.h</in>
+      <in>util.c</in>
+      <in>util.h</in>
+    </df>
+    <logicalFolder name="oram_fssl"
+                   displayName="oram_fssl"
+                   projectFiles="true"
+                   root="../../../absentminded-crypto-kit/src/oram_fssl">
+      <itemPath>../../../absentminded-crypto-kit/src/oram_fssl/floram.h</itemPath>
+      <itemPath>../../../absentminded-crypto-kit/src/oram_fssl/floram_util.h</itemPath>
+      <itemPath>../../../absentminded-crypto-kit/src/oram_fssl/fss.c</itemPath>
+      <itemPath>../../../absentminded-crypto-kit/src/oram_fssl/fss.h</itemPath>
+      <itemPath>../../../absentminded-crypto-kit/src/oram_fssl/fss_cprg.c</itemPath>
+      <itemPath>../../../absentminded-crypto-kit/src/oram_fssl/fss_cprg.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+      <itemPath>nbproject/private/launcher.properties</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Default" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <flagsDictionary>
+        <element flagsID="0" commonFlags="-g"/>
+      </flagsDictionary>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE} -f Makefile</buildCommand>
+          <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
+          <executablePath>a.out</executablePath>
+          <cTool>
+            <incDir>
+              <pElem>../../obliv-c/src/ext/oblivc</pElem>
+            </incDir>
+            <incFile>
+              <pElem>../../obliv-c/src/ext/oblivc/obliv_bits.h</pElem>
+            </incFile>
+            <preprocessorList>
+              <Elem>CIL=1</Elem>
+              <Elem>_GNUCC</Elem>
+            </preprocessorList>
+          </cTool>
+        </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand></preBuildCommand>
+        </preBuild>
+      </makefileType>
+      <item path="../../../absentminded-crypto-kit/src/oram_fssl/fss.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+        <cTool flags="0">
+        </cTool>
+      </item>
+      <item path="../../../absentminded-crypto-kit/src/oram_fssl/fss_cprg.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+        <cTool flags="0">
+        </cTool>
+      </item>
+      <folder path="0">
+        <cTool>
+          <incDir>
+            <pElem>../../absentminded-crypto-kit/src/oram_fssl</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="oram_fssl">
+        <cTool>
+          <incDir>
+            <pElem>../../../leos_code/mpfss</pElem>
+            <pElem>../../../absentminded-crypto-kit/src</pElem>
+            <pElem>../../../absentminded-crypto-kit/src/oram_fssl</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <item path="mpfss_naive.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+        </cTool>
+      </item>
+      <item path="util.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="0">
+        </cTool>
+      </item>
+    </conf>
+    <conf name="mpfss-server" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE}</buildCommand>
+          <cleanCommand>${MAKE} clean</cleanCommand>
+          <executablePath>a.out</executablePath>
+        </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand></preBuildCommand>
+        </preBuild>
+      </makefileType>
+      <item path="dbg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mpfss_naive.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="mpfss_naive.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="util.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="util.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="mpfss-client" type="0">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>false</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <codeAssistance>
+      </codeAssistance>
+      <makefileType>
+        <makeTool>
+          <buildCommandWorkingDir>.</buildCommandWorkingDir>
+          <buildCommand>${MAKE}</buildCommand>
+          <cleanCommand>${MAKE} clean</cleanCommand>
+          <executablePath>a.out</executablePath>
+        </makeTool>
+        <preBuild>
+          <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
+          <preBuildCommand></preBuildCommand>
+        </preBuild>
+      </makefileType>
+      <item path="dbg.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="mpfss_naive.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="mpfss_naive.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="util.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="util.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

@@ -1,7 +1,7 @@
 #include <obliv.oh>
 #include "mpfss_naive.h"
 
-#include <fss.oh>
+#include <fss_cprg.oh>
 
 
 void mpfss_naive(void* args){
@@ -11,7 +11,6 @@ void mpfss_naive(void* args){
 
     /*one block: 16 byte -> Blockmultiple allow longer */
     size_t blockmultiple=1;
-    uint32_t truncated_levels=0;
 
     
     /* Creates new FSS instance
@@ -21,7 +20,7 @@ void mpfss_naive(void* args){
 		(only needed for fss_new , not for fss_cprg_new)
     */
     fss *my_fss;
-    my_fss= fss_new(size, blockmultiple, truncated_levels);
+    my_fss= fss_cprg_new(size, blockmultiple);
 	
 	
     /*	The 'fss_getblockvector' function takes the
@@ -51,7 +50,8 @@ void mpfss_naive(void* args){
 
    	//obliv size_t index= i_1^i_2;
 
-	obliv size_t index=0;
+	obliv size_t index=2;
+// size_t index=0;
 
   	/* "Finally, you'll have noticed that there's no input for beta. That's because
 	the final, correction stage of the FSS has not been performed, which means
@@ -79,7 +79,7 @@ void mpfss_naive(void* args){
 		fss * fss: instance of fss
 		obliv size_t index: index where point function =/= 0
 	*/
-    fss_getblockvector( 	active_block_delta, 
+    fss_cprg_getblockvector( 	active_block_delta, 
                             local_output, 
                             local_bit_output, 
                             my_fss, 
@@ -91,6 +91,14 @@ void mpfss_naive(void* args){
 	      printf("%zu ", local_output[i]);	
 	}
 	printf(" \n");
+
+
+    printf(" local_output_bits: Party %d \n", io->party);
+    for(int i = 0; i <size ; i++) {
+    
+        printf("%d ", local_bit_output[i]);  
+  }
+  printf("\n");
 
     obliv uint8_t *v1= calloc(size, BLOCKSIZE*scale*blockmultiple);
     obliv uint8_t *v2= calloc(size, BLOCKSIZE*scale*blockmultiple);
