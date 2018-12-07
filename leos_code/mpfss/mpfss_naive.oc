@@ -9,7 +9,7 @@ size_t blockmultiple=1;
 
 
 void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obliv uint8_t *values, int j){
-  printf("-----------DPF -----------\n" );
+  printf("-----------DPF Run: %d -----------\n",j );
     
     /*  fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
         Creates new FSS instance
@@ -71,23 +71,23 @@ void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obli
     		fss * fss: instance of fss
     		obliv size_t index: index where point function =/= 0
   	*/
-    fss_cprg_getblockvector( 	active_block_delta, 
+  fss_cprg_getblockvector( 	active_block_delta, 
                             local_output, 
                             local_bit_output, 
                             my_fss, 
                            	index);
 
-  // For debugging
+    // For debugging
   obliv int index_int= (obliv int) index;
   int index_non_obliv;
   revealOblivInt(&index_non_obliv, index_int, 0);
   printf("Index %d\n", index_non_obliv );
 
-  printf(" local_output_bits: Party %d \n", party);
+  /*printf(" local_output_bits: Party %d \n", party);
     for(int i = 0; i <size ; i++) {
         printf("%d ", local_bit_output[i]);  
   }
-	printf(" \n");
+	printf(" \n");*/
 
 
   obliv bool *v1= calloc(size, sizeof(obliv bool));
@@ -103,12 +103,10 @@ void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obli
   feedOblivBoolArray(v2, local_bit_output, size, 2);
 
   obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
-
-  /*	Xor both local output vectors to generate an obliv vector*/
+    /*	Xor both local output vectors to generate an obliv vector*/
   for(int i = 0; i <size ; i++) {
     dpf_obliv[i]=v1[i]^v2[i]; 
   }
-
   bool *dpf= calloc(size, sizeof(bool));
     
 
@@ -125,20 +123,22 @@ void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obli
 	printf(" \n");	
 
 
-
-
-	/*Reveal b value */
+    /*Reveal b value */
 	/*int activ_value=0;
   int *activ_value_ptr=&activ_value;
 	revealOblivInt(activ_value_ptr, *active_block_delta, 0);
 	printf("activ_value %d\n", activ_value );*/
 
-  /*Writing the return values to correct location*/
-  memcpy ( &vectors[j], dpf_obliv, sizeof(dpf_obliv) );
+    /*  
+        Writing the return values to correct location
+        ==>void * memcpy ( void * destination, const void * source, size_t num );
+    */
+  memcpy ( &vectors[j], dpf_obliv, sizeof(obliv bool)*size );
+
   values[j]=*active_block_delta;
 
 
-  /* Freeing the allocated space.*/
+    /* Freeing the allocated space.*/
   free(active_block_delta);
   free(local_output);
   free(local_bit_output);
@@ -147,7 +147,7 @@ void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obli
   free(dpf);
   free(dpf_obliv);
   fss_cprg_free(my_fss);
-}
+} 
 
 
 
@@ -167,22 +167,29 @@ void mpfss_naive(void* args){
   
   for (int j=0; j<t;j++){
       input =(j+party) % (int) size;
-      printf(" input %d\n", input );
-  
+      //printf(" input %d\n", input );
+
       dpf(size,input,party, vectors, values, j);
 
-      bool *vdpf= calloc(size, sizeof(bool));
-
-       revealOblivBoolArray(vdpf, &vectors[j], size, 0);
-               printf("dpf %d:", j);  
-
+        //Debug
+      /*bool *vdpf= calloc(size, sizeof(bool));
+      revealOblivBoolArray(vdpf, &vectors[j], size, 0);
+      printf("dpf  %d:", j);  
       for(int i = 0; i <size ; i++) {
         printf("%d ", vdpf[i]);  
       }
       printf(" \n");
 
+      bool *vdpf2= calloc(size, sizeof(bool));
+      revealOblivBoolArray(vdpf2, vector, size, 0);
+      printf("dpf2 %d:", j);  
+      for(int i = 0; i <size ; i++) {
+        printf("%d ", vdpf2[i]);  
+      }
+      printf(" \n");*/
 
-          /*Debug*/
+
+        //Debug
       /*int v_value=0;
       int *v_value_ptr=&v_value;
       revealOblivInt(v_value_ptr, values[j], 0);
