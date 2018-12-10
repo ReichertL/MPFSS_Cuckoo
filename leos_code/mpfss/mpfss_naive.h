@@ -12,10 +12,11 @@ int cp;
 typedef struct {
     int t; // number of points in mpfss
     size_t size; //size of input field
-    int input;
     int party;
 
 
-} protocolIO;
-
+} mpfss;
+mpfss * new_mpfss_naive( int t, size_t size,  int party);
+void dpf( size_t size, int input_for_index, int party, obliv uint8_t *values, int j, obliv bool **vector);
+void get_mpfss_vectors(mpfss *mpfss, obliv bool **vectors, obliv uint8_t *values );
 void mpfss_naive(void* args);

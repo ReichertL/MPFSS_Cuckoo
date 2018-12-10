@@ -20,7 +20,6 @@ int main(int argc, char *argv[]) {
         const char *remote_host = strtok(argv[1], ":");
         const char *port = strtok(NULL, ":");
         ProtocolDesc pd;
-        protocolIO io;
         
         // Make connection between two shells
         // Modified ocTestUtilTcpOrDie() function from obliv-c/test/oblivc/common/util.c
@@ -39,24 +38,15 @@ int main(int argc, char *argv[]) {
 
         // Final initializations before entering protocol
         cp = (argv[2][0]=='1'? 1 : 2);
-                log_info("-----Party %d-------\n", cp);
-
-        setCurrentParty(&pd, cp); // only checks for a '1'
-
-        
-        //printf ("Enter a number: ");
-        //int no=scanf ("%d", no);
-        int no=5;
-        strcpy(&io.input, &no);
+        log_info("-----Party %d-------\n", cp);
+        setCurrentParty(&pd, cp); // only checks for a '1'        
         size_t size=10;
-        strcpy(&io.size,&size);
-        strcpy(&io.party, &cp);
-        int t= 5;
-		strcpy(&io.t, &t);
-
+        int t= 10;
+        mpfss *m=new_mpfss_naive(t, size, cp);
         lap = wallClock();        
+
          // Execute Yao's protocol and cleanup
-        execYaoProtocol(&pd, mpfss_naive, &io);
+        execYaoProtocol(&pd, mpfss_naive, m);
         cleanupProtocol(&pd);
         double runtime = wallClock() - lap; // stop clock here 
 
