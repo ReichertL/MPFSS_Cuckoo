@@ -8,7 +8,7 @@
 size_t blockmultiple=1;
 
 
-void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obliv uint8_t *values, int j, obliv bool **vector){
+void dpf( size_t size, int input_for_index, int party, obliv uint8_t *values, int j, obliv bool **vector){
   printf("-----------DPF Run: %d -----------\n",j );
     
     /*  fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
@@ -77,7 +77,7 @@ void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obli
                             my_fss, 
                            	index);
 
-    // For debugging
+    //Debug
   obliv int index_int= (obliv int) index;
   int index_non_obliv;
   revealOblivInt(&index_non_obliv, index_int, 0);
@@ -116,14 +116,15 @@ void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obli
   		  When party=0: All parties will receive this value.
   		  ==>bool  revealOblivBoolArray(bool dest[],  obliv bool src[],  size_t n, int party);
     */
-  revealOblivBoolArray(dpf, dpf_obliv, size, 0);
+    //Debug
+  /*revealOblivBoolArray(dpf, dpf_obliv, size, 0);
 	for(int i = 0; i <size ; i++) {
     printf("%d ", dpf[i]);	
 	}
-	printf(" \n");	
+	printf(" \n");	*/
 
 
-    /*Reveal b value */
+    //Debug
 	/*int activ_value=0;
   int *activ_value_ptr=&activ_value;
 	revealOblivInt(activ_value_ptr, *active_block_delta, 0);
@@ -159,29 +160,26 @@ void mpfss_naive(void* args){
   int input;
   printf("t %d\n", t );
 
-  obliv bool *vectors= calloc((int)size, sizeof(obliv bool)*t);
-  obliv uint8_t *values = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple*t);
-
   obliv bool *vector;
-  printf("v0%s\n", vector );
-
+  obliv bool **vectors= calloc(t, sizeof(vector));
+  printf("%d\n", sizeof(vector));
+  obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
   
   for (int j=0; j<t;j++){
       input =(j+party) % (int) size;
       //printf(" input %d\n", input );
 
       dpf(size,input,party, values, j,&vector);
-        printf("v2 :%p\n", vector );
+      vectors[j]=vector;
 
         //Debug
       /*bool *vdpf2= calloc(size, sizeof(bool));
-      revealOblivBoolArray(vdpf2, vector, size, 0);
+      revealOblivBoolArray(vdpf2, vectors[j], size, 0);
       printf("dpf2 %d:", j);  
       for(int i = 0; i <size ; i++) {
         printf("%d ", vdpf2[i]);  
       }
       printf(" \n");*/
-
 
         //Debug
       /*int v_value=0;
