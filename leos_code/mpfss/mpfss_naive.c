@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     printf("MPFSS NAIVE\n");
     printf("=================\n\n");
     // Check args
-    if (argc == 3) {
+    if (argc == 5) {
         // Initialize protocols and obtain connection information
         const char *remote_host = strtok(argv[1], ":");
         const char *port = strtok(NULL, ":");
@@ -80,8 +80,9 @@ int main(int argc, char *argv[]) {
         cp = (argv[2][0]=='1'? 1 : 2);
         log_info("-----Party %d-------\n", cp);
         setCurrentParty(&pd, cp); // only checks for a '1'        
-        size_t size=10;
-        int t= 1;
+        int t = atoi(argv[3]);
+        int size = atoi(argv[4]);
+
         mpfss *m=new_mpfss_naive(t, size, cp);
         lap = wallClock();        
 
@@ -98,7 +99,7 @@ int main(int argc, char *argv[]) {
 
         
    } else {
-        log_info("Usage: %s <hostname:port> <1|2> \n" 
+        log_info("Usage: %s <hostname:port> <1|2> <t> <size> \n" 
                  "\tHostname usage:\n" 
                  "\tlocal -> 'localhost' remote -> IP address or DNS name\n", argv[0]);
     }
