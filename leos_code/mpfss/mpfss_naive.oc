@@ -8,7 +8,7 @@
 size_t blockmultiple=1;
 
 
-void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obliv uint8_t *values, int j){
+void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obliv uint8_t *values, int j, obliv bool **vector){
   printf("-----------DPF Run: %d -----------\n",j );
     
     /*  fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
@@ -133,9 +133,8 @@ void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obli
         Writing the return values to correct location
         ==>void * memcpy ( void * destination, const void * source, size_t num );
     */
-  memcpy ( &vectors[j], dpf_obliv, sizeof(obliv bool)*size );
-
   values[j]=*active_block_delta;
+  *vector=dpf_obliv;
 
 
     /* Freeing the allocated space.*/
@@ -145,7 +144,6 @@ void dpf( size_t size, int input_for_index, int party, obliv bool *vectors, obli
   free(v1);
   free(v2);
   free(dpf);
-  free(dpf_obliv);
   fss_cprg_free(my_fss);
 } 
 
@@ -164,23 +162,19 @@ void mpfss_naive(void* args){
   obliv bool *vectors= calloc((int)size, sizeof(obliv bool)*t);
   obliv uint8_t *values = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple*t);
 
+  obliv bool *vector;
+  printf("v0%s\n", vector );
+
   
   for (int j=0; j<t;j++){
       input =(j+party) % (int) size;
       //printf(" input %d\n", input );
 
-      dpf(size,input,party, vectors, values, j);
+      dpf(size,input,party, values, j,&vector);
+        printf("v2 :%p\n", vector );
 
         //Debug
-      /*bool *vdpf= calloc(size, sizeof(bool));
-      revealOblivBoolArray(vdpf, &vectors[j], size, 0);
-      printf("dpf  %d:", j);  
-      for(int i = 0; i <size ; i++) {
-        printf("%d ", vdpf[i]);  
-      }
-      printf(" \n");
-
-      bool *vdpf2= calloc(size, sizeof(bool));
+      /*bool *vdpf2= calloc(size, sizeof(bool));
       revealOblivBoolArray(vdpf2, vector, size, 0);
       printf("dpf2 %d:", j);  
       for(int i = 0; i <size ; i++) {
@@ -196,7 +190,7 @@ void mpfss_naive(void* args){
       printf("activ_value %d\n", v_value );*/
 
   }
-
+  free(vector);
   free(vectors);
   free(values);
 
