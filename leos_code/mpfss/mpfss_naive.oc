@@ -250,7 +250,7 @@ void get_mpfss_vectors(mpfss *mpfss, obliv bool **vectors, obliv uint8_t *values
 void mpfss_naive(void* args){
 
   mpfss *mpfss = (mpfss*) args;
-
+  
     /*Array of pointers: Length of pointers depend on system*/
   obliv bool **vectors= calloc(mpfss->t, sizeof(int *));
   obliv uint8_t *values = calloc(mpfss->t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);

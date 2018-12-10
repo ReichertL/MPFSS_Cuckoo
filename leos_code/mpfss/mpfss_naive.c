@@ -5,14 +5,54 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <time.h>
 #include "util.h"
 #include "mpfss_naive.h"
+
+/*  For benchmarking purposes. 
+    Creates/ appends to a file the run time of the execution.
+    Files are stored in the subfolder "benchmark".
+*/
+void benchmark(double runtime, size_t size, int t, int party){
+
+        char filename[80];
+        sprintf(filename, "benchmark/resutls_t:%d_size:%d", t, (int) size);
+
+
+        FILE *fptr;
+        fptr = fopen(filename,"a+");
+
+        time_t rawtime;
+        struct tm * timeinfo;
+        char current_time[80];
+        time (&rawtime);
+        timeinfo = localtime (&rawtime);
+        strftime (current_time,80,"%d.%m.%Y-%H:%M",timeinfo);
+
+        if(fptr == NULL){
+              printf("Error!");   
+              exit(1);             
+        }
+
+        fseek (fptr, 0, SEEK_END);
+        int len = ftell(fptr);
+        if (0 == len) {
+            fprintf(fptr,"Time, Party number, Runtime in Seconds\n" );
+        }
+        
+        fprintf(fptr,"%s,",current_time);
+        fprintf(fptr,"%d,",party);
+        fprintf(fptr,"%lf\n",runtime);
+       // fprintf(fptr,"%u/n", yaoGateCount());
+        fclose(fptr);
+
+}
 
 
 int main(int argc, char *argv[]) {
   // call a function in another file
 
- printf("MPFSS NAIVE\n");
+    printf("MPFSS NAIVE\n");
     printf("=================\n\n");
     // Check args
     if (argc == 3) {
@@ -41,7 +81,7 @@ int main(int argc, char *argv[]) {
         log_info("-----Party %d-------\n", cp);
         setCurrentParty(&pd, cp); // only checks for a '1'        
         size_t size=10;
-        int t= 10;
+        int t= 1;
         mpfss *m=new_mpfss_naive(t, size, cp);
         lap = wallClock();        
 
@@ -52,9 +92,10 @@ int main(int argc, char *argv[]) {
 
         // Print results and gate count
         log_info("Total time: %lf seconds\n", runtime);
-        // log_info("Yao Gate Count: %u\n", yaoGateCount());
         printf("\n");
-       
+        benchmark(runtime, size, t, cp);
+
+
         
    } else {
         log_info("Usage: %s <hostname:port> <1|2> \n" 

@@ -5,7 +5,7 @@ RUNTIME=../../obliv-c/_build/libobliv.a
 
 
 #CILPATH=../../obliv-c/
-CFLAGS=-g -Wall -DNDEBUG
+CFLAGS=-g -Wall #-DNDEBUG
 
 ACKLIB_FFSL=../../absentminded-crypto-kit/src/oram_fssl/
 
