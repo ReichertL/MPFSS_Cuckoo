@@ -1,7 +1,8 @@
 #include <obliv.oh>
 #include "mpfss_naive.h"
 #include "dbg.h"
-
+#include <time.h>
+#include <stdlib.h>
 //#include <fss.oh>
 #include <fss_cprg.oh>
 
@@ -26,7 +27,7 @@ mpfss * new_mpfss_naive( int t, size_t size,  int party){
 /*  Creates a Distributed Point Function using the fss_cprg.oh.
     Input
       size_t size: Size of the input field
-      int input_for_index: Random value used to compute the x for the dpf
+      obliv size_t index: Used as x value for the point function
       int party: No of this party
       obliv uint8_t *values: Pointer to array of obliv integers
       int j : current run in loop (see loop in get_mpfss_vectors) 
@@ -38,7 +39,7 @@ mpfss * new_mpfss_naive( int t, size_t size,  int party){
       ended, vector will point to this specific array.   
       Return type: Void
 */
-void dpf( size_t size, int input_for_index, int party, obliv uint8_t *values, int j, obliv bool **vector){
+void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int j, obliv bool **vector){
   log_info("-----------DPF Run: %d -----------\n",j );
     
     /*  fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
@@ -65,16 +66,6 @@ void dpf( size_t size, int input_for_index, int party, obliv uint8_t *values, in
     */
   uint8_t *local_output = calloc(size, BLOCKSIZE*blockmultiple);
   bool *local_bit_output = calloc(size,  sizeof(bool));
-  	
-
-  	/*  In DPF f(a)=b everywhere else the Function is 0. Index is equal to a.
-  	    The 'fss_getblockvector' function takes the value a as "index".
-  	    TODO: Should be a random number!
-   	*/
- 	obliv int i_1=feedOblivInt(input_for_index, 1);
- 	obliv int i_2=feedOblivInt(input_for_index, 2);
-
-  obliv size_t index= (i_1^i_2 )% (int) size;
 
   	/* "Finally, you'll have noticed that there's no input for beta. That's because
 	      the final, correction stage of the FSS has not been performed, which means
@@ -83,7 +74,7 @@ void dpf( size_t size, int input_for_index, int party, obliv uint8_t *values, in
       	'active_block_delta' "
 
       	active_block_delta is a single Element of size: Blocksize*blockmultiple. But since these will be
-      	oblive bits a larger amount of bits need to be allocated. 
+      	obliv bits a larger amount of bits need to be allocated. 
       	active_block_delta will later on hold be the b value. This value is not preset in this 
       	case as it will be set by the protocol at random.
 	   */
@@ -99,7 +90,7 @@ void dpf( size_t size, int input_for_index, int party, obliv uint8_t *values, in
     		uint8_t * local_output: 
     		bool * local_bit_output: Will be 1 at corresponding index
     		fss * fss: instance of fss
-    		obliv size_t index: index where point function =/= 0
+    		obliv size_t index: In DPF f(a)=b everywhere else the Function is 0. Index is equal to a.
   	*/
   fss_cprg_getblockvector( 	active_block_delta, 
                             local_output, 
@@ -143,7 +134,7 @@ void dpf( size_t size, int input_for_index, int party, obliv uint8_t *values, in
     
 
     /*  bool revealObliv<Tname>(tname* dest, obliv tname src, int party)
-  		  Revealing oblive values to specified parties.
+  		  Revealing obliv values to specified parties.
   		  Returns true if successful.
   		  When party=0: All parties will receive this value.
   		  ==>bool  revealOblivBoolArray(bool dest[],  obliv bool src[],  size_t n, int party);
@@ -188,32 +179,29 @@ void dpf( size_t size, int input_for_index, int party, obliv uint8_t *values, in
     Creates a obliv multi-point function. 
     Input: 
       mpfss *mpfss: Struct holing generall input information for the MPFSS
-      obliv bool **vectors: Pointer to an array of pointers, which reference to oblive bool values. Length of array = size in mpfss struct.
+      obliv size_t *indices: Oblive array holding the indices (x values) for the multipoint function. Length of array: t.
+      obliv bool **vectors: Pointer to an array of pointers, which reference to obliv bool values. Length of array = size in mpfss struct.
       obliv uint8_t *values: Pointer to an array of obliv unit8_t values. Length of array = size in mpfss struct.
     
     Output:
-      After function termination, vectors will hold a array of vectors which point to oblive bool values. 
+      After function termination, vectors will hold a array of vectors which point to obliv bool values. 
       Each vector represents a non-obliv array with zeros everywhere, except when index equals to x of the dpf. At this position the non-obliv vector will hold a 1.
       Each vector from vectors represents one x value for a point of our multi-point function.  
       Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
       Return type is void.
 */
-void get_mpfss_vectors(mpfss *mpfss, obliv bool **vectors, obliv uint8_t *values ){
+void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors, obliv uint8_t *values ){
   size_t size=mpfss->size;
   int t=mpfss->t;
   debug("t %d\n", t );
   int party=mpfss->party;
-  int input;
-
+  obliv size_t index;
   obliv bool *vector;
 
   for (int j=0; j<t;j++){
 
-      //TODO: get true randomization
-      input =(j+party);
-      debug("input %d\n", input );
-
-      dpf(size,input,party, values, j,&vector);
+      index=indices[j];
+      dpf(size,index,party, values, j,&vector);
       vectors[j]=vector;
 
         //Debug
@@ -240,7 +228,8 @@ void get_mpfss_vectors(mpfss *mpfss, obliv bool **vectors, obliv uint8_t *values
 }
 
 
-/*  Allows calling the mpfss function for an execYaoProtocol() call
+/*  Example for creating a MPFSS Schema. 
+    Callable from execYaoProtocol().
     Input:
       void* args -> mpfss *mpfss
 
@@ -250,10 +239,21 @@ void get_mpfss_vectors(mpfss *mpfss, obliv bool **vectors, obliv uint8_t *values
 void mpfss_naive(void* args){
 
   mpfss *mpfss = (mpfss*) args;
-  
+  int t=mpfss->t;
     /*Array of pointers: Length of pointers depend on system*/
-  obliv bool **vectors= calloc(mpfss->t, sizeof(int *));
-  obliv uint8_t *values = calloc(mpfss->t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
-  get_mpfss_vectors(mpfss, vectors, values);
+  obliv bool **vectors= calloc(t, sizeof(int *));
+  obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+  int *indices_notobliv = calloc(t, sizeof(int));
+
+    /*Creates pseudo-random indices*/
+  srand(time(NULL)); 
+  for(int i=0; i<t; i++){
+    int r = rand(); 
+    indices_notobliv[i]=r % mpfss->size;
+  }
+
+  obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
+  feedOblivIntArray(indices, indices_notobliv, t, 1);
+  get_mpfss_vectors(mpfss, indices, vectors, values);
 
 }

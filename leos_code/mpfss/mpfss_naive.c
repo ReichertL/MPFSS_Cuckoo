@@ -103,6 +103,6 @@ int main(int argc, char *argv[]) {
                  "\tHostname usage:\n" 
                  "\tlocal -> 'localhost' remote -> IP address or DNS name\n", argv[0]);
     }
-    return 0;
-
+    //return 0;
+    exit(0);
 }
