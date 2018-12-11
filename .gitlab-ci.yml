@@ -5,4 +5,4 @@ stages:
 job1:
   stage: build
   script:
-    - leos_code/mpfss/make
+    -  make -C leos_code/mpfss/
