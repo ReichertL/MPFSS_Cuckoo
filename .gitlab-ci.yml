@@ -11,6 +11,5 @@ job1:
     - apt-get -y install ocamlbuild
     - uname -a
     - ls -la /usr/bin
-    - 
     - ./configure && make
 
