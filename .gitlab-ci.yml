@@ -8,9 +8,9 @@ job1:
     - apt-get update && apt-get -y upgrade
     - apt-get -y install ocaml libgcrypt20-dev ocaml-findlib opam m4
     - cd obliv-c/
-    - opam init --auto-setup
-    - opam install -y ocamlbuild
+    - apt-get -y install ocamlbuild
+    - uname -a
     - ls -la /usr/bin
-    - which ocamlbuild
+    - 
     - ./configure && make
 
