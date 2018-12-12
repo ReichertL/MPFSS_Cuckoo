@@ -5,4 +5,7 @@ stages:
 job1:
   stage: build
   script:
+    - apt update
     - apt-get install ocaml libgcrypt20-dev ocaml-findlib opam m4
+    - cd obliv-c/
+    - ./configure && make
