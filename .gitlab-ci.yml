@@ -5,4 +5,5 @@ stages:
 job1:
   stage: build
   script:
+    - echo $0 
     - make -C leos_code/mpfss/
