@@ -5,4 +5,5 @@ stages:
 job1:
   stage: build
   script:
+    - sudo apt install make
     - which make
