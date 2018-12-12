@@ -5,4 +5,4 @@ stages:
 job1:
   stage: build
   script:
-    - sudo apt-get install ocaml libgcrypt20-dev ocaml-findlib opam m4
+    - apt-get install ocaml libgcrypt20-dev ocaml-findlib opam m4
