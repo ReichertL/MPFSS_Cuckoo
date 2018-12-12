@@ -5,5 +5,4 @@ stages:
 job1:
   stage: build
   script:
-    - sudo apt install make
-    - which make
+    - sudo apt-get install ocaml libgcrypt20-dev ocaml-findlib opam m4
