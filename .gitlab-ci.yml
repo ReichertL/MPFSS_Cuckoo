@@ -1,9 +1,4 @@
-stages:
-  - build
-  - test
-
 job1:
-  stage: build
   script:
     - cd leos_code/mpfss/
     
