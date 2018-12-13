@@ -14,6 +14,7 @@ job1:
     - cd ../absentminded-crypto-kit
     - export OBLIVC_PATH=../obliv-c/
     - CFLAGS=-D_Float128=double make
-    - cd ../leos_code/mpfss/make
+    - cd ../leos_code/mpfss
+    - make
 
 
