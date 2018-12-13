@@ -15,6 +15,6 @@ job1:
     - export OBLIVC_PATH=../obliv-c/
     - CFLAGS=-D_Float128=double make
     - cd ../leos_code/mpfss
-    - CFLAGS=-D_Float128=double make
+    - make
 
 
