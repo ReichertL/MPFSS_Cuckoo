@@ -9,7 +9,6 @@ job1:
   script:
     - pacman --noconfirm -Syu ocaml ocaml-findlib opam
     - opam init --disable-sandboxing -y
-    - opam switch create -y 4.06.0
     - eval `opam config env`
     - opam install -y camlp4 ocamlfind ocamlbuild batteries
     - cd obliv-c/
