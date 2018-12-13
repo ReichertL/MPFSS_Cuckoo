@@ -1,5 +1,3 @@
-image: gitlab.informatik.hu-berlin.de:4567/ti/software/bazel-builder:latest
-
 stages:
   - build
   - test
@@ -7,16 +5,15 @@ stages:
 job1:
   stage: build
   script:
-    - pacman --noconfirm -Syu
-    - pacman --noconfirm -Syu ocaml ocaml-findlib opam
-    - opam init --disable-sandboxing -y
-    - eval `opam config env`
-    - opam install -y camlp4 ocamlfind ocamlbuild batteries
+    - apt-get update && apt-get -y upgrade
+    - apt-get -y install ocaml libgcrypt20-dev ocaml-findlib opam m4
     - cd obliv-c/
+    - apt-get -y install ocamlbuild
     - ./configure
     - CFLAGS=-D_Float128=double make
     - cd ../absentminded-crypto-kit
     - export OBLIVC_PATH=../obliv-c/
     - CFLAGS=-D_Float128=double make
     - cd ../leos_code/mpfss/make
+
 
