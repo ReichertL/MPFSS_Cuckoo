@@ -10,11 +10,11 @@ job1:
     - cd obliv-c/
     - apt-get -y install ocamlbuild
     - ./configure
-    - CFLAGS=-D_Float128=double make --always-make
+    - CFLAGS=-D_Float128=double make
     - cd ../absentminded-crypto-kit
     - export OBLIVC_PATH=../obliv-c/
     - CFLAGS=-D_Float128=double make --always-make
     - cd ../leos_code/mpfss
-    - FLAGS=-D_Float128=double make --always-make
+    - make
 
 
