@@ -9,9 +9,12 @@ job1:
     - apt-get -y install ocaml libgcrypt20-dev ocaml-findlib opam m4
     - cd obliv-c/
     - apt-get -y install ocamlbuild
-    - ./configure && make
+    - ./configure
+    - CFLAGS=-D_Float128=double make
     - cd ../absentminded-crypto-kit
     - export OBLIVC_PATH=../obliv-c/
+    - CFLAGS=-D_Float128=double make --always-make
+    - cd ../leos_code/mpfss
     - make
-    - cd ../leos_code/mpfss/make
+
 
