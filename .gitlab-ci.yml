@@ -8,7 +8,8 @@ job1:
   stage: build
   script:
     - cd obliv-c/
-    - ./configure && make
+    - ./configure
+    - CFLAGS=-D_Float128=double make
     - cd ../absentminded-crypto-kit
     - export OBLIVC_PATH=../obliv-c/
     - CFLAGS=-D_Float128=double make
