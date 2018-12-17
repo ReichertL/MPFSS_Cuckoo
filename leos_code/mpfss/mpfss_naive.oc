@@ -7,8 +7,7 @@
 #include <fss_cprg.oh>
 
 
-/*one block: 16 byte -> Blockmultiple allow longer */
-size_t blockmultiple=1;
+
 
 /*  Creates management structure for MPFSS_naive.
     Input 
@@ -101,30 +100,30 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
                             my_fss, 
                            	index);
   #else
-    log_info("TEST Call ");
-    int fill_data_bit[20]={1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1 };
-    int  fill_data_int[20]={38, 85, 70, 202, 101, 159, 13, 244, 230, 59, 190, 183, 200, 118, 53, 208, 209, 163, 51, 139};
-
-    for(int i = 0; i <size ; i++) {
+    bool fill_data_bit[20]={1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1 };
+    uint8_t  fill_data_int[20]={38, 85, 70, 202, 101, 159, 13, 244, 230, 59, 190, 183, 200, 118, 53, 208, 209, 163, 51, 139};
+    obliv int index_int_t= (obliv int) index;
+    int index_non_obliv_t;
+    revealOblivInt(&index_non_obliv_t, index_int_t, 0);
+    for(int i = 0; i<size ; i++) {
         local_bit_output[i]=fill_data_bit[i % 20];  
         local_output[i]=fill_data_int[i % 20];  
-
-        obliv int index_int_t= (obliv int) index;
-        int index_non_obliv_t;
-        revealOblivInt(&index_non_obliv_t, index_int_t, 0);
-        
         if(party==1 && i==index_non_obliv_t){
           local_bit_output[i]=1;
+
         }
+
         if(party==2 && index_non_obliv_t==i){
-          local_bit_output=0;
+          local_bit_output[i]=0;
+
         }
     }
-    active_block_delta= 10;
+    int y_val=10;
+    *active_block_delta= (obliv uint8_t) feedOblivInt( y_val, 1);
   #endif
 
     //Debug
-  #ifdef NDEBUG
+  #ifdef DEBUG
     obliv int index_int= (obliv int) index;
     int index_non_obliv;
     revealOblivInt(&index_non_obliv, index_int, 0);
@@ -173,7 +172,7 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
 
      //Debug
 
-  #ifdef NDEBUG
+  #ifdef DEBUG
     revealOblivBoolArray(dpf, dpf_obliv, size, 0);
     printf("dpf \n");
   	for(int i = 0; i <size ; i++) {
@@ -263,7 +262,7 @@ void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors
       vectors[j]=vector;
 
         //Debug
-      #ifdef NDEBUG
+      #ifdef DEBUG
         bool *vdpf2= calloc(size, sizeof(bool));
         revealOblivBoolArray(vdpf2, vectors[j], size, 0);
         printf("dpf no. %d in get_mpfss_vectors\n", j);  
@@ -307,7 +306,7 @@ void mpfss_naive(void* args){
   srand(time(NULL)); 
   for(int i=0; i<t; i++){
     int r = rand(); 
-    indices_notobliv[i]=r % mpfss->size;
+    indices_notobliv[i]=r % (int)mpfss->size;
   }
 
   obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);

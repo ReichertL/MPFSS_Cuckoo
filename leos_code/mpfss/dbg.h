@@ -8,17 +8,26 @@
 #include <errno.h>
 #include <string.h>
 
-#ifdef NDEBUG
+#ifdef INFO
+#define log_info(M, ...) fprintf(stderr, "[INFO] (%s:%s:L%d) " M, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define debug(M, ...)
+
+#elif DEBUG
 #define debug(M, ...) fprintf(stderr, "DEBUG %s:%s:L%d: " M "\n", __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#define log_info(M, ...) fprintf(stderr, "[INFO] (%s:%s:L%d) " M, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+
 #else
 #define debug(M, ...)
+#define log_info(M, ...)
 #endif
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
 
+
+
 #define log_err(M, ...) fprintf(stderr, "[ERROR] (%s:%s:L%d: errno: %s) " M, __FILE__, __FUNCTION__, __LINE__, clean_errno(), ##__VA_ARGS__)
 
-#define log_info(M, ...) fprintf(stderr, "[INFO] (%s:%s:L%d) " M, __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+
 
 
 

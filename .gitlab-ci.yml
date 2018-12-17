@@ -16,5 +16,15 @@ job1:
     - CFLAGS=-D_Float128=double make --always-make
     - cd ../leos_code/mpfss
     - make
+    - cd ../mpfss_unit_tests/
+    - make
+
+job2:
+  stage: test
+  script:
+    - cd leos_code/mpfss_unit_tests/
+    - a.out localhost:88888 1 &
+    - a.out localhost:88888 2
+
 
 
