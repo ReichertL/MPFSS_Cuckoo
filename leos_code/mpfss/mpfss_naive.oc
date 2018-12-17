@@ -6,6 +6,7 @@
 //#include <fss.oh>
 #include <fss_cprg.oh>
 
+
 /*one block: 16 byte -> Blockmultiple allow longer */
 size_t blockmultiple=1;
 
@@ -79,7 +80,9 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
       	case as it will be set by the protocol at random.
 	   */
   obliv uint8_t *active_block_delta = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
-	
+
+
+  #ifndef TESTING
 
     /*  fss_getblockvector 
       	Calls fss gen and eval.
@@ -92,11 +95,33 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
     		fss * fss: instance of fss
     		obliv size_t index: In DPF f(a)=b everywhere else the Function is 0. Index is equal to a.
   	*/
-  fss_cprg_getblockvector( 	active_block_delta, 
+    fss_cprg_getblockvector( 	active_block_delta, 
                             local_output, 
                             local_bit_output, 
                             my_fss, 
                            	index);
+  #else
+    log_info("TEST Call ");
+    int fill_data_bit[20]={1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1 };
+    int  fill_data_int[20]={38, 85, 70, 202, 101, 159, 13, 244, 230, 59, 190, 183, 200, 118, 53, 208, 209, 163, 51, 139};
+
+    for(int i = 0; i <size ; i++) {
+        local_bit_output[i]=fill_data_bit[i % 20];  
+        local_output[i]=fill_data_int[i % 20];  
+
+        obliv int index_int_t= (obliv int) index;
+        int index_non_obliv_t;
+        revealOblivInt(&index_non_obliv_t, index_int_t, 0);
+        
+        if(party==1 && i==index_non_obliv_t){
+          local_bit_output[i]=1;
+        }
+        if(party==2 && index_non_obliv_t==i){
+          local_bit_output=0;
+        }
+    }
+    active_block_delta= 10;
+  #endif
 
     //Debug
   #ifdef NDEBUG
@@ -106,10 +131,16 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
     printf("index: %d\n", index_non_obliv );
 
     printf("local_output_bits (Party %d) \n", party);
-      for(int i = 0; i <size ; i++) {
+    for(int i = 0; i <size ; i++) {
           printf("%d ", local_bit_output[i]);  
     }
   	printf(" \n");
+
+    printf("local_output (Party %d) \n", party);
+      for(int i = 0; i <size ; i++) {
+          printf("%d ", local_output[i]);  
+    }
+    printf(" \n");
   #endif
 
 
@@ -141,6 +172,7 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
     */
 
      //Debug
+
   #ifdef NDEBUG
     revealOblivBoolArray(dpf, dpf_obliv, size, 0);
     printf("dpf \n");
@@ -148,6 +180,32 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
       printf("%d ", dpf[i]);	
   	}
   	printf(" \n");
+
+    #ifndef TESTING
+      /*  This test is only to figure out, if there is a bug.
+          In combination with the above Testing output it will not produce meaningful output.
+      */
+      obliv bool *v1_lo= calloc(size, sizeof(obliv int));
+      obliv bool *v2_lo= calloc(size, sizeof(obliv int));
+      feedOblivIntArray(v1_lo, local_output, size, 1);
+      feedOblivIntArray(v2_lo, local_output, size, 2);
+      obliv int *dpf_obliv_lo= calloc(size, sizeof(obliv int));
+      for(int i = 0; i <size ; i++) {
+        dpf_obliv_lo[i]=v1_lo[i]^v2_lo[i]; 
+      }
+      int *dpf_local_output= calloc(size, sizeof(int));
+      revealOblivIntArray(dpf_local_output, dpf_obliv_lo, size, 0);
+      printf("dpf from local_output \n");
+      for(int i = 0; i <size ; i++) {
+        printf("%d ", dpf[i]);  
+      }
+      printf(" \n");
+      free(v1_lo);
+      free(v2_lo);
+      free(dpf_obliv_lo);
+      free(dpf_local_output);
+    #endif
+
 
   	int activ_value=0;
     int *activ_value_ptr=&activ_value;

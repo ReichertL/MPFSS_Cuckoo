@@ -9,6 +9,7 @@
 #include "util.h"
 #include "mpfss_naive.h"
 
+
 /*  For benchmarking purposes. 
     Creates/ appends to a file the run time of the execution.
     Files are stored in the subfolder "benchmark".
