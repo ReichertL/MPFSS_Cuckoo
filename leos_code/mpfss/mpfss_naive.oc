@@ -7,7 +7,8 @@
 #include <fss_cprg.oh>
 
 
-
+/*one block: 16 byte -> Blockmultiple allow longer */
+size_t blockmultiple=1;
 
 /*  Creates management structure for MPFSS_naive.
     Input 

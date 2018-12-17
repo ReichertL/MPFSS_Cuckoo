@@ -7,8 +7,7 @@
 
 #define TESTING
 
-/*one block: 16 byte -> Blockmultiple allow longer */
-size_t blockmultiple=1;
+
 
 double lap;
 int cp;
