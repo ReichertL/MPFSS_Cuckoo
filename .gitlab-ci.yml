@@ -23,8 +23,8 @@ job2:
   stage: test
   script:
     - cd leos_code/mpfss_unit_tests/
-    - a.out localhost:88888 1 &
-    - a.out localhost:88888 2
+    - ./a.out localhost:88888 1 &
+    - ./a.out localhost:88888 2
 
 
 

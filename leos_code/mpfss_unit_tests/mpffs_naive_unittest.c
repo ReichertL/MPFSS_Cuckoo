@@ -24,16 +24,38 @@ bool test_get_mpfss_vectors(int t ){
   	return false;
 }
 
+bool TEST_new_mpfss_naive( int t, size_t size, int party){
+    mpfss *m=new_mpfss_naive(t, size, cp);
+   	bool succ=true;
 
-bool dpf_test(size_t size, int index, int party ){
-	log_info("Running DPF_Test");
+
+   	if(m->t !=t){
+		printf("TEST_new_mpfss_naive: t value was %d, but %d expected.\n", m->t, t );
+		succ=false;
+   	}
+
+   	if(m->size !=size){
+		printf("TEST_new_mpfss_naive: size value was %d, but %d expected.\n", m->size, size );
+		succ=false;
+   	}
+
+   	if(m->party !=party){
+		printf("TEST_new_mpfss_naive: party value was %d, but %d expected.\n", m->party, party );
+		succ=false;
+   	}
+
+   	free(m);
+   	return succ;
+
+
+
+}
+
+bool TEST_dpf(size_t size, int index, int party ){
   	obliv bool *vector= calloc(1, sizeof(int));
   	obliv uint8_t *values = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
   	obliv size_t index_obliv;
-  	log_info("Running DPF_Test 2");
-
   	index_obliv=feedOblivInt(index, 1);
-  	log_info("Running DPF_Test 3");
 
 	dpf(size,index_obliv,party, values, 0,&vector);
 	int activ_value;
@@ -45,19 +67,19 @@ bool dpf_test(size_t size, int index, int party ){
 	bool succ=true;
 	bool print=false;
 	if(activ_value!=10){
-		printf("dpf_test: activ_value has wrong value after reveal.\n");
-		printf("dpf_test: activ_value %d\n", activ_value );
+		printf("TEST_dpf: activ_value has wrong value after reveal.\n");
+		printf("TEST_dpf: activ_value %d\n", activ_value );
 		succ=false;
 	}
 
 	for(int i=0; i<size; i++){
 		if(i==index && dpf[i]!=1 ){
-			printf("dpf_test: Resulting Dpf is not 1 at index %d.\n", index);
+			printf("TEST_dpf: Resulting Dpf is not 1 at index %d.\n", index);
 				print=true;
 				succ=false;
 
 		}else if(dpf[i]!=0 && i!=index){
-			printf("dpf_test: Resulting Dpf is not 0 at %d.\n", i);
+			printf("TEST_dpf: Resulting Dpf is not 0 at %d.\n", i);
 			print=true;
 			succ=false;
 			break;
@@ -65,7 +87,7 @@ bool dpf_test(size_t size, int index, int party ){
 	}
 
 	if(print){
-      	printf("dpf_test: dpf\n");  
+      	printf("TEST_dpf: dpf\n");  
         for(int i = 0; i <size ; i++) {
           printf("%d ", dpf[i]);  
         }
@@ -80,20 +102,28 @@ bool dpf_test(size_t size, int index, int party ){
 }
 
 
-void TESTING_mpfss_naive(void* args){
+void TEST_ALL(void* args){
 	bool *err=(bool *) args;
-  	if(!dpf_test(10, 3, cp )){
-        printf("%s\n", "dpf_test(10,1, 0, %d ) failed", cp );
+	//---------------------------------------------------------
+  	if(!TEST_dpf(10, 3, cp )){
+        printf("%s\n", "TEST_dpf(10,1, 0, %d ) failed", cp );
+        *err=1;
+    }
+    if(!TEST_dpf(10, 11, cp )){
+        printf("%s\n", "TEST_dpf(10,1, 0, %d ) failed", cp );
         *err=1;
     }
 
-    if(!dpf_test(10, 11, cp )){
-        printf("%s\n", "dpf_test(10,1, 0, %d ) failed", cp );
+    //---------------------------------------------------------
+    if(!TEST_new_mpfss_naive( 5, (size_t) 10, cp)){
+        printf("%s\n", "TEST_new_mpfss_naive( 5, (size_t) 10, %d ) failed", cp );
         *err=1;
     }
+
+    //---------------------------------------------------------
+
 
     *err=0;
-
   }
 
 
@@ -124,7 +154,7 @@ int main(int argc, char *argv[]) {
         log_info("-----Party %d-------\n", cp);
         setCurrentParty(&pd, cp); // only checks for a '1' 
         bool err=1;  
-     	execYaoProtocol(&pd, TESTING_mpfss_naive, &err);
+     	execYaoProtocol(&pd, TEST_ALL, &err);
         cleanupProtocol(&pd);
         return err;
 
