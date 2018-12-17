@@ -13,7 +13,7 @@
     Creates/ appends to a file the run time of the execution.
     Files are stored in the subfolder "benchmark".
 */
-void benchmark(double runtime, size_t size, int t, int party){
+void benchmark(double runtime, size_t size, int t){
 
         char filename[80];
         sprintf(filename, "benchmark/resutls_t:%d_size:%d", t, (int) size);
@@ -41,7 +41,7 @@ void benchmark(double runtime, size_t size, int t, int party){
         }
         
         fprintf(fptr,"%s,",current_time);
-        fprintf(fptr,"%d,",party);
+        fprintf(fptr,"%d,",cp);
         fprintf(fptr,"%lf\n",runtime);
        // fprintf(fptr,"%u/n", yaoGateCount());
         fclose(fptr);
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
         int t = atoi(argv[3]);
         int size = atoi(argv[4]);
 
-        mpfss *m=new_mpfss_naive(t, size, cp);
+        mpfss *m=new_mpfss_naive(t, size);
         lap = wallClock();        
 
          // Execute Yao's protocol and cleanup
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
         // Print results and gate count
         log_info("Total time: %lf seconds\n", runtime);
         printf("\n");
-        benchmark(runtime, size, t, cp);
+        benchmark(runtime, size, t);
 
 
         

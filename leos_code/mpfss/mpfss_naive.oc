@@ -14,13 +14,12 @@ size_t blockmultiple=1;
     Input 
       t: Number of points in mpfss
       size: Size of the field the points can be taken from 
-      party: Number of this party (either 1 or 2)
+
 */
-mpfss * new_mpfss_naive( int t, size_t size,  int party){
+mpfss * new_mpfss_naive( int t, size_t size){
   mpfss * mpfss = malloc(sizeof(mpfss));
   mpfss->t = t;
   mpfss->size = size;
-  mpfss->party = party;
   return mpfss;
 
 }
@@ -29,7 +28,6 @@ mpfss * new_mpfss_naive( int t, size_t size,  int party){
     Input
       size_t size: Size of the input field
       obliv size_t index: Used as x value for the point function
-      int party: No of this party
       obliv uint8_t *values: Pointer to array of obliv integers
       int j : current run in loop (see loop in get_mpfss_vectors) 
       obliv bool **vector: pointer to a pointer 
@@ -40,7 +38,7 @@ mpfss * new_mpfss_naive( int t, size_t size,  int party){
       ended, vector will point to this specific array.   
       Return type: Void
 */
-void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int j, obliv bool **vector){
+void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv bool **vector){
   log_info("-----------DPF Run: %d -----------\n",j );
     
     /*  fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
@@ -65,6 +63,7 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
       	Blocksize and blockmultiple inidicates the size of our output field:
       	Blocksize*blockmultiple = 2 ==> only 4 different y values possible.
     */
+
   uint8_t *local_output = calloc(size, BLOCKSIZE*blockmultiple);
   bool *local_bit_output = calloc(size,  sizeof(bool));
 
@@ -109,12 +108,12 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
     for(int i = 0; i<size ; i++) {
         local_bit_output[i]=fill_data_bit[i % 20];  
         local_output[i]=fill_data_int[i % 20];  
-        if(party==1 && i==index_non_obliv_t){
+        if(cp==1 && i==index_non_obliv_t){
           local_bit_output[i]=1;
 
         }
 
-        if(party==2 && index_non_obliv_t==i){
+        if(cp==2 && index_non_obliv_t==i){
           local_bit_output[i]=0;
 
         }
@@ -130,13 +129,13 @@ void dpf( size_t size, obliv size_t index, int party, obliv uint8_t *values, int
     revealOblivInt(&index_non_obliv, index_int, 0);
     printf("index: %d\n", index_non_obliv );
 
-    printf("local_output_bits (Party %d) \n", party);
+    printf("local_output_bits (Party %d) \n", cp);
     for(int i = 0; i <size ; i++) {
           printf("%d ", local_bit_output[i]);  
     }
   	printf(" \n");
 
-    printf("local_output (Party %d) \n", party);
+    printf("local_output (Party %d) \n", cp);
       for(int i = 0; i <size ; i++) {
           printf("%d ", local_output[i]);  
     }
@@ -252,14 +251,13 @@ void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors
   size_t size=mpfss->size;
   int t=mpfss->t;
   debug("t %d\n", t );
-  int party=mpfss->party;
   obliv size_t index;
   obliv bool *vector;
 
   for (int j=0; j<t;j++){
 
       index=indices[j];
-      dpf(size,index,party, values, j,&vector);
+      dpf(size,index, values, j,&vector);
       vectors[j]=vector;
 
         //Debug
