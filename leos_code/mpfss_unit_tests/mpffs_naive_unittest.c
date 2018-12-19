@@ -19,6 +19,7 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 	for(int i=0; i<t; i++){
     	indices_notobliv1[i]=i;
   	}
+
   	feedOblivIntArray(indices1, indices_notobliv1, t, 1);
   	obliv bool **vectors1= calloc(t, sizeof(int *));
   	obliv uint8_t *values1 = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
@@ -27,18 +28,36 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
   	bool succ=true;
   	bool print=false;
   	for(int i=0; i<t; i++){
+		bool *vdpf= calloc(size, sizeof(bool));
+        revealOblivBoolArray(vdpf, vectors1[i], size, 0);
+
   		for(int j=0; j<size; j++){
 
- 	    	int val=vectors1[i][j];
- 	    	if(j==indices1[i] && val!=1){
+ 	    	int val=vdpf[j];
+ 	    	if(j==indices_notobliv1[i] && val!=1){
  	    		succ=false;
  	    		print=true;
 				printf("TEST_get_mpfss_vectors: Resulting Dpf %d is not 1 at index %d.\n", i, j);
 
  	    	}
-
   		}
+
+        free(vdpf);
   	} 
+
+  	if(print){
+  		for(int i; i< size; i++){
+			bool *vdpf= calloc(size, sizeof(bool));
+        	revealOblivBoolArray(vdpf, vectors1[i], size, 0);
+  			printf("dpf #%d: ", i);  
+	        for(int j = 0; j <size ; j++) {
+	          printf("%d ", vdpf[j]);  
+	        }
+	        printf(" \n"); 
+	    	free(vdpf);      
+	  	}
+  	}
+
   	free(m1);
   	free(indices_notobliv1);
   	free(indices1);
