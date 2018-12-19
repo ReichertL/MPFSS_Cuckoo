@@ -5,9 +5,6 @@
 #define ALLOC 128 
 // doubled when needed in load_data()
 
-#define TESTING
-
-
 
 double lap;
 int cp;

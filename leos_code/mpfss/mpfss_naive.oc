@@ -11,9 +11,9 @@
 size_t blockmultiple=1;
 
 /*  Creates management structure for MPFSS_naive.
-    Input 
-      t: Number of points in mpfss
-      size: Size of the field the points can be taken from 
+	Input 
+	  t: Number of points in mpfss
+	  size: Size of the field the points can be taken from 
 
 */
 mpfss * new_mpfss_naive( int t, size_t size){
@@ -25,203 +25,201 @@ mpfss * new_mpfss_naive( int t, size_t size){
 }
 
 /*  Creates a Distributed Point Function using the fss_cprg.oh.
-    Input
-      size_t size: Size of the input field
-      obliv size_t index: Used as x value for the point function
-      obliv uint8_t *values: Pointer to array of obliv integers
-      int j : current run in loop (see loop in get_mpfss_vectors) 
-      obliv bool **vector: pointer to a pointer 
+	Input
+	  size_t size: Size of the input field
+	  obliv size_t index: Used as x value for the point function
+	  obliv uint8_t *values: Pointer to array of obliv integers
+	  int j : current run in loop (see loop in get_mpfss_vectors) 
+	  obliv bool **vector: pointer to a pointer 
 
-    Output
-      Writes obliv y value in values[j] 
-      Returns the x value in form of an array of obliv bools. When the function 
-      ended, vector will point to this specific array.   
-      Return type: Void
+	Output
+	  Writes obliv y value in values[j] 
+	  Returns the x value in form of an array of obliv bools. When the function 
+	  ended, vector will point to this specific array.   
+	  Return type: Void
 */
 void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv bool **vector){
-  log_info("-----------DPF Run: %d -----------\n",j );
-    
-    /*  fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
-        Creates new FSS instance
-        size_t size: size of input field
-        size_t blockmultiple: How many Blocks are there in one entry -> 1 should be sufficient
-		    uint32_t truncated_levels:  The same as start level -> 0 should be a good value
-		    (only needed for fss_new , not for fss_cprg_new)
-    */
-  fss_cprg *my_fss;
+  	log_info("-----------DPF Run: %d -----------\n",j );
+	
+	/*  fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
+		Creates new FSS instance
+		size_t size: size of input field
+		size_t blockmultiple: How many Blocks are there in one entry -> 1 should be sufficient
+			uint32_t truncated_levels:  The same as start level -> 0 should be a good value
+			(only needed for fss_new , not for fss_cprg_new)
+	*/
+  	fss_cprg *my_fss;
 	my_fss= fss_cprg_new(size, blockmultiple);
 
 	
-    /*	The 'fss_getblockvector' function takes the
-		    value a as "index", and writes y^1 and y^2 as output into the location
-		    specified by the "local_output". Party 1 gets y^1 and party 2 gets y^2.
-      	void *calloc(size_t nitems, size_t size)
-      	calloc allocats memory and sets everything to zero.
-      	Returns: Pointer to memory, NULL if request fails
-      	nitems: no. of elements to be allocated
-      	size: size of elements
-      	Blocksize and blockmultiple inidicates the size of our output field:
-      	Blocksize*blockmultiple = 2 ==> only 4 different y values possible.
-    */
+	/*	The 'fss_getblockvector' function takes the
+			value a as "index", and writes y^1 and y^2 as output into the location
+			specified by the "local_output". Party 1 gets y^1 and party 2 gets y^2.
+		void *calloc(size_t nitems, size_t size)
+		calloc allocats memory and sets everything to zero.
+		Returns: Pointer to memory, NULL if request fails
+		nitems: no. of elements to be allocated
+		size: size of elements
+		Blocksize and blockmultiple inidicates the size of our output field:
+		Blocksize*blockmultiple = 2 ==> only 4 different y values possible.
+	*/
 
-  uint8_t *local_output = calloc(size, BLOCKSIZE*blockmultiple);
-  bool *local_bit_output = calloc(size,  sizeof(bool));
+  	uint8_t *local_output = calloc(size, BLOCKSIZE*blockmultiple);
+ 	bool *local_bit_output = calloc(size,  sizeof(bool));
 
-  	/* "Finally, you'll have noticed that there's no input for beta. That's because
-	      the final, correction stage of the FSS has not been performed, which means
-      	in effect that the DPF magnitude is random. This random magnitude is
-      	returned as a vector of obliv bytes, to the location specified by
-      	'active_block_delta' "
+	/* "Finally, you'll have noticed that there's no input for beta. That's because
+		  the final, correction stage of the FSS has not been performed, which means
+		in effect that the DPF magnitude is random. This random magnitude is
+		returned as a vector of obliv bytes, to the location specified by
+		'active_block_delta' "
 
-      	active_block_delta is a single Element of size: Blocksize*blockmultiple. But since these will be
-      	obliv bits a larger amount of bits need to be allocated. 
-      	active_block_delta will later on hold be the b value. This value is not preset in this 
-      	case as it will be set by the protocol at random.
+		active_block_delta is a single Element of size: Blocksize*blockmultiple. But since these will be
+		obliv bits a larger amount of bits need to be allocated. 
+		active_block_delta will later on hold be the b value. This value is not preset in this 
+		case as it will be set by the protocol at random.
 	   */
   obliv uint8_t *active_block_delta = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
 
 
-  #ifndef TESTING
+  	#ifndef TESTING
 
-    /*  fss_getblockvector 
-      	Calls fss gen and eval.
-      	Generates a pair of keys and then evaluates the keys to produce
-  		  two vectors y^1 and y^2 such that y^1_x xor y^2_x == b if x == a and
-    		y^1_x xor y^2_x == 0 otherwise.
-    		obliv uint8_t * active_block_delta: value of point function at point i
-    		uint8_t * local_output: 
-    		bool * local_bit_output: Will be 1 at corresponding index
-    		fss * fss: instance of fss
-    		obliv size_t index: In DPF f(a)=b everywhere else the Function is 0. Index is equal to a.
-  	*/
-    fss_cprg_getblockvector( 	active_block_delta, 
-                            local_output, 
-                            local_bit_output, 
-                            my_fss, 
-                           	index);
-  #else
-    bool fill_data_bit[20]={1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1 };
-    uint8_t  fill_data_int[20]={38, 85, 70, 202, 101, 159, 13, 244, 230, 59, 190, 183, 200, 118, 53, 208, 209, 163, 51, 139};
-    obliv int index_int_t= (obliv int) index;
-    int index_non_obliv_t;
-    revealOblivInt(&index_non_obliv_t, index_int_t, 0);
-    for(int i = 0; i<size ; i++) {
-        local_bit_output[i]=fill_data_bit[i % 20];  
-        local_output[i]=fill_data_int[i % 20];  
-        if(cp==1 && i==index_non_obliv_t){
-          local_bit_output[i]=1;
+	/*  fss_getblockvector 
+		Calls fss gen and eval.
+		Generates a pair of keys and then evaluates the keys to produce
+		  two vectors y^1 and y^2 such that y^1_x xor y^2_x == b if x == a and
+			y^1_x xor y^2_x == 0 otherwise.
+			obliv uint8_t * active_block_delta: value of point function at point i
+			uint8_t * local_output: 
+			bool * local_bit_output: Will be 1 at corresponding index
+			fss * fss: instance of fss
+			obliv size_t index: In DPF f(a)=b everywhere else the Function is 0. Index is equal to a.
+	*/
+	fss_cprg_getblockvector( 	active_block_delta, 
+							local_output, 
+							local_bit_output, 
+							my_fss, 
+							index);
+	#else
+		bool fill_data_bit[20]={1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1 };
+		uint8_t  fill_data_int[20]={38, 85, 70, 202, 101, 159, 13, 244, 230, 59, 190, 183, 200, 118, 53, 208, 209, 163, 51, 139};
+		obliv int index_int_t= (obliv int) index;
+		int index_non_obliv_t;
+		revealOblivInt(&index_non_obliv_t, index_int_t, 0);
+		for(int i = 0; i<size ; i++) {
+			local_bit_output[i]=fill_data_bit[i % 20];  
+			local_output[i]=fill_data_int[i % 20];  
+			if(cp==1 && i==index_non_obliv_t){
+			  local_bit_output[i]=1;
 
-        }
+			}
 
-        if(cp==2 && index_non_obliv_t==i){
-          local_bit_output[i]=0;
+			if(cp==2 && index_non_obliv_t==i){
+			  local_bit_output[i]=0;
 
-        }
-    }
-    int y_val=10;
-    *active_block_delta= (obliv uint8_t) feedOblivInt( y_val, 1);
-  #endif
+			}
+		}
+		int y_val=10;
+		*active_block_delta= (obliv uint8_t) feedOblivInt( y_val, 1);
+	  #endif
 
-    //Debug
-  #ifdef DEBUG
-    obliv int index_int= (obliv int) index;
-    int index_non_obliv;
-    revealOblivInt(&index_non_obliv, index_int, 0);
-    printf("index: %d\n", index_non_obliv );
+		//Debug
+	  #ifdef DEBUG
+		obliv int index_int= (obliv int) index;
+		int index_non_obliv;
+		revealOblivInt(&index_non_obliv, index_int, 0);
+		printf("index from obliv: %d\n", index_non_obliv );
 
-    printf("local_output_bits (Party %d) \n", cp);
-    for(int i = 0; i <size ; i++) {
-          printf("%d ", local_bit_output[i]);  
-    }
-  	printf(" \n");
+		/*printf("local_output_bits           ", cp);
+		for(int i = 0; i <size ; i++) {
+			  printf("%d ", local_bit_output[i]);  
+		}
+		printf(" \n");
 
-    printf("local_output (Party %d) \n", cp);
-      for(int i = 0; i <size ; i++) {
-          printf("%d ", local_output[i]);  
-    }
-    printf(" \n");
-  #endif
+		printf("local_output                ", cp);  
+		  for(int i = 0; i <size ; i++) {
+			  printf("%d ", local_output[i]);  
+		}
+		printf(" \n");*/
+	#endif
 
 
   obliv bool *v1= calloc(size, sizeof(obliv bool));
   obliv bool *v2= calloc(size, sizeof(obliv bool));
 
 
-    /* 	feedObliv<Typename>(typename v, int party)
-      	Send obliv values to all parties.
-      	tname can be: bool, char, int, short, long, long long, or float
-      	==> void  feedOblivBoolArray(obliv bool  dest[],const bool  src[],size_t n, int party);;
-    */
-  feedOblivBoolArray(v1, local_bit_output, size, 1);
-  feedOblivBoolArray(v2, local_bit_output, size, 2);
+	/* 	feedObliv<Typename>(typename v, int party)
+		Send obliv values to all parties.
+		tname can be: bool, char, int, short, long, long long, or float
+		==> void  feedOblivBoolArray(obliv bool  dest[],const bool  src[],size_t n, int party);;
+	*/
+  	feedOblivBoolArray(v1, local_bit_output, size, 1);
+  	feedOblivBoolArray(v2, local_bit_output, size, 2);
 
-  obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
-    /*	Xor both local output vectors to generate an obliv vector*/
-  for(int i = 0; i <size ; i++) {
-    dpf_obliv[i]=v1[i]^v2[i]; 
-  }
-  bool *dpf= calloc(size, sizeof(bool));
-    
-
-    /*  bool revealObliv<Tname>(tname* dest, obliv tname src, int party)
-  		  Revealing obliv values to specified parties.
-  		  Returns true if successful.
-  		  When party=0: All parties will receive this value.
-  		  ==>bool  revealOblivBoolArray(bool dest[],  obliv bool src[],  size_t n, int party);
-    */
-
-     //Debug
-
-  #ifdef DEBUG
-    revealOblivBoolArray(dpf, dpf_obliv, size, 0);
-    printf("dpf \n");
+ 	obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+	/*	Xor both local output vectors to generate an obliv vector*/
   	for(int i = 0; i <size ; i++) {
-      printf("%d ", dpf[i]);	
+		dpf_obliv[i]=v1[i]^v2[i]; 
   	}
-  	printf(" \n");
+  	bool *dpf= calloc(size, sizeof(bool));
+	
 
-    #ifndef TESTING
-      /*  This test is only to figure out, if there is a bug.
-          In combination with the above Testing output it will not produce meaningful output.
-      */
-      obliv bool *v1_lo= calloc(size, sizeof(obliv int));
-      obliv bool *v2_lo= calloc(size, sizeof(obliv int));
-      feedOblivIntArray(v1_lo, local_output, size, 1);
-      feedOblivIntArray(v2_lo, local_output, size, 2);
-      obliv int *dpf_obliv_lo= calloc(size, sizeof(obliv int));
-      for(int i = 0; i <size ; i++) {
-        dpf_obliv_lo[i]=v1_lo[i]^v2_lo[i]; 
-      }
-      int *dpf_local_output= calloc(size, sizeof(int));
-      revealOblivIntArray(dpf_local_output, dpf_obliv_lo, size, 0);
-      printf("dpf from local_output \n");
-      for(int i = 0; i <size ; i++) {
-        printf("%d ", dpf[i]);  
-      }
-      printf(" \n");
-      free(v1_lo);
-      free(v2_lo);
-      free(dpf_obliv_lo);
-      free(dpf_local_output);
-    #endif
+	/*  bool revealObliv<Tname>(tname* dest, obliv tname src, int party)
+		  Revealing obliv values to specified parties.
+		  Returns true if successful.
+		  When party=0: All parties will receive this value.
+		  ==>bool  revealOblivBoolArray(bool dest[],  obliv bool src[],  size_t n, int party);
+	*/
+
+	 //Debug
+
+  	#ifdef DEBUG
+		revealOblivBoolArray(dpf, dpf_obliv, size, 0);
+		printf("dpf                    ");
+
+		for(int i = 0; i <size ; i++) {
+		  printf("%d ", dpf[i]);	
+		}
+		printf(" \n");
+
+		
+		  obliv bool *v1_lo= calloc(size, sizeof(obliv int));
+		  obliv bool *v2_lo= calloc(size, sizeof(obliv int));
+		  feedOblivIntArray(v1_lo, local_output, size, 1);
+		  feedOblivIntArray(v2_lo, local_output, size, 2);
+		  obliv int *dpf_obliv_lo= calloc(size, sizeof(obliv int));
+		  for(int i = 0; i <size ; i++) {
+			dpf_obliv_lo[i]=v1_lo[i]^v2_lo[i]; 
+		  }
+		  int *dpf_local_output= calloc(size, sizeof(int));
+		  revealOblivIntArray(dpf_local_output, dpf_obliv_lo, size, 0);
+		  printf("dpf from local_output: ");
+
+		  for(int i = 0; i <size ; i++) {
+			printf("%d ", dpf[i]);  
+		  }
+		  printf(" \n");
+		  free(v1_lo);
+		  free(v2_lo);
+		  free(dpf_obliv_lo);
+		  free(dpf_local_output);
 
 
-  	int activ_value=0;
-    int *activ_value_ptr=&activ_value;
-  	revealOblivInt(activ_value_ptr, *active_block_delta, 0);
-  	printf("activ_value %d\n", activ_value );
-  #endif
+		int activ_value=0;
+		int *activ_value_ptr=&activ_value;
+		revealOblivInt(activ_value_ptr, *active_block_delta, 0);
+		printf("activ_value %d\n", activ_value );
+  	#endif
 
 
-    /*  
-        Writing the return values to correct location
-        ==>void * memcpy ( void * destination, const void * source, size_t num );
-    */
+	/*  
+		Writing the return values to correct location
+		==>void * memcpy ( void * destination, const void * source, size_t num );
+	*/
   values[j]=*active_block_delta;
   *vector=dpf_obliv;
 
 
-    /* Freeing the allocated space.*/
+	/* Freeing the allocated space.*/
   free(active_block_delta);
   free(local_output);
   free(local_bit_output);
@@ -233,19 +231,19 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 
 
 /*  Interface for calling MPFSS. 
-    Creates a obliv multi-point function. 
-    Input: 
-      mpfss *mpfss: Struct holing generall input information for the MPFSS
-      obliv size_t *indices: Oblive array holding the indices (x values) for the multipoint function. Length of array: t.
-      obliv bool **vectors: Pointer to an array of pointers, which reference to obliv bool values. Length of array = size in mpfss struct.
-      obliv uint8_t *values: Pointer to an array of obliv unit8_t values. Length of array = size in mpfss struct.
-    
-    Output:
-      After function termination, vectors will hold a array of vectors which point to obliv bool values. 
-      Each vector represents a non-obliv array with zeros everywhere, except when index equals to x of the dpf. At this position the non-obliv vector will hold a 1.
-      Each vector from vectors represents one x value for a point of our multi-point function.  
-      Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
-      Return type is void.
+	Creates a obliv multi-point function. 
+	Input: 
+	  mpfss *mpfss: Struct holing generall input information for the MPFSS
+	  obliv size_t *indices: Oblive array holding the indices (x values) for the multipoint function. Length of array: t.
+	  obliv bool **vectors: Pointer to an array of pointers, which reference to obliv bool values. Length of array = size in mpfss struct.
+	  obliv uint8_t *values: Pointer to an array of obliv unit8_t values. Length of array = size in mpfss struct.
+	
+	Output:
+	  After function termination, vectors will hold a array of vectors which point to obliv bool values. 
+	  Each vector represents a non-obliv array with zeros everywhere, except when index equals to x of the dpf. At this position the non-obliv vector will hold a 1.
+	  Each vector from vectors represents one x value for a point of our multi-point function.  
+	  Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
+	  Return type is void.
 */
 void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors, obliv uint8_t *values ){
   size_t size=mpfss->size;
@@ -256,64 +254,101 @@ void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors
 
   for (int j=0; j<t;j++){
 
-      index=indices[j];
-      dpf(size,index, values, j,&vector);
-      vectors[j]=vector;
+	  index=indices[j];
+	  dpf(size,index, values, j,&vector);
+	  vectors[j]=vector;
 
-        //Debug
-      #ifdef DEBUG
-        bool *vdpf2= calloc(size, sizeof(bool));
-        revealOblivBoolArray(vdpf2, vectors[j], size, 0);
-        printf("dpf no. %d in get_mpfss_vectors\n", j);  
-        for(int i = 0; i <size ; i++) {
-          printf("%d ", vdpf2[i]);  
-        }
-        printf(" \n");        
-        free(vdpf2);
+		//Debug
+	  #ifdef DEBUG
+		printf("-----------Debug get_mpfss_vectors()-----------\n",j );
+		int in;
+		revealOblivInt(&in, index, 0);
+		printf("Index from obliv given by get_mpfss_vectors: %d\n",in );
+
+		bool *vdpf2= calloc(size, sizeof(bool));
+		revealOblivBoolArray(vdpf2, vectors[j], size, 0);
+		printf("dpf #%d:               ", j);  
+		for(int i = 0; i <size ; i++) {
+		  printf("%d ", vdpf2[i]);  
+		}
+		printf(" \n");        
+		free(vdpf2);
 
 
-        int v_value=0;
-        int *v_value_ptr=&v_value;
-        revealOblivInt(v_value_ptr, values[j], 0);
-        printf("activ_value in get_mpfss_vectors: %d\n", v_value );
-
-      #endif
+		int v_value=0;
+		int *v_value_ptr=&v_value;
+		revealOblivInt(v_value_ptr, values[j], 0);
+		printf("activ_value in get_mpfss_vectors: %d\n", v_value );
+	  #endif
 
   }
-  free(vector);
+
+
+  
+  //free(vector);
 
 }
 
 
 /*  Example for creating a MPFSS Schema. 
-    Callable from execYaoProtocol().
-    Input:
-      void* args -> mpfss *mpfss
+	Callable from execYaoProtocol().
+	Input:
+	  void* args -> mpfss *mpfss
 
-    Output
-      No return type.
+	Output
+	  No return type.
 */
 void mpfss_naive(void* args){
 
-  mpfss *mpfss = (mpfss*) args;
-  int t=mpfss->t;
-    /*Array of pointers: Length of pointers depend on system*/
-  obliv bool **vectors= calloc(t, sizeof(int *));
-  obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
-  int *indices_notobliv = calloc(t, sizeof(int));
+  	mpfss *mpfss = (mpfss*) args;
+  	int t=mpfss->t;
+  	int size=mpfss->size;
+		/*Array of pointers: Length of pointers depend on system*/
+  	obliv bool **vectors= calloc(t, sizeof(int *));
+  	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+  	int *indices_notobliv = calloc(t, sizeof(int));
 
-    /*Creates pseudo-random indices*/
-  srand(time(NULL)); 
-  for(int i=0; i<t; i++){
-    int r = rand(); 
-    indices_notobliv[i]=r % (int)mpfss->size;
-  }
+		/*Creates pseudo-random indices*/
+  	srand(time(NULL)); 
+  	for(int i=0; i<t; i++){
+		int r = rand(); 
+		indices_notobliv[i]=r % (int)mpfss->size;
+  	}
 
-  obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
-  feedOblivIntArray(indices, indices_notobliv, t, 1);
-  get_mpfss_vectors(mpfss, indices, vectors, values);
-  free(vectors);
-  free(values);
-  free(indices);
-  free(indices_notobliv);
+  	#ifdef DEBUG
+		printf("Indices before feedObliv\n");
+		for(int i=0; i<t; i++){
+	  		printf(" %d ", indices_notobliv[i]);
+		}
+		printf("\n");
+  	#endif
+  
+		//feed indices one by one because target type is not int but size_t
+  	obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
+	for(int i=0; i<t; i++){
+		obliv size_t k_obliv= feedOblivInt(indices_notobliv[i], 1);
+		indices[i]=k_obliv;
+	}
+
+  	get_mpfss_vectors(mpfss, indices, vectors, values);
+
+
+	#ifdef DEBUG
+		printf("results\n");
+	  	for(int i=0; i<t; i++){
+	  				
+	  		bool *vdpf2= calloc(size, sizeof(bool));
+			revealOblivBoolArray(vdpf2, vectors[i], size, 0);
+	  		for(int j=0; j<size; j++){
+	  			printf("%d ", vdpf2[j]);  
+			}
+			printf(" \n");        
+			free(vdpf2);
+	  	}
+  	#endif
+
+  	free(vectors);
+  	free(values);
+  	free(indices);
+  	free(indices_notobliv);
 }
