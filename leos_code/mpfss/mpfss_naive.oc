@@ -268,17 +268,19 @@ void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors
         for(int i = 0; i <size ; i++) {
           printf("%d ", vdpf2[i]);  
         }
-        printf(" \n");
+        printf(" \n");        
+        free(vdpf2);
+
 
         int v_value=0;
         int *v_value_ptr=&v_value;
         revealOblivInt(v_value_ptr, values[j], 0);
         printf("activ_value in get_mpfss_vectors: %d\n", v_value );
+
       #endif
 
   }
   free(vector);
-  free(vdpf2);
 
 }
 
