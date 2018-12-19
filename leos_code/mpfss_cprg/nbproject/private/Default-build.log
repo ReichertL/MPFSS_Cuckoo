@@ -1,6 +1,0 @@
-../../obliv-c/bin/oblivcc -g -Wall -I . -I../../absentminded-crypto-kit/src/ -I../../absentminded-crypto-kit/src/oram_fssl mpfss_naive.oc mpfss_naive.c -lm -L../../absentminded-crypto-kit/build/lib/liback.a
-mpfss_naive.c[49:0-0] : syntax error
-Parsing errorFatal error: exception Frontc.ParseError("Parse error")
-(Program not linked with -g, cannot print stack backtrace)
-Makefile:14: recipe for target 'a.out' failed
-make: *** [a.out] Error 2
