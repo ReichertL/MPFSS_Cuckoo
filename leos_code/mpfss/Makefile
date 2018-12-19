@@ -6,14 +6,15 @@ RUNTIME=../../obliv-c/_build/libobliv.a
 
 #CILPATH=../../obliv-c/
 #DNDEBUG sets the debug level. 
-CFLAGS=-g -Wall -D _Float128=double -DDEBUG #-DINFO
+CFLAGS=-g -Wall -D _Float128=double -DINFO #-DINFO
 
 ACKLIB_FFSL=../../absentminded-crypto-kit/src/oram_fssl/
+Util_path=../util/
 
-INCLUDE=-I$(ACKLIB_FFSL)  
+INCLUDE=-I$(ACKLIB_FFSL) -I$(Util_path)
 
 
-LOADFILES= util.c 
+LOADFILES= ../util/util.c 
 
 ACKLIB_PATH=../../absentminded-crypto-kit/build/lib/liback.a 
 #-lgomp flag is very important. Otherwise linking will fail. Does some kind of parallelization.
