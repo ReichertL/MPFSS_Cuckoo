@@ -9,7 +9,6 @@
 #include "util.h"
 #include "mpfss_naive.h"
 #include "mpfss_naive.oc"
-
 #include <fss_cprg.oh>
 
 bool TEST_get_mpfss_vectors(int t, size_t size){
@@ -192,11 +191,11 @@ void TEST_ALL(void* args){
 
 	printf("TEST_dpf---------------------------------------------------------\n" );
 	if(!TEST_dpf(10, 3 )){
-		printf("%s\n", "TEST_dpf(10,1, 0) failed" );
+		printf("%s\n", "TEST_dpf(10,3) failed" );
 		*err=1;
 	}
 	if(!TEST_dpf(10, 11 )){
-		printf("%s\n", "TEST_dpf(10,1, 0) failed" );
+		printf("%s\n", "TEST_dpf(10,11) failed" );
 		*err=1;
 	}
 

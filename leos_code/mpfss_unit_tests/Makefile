@@ -6,7 +6,7 @@ RUNTIME=../../obliv-c/_build/libobliv.a
 
 #CILPATH=../../obliv-c/
 #DNDEBUG sets the debug level. 
-CFLAGS=-g -Wall -D _Float128=double #-DDEBUG
+CFLAGS=-g -Wall -D _Float128=double -DTESTING #-DDEBUG
 
 ACKLIB_FFSL=../../absentminded-crypto-kit/src/oram_fssl/
 Mpfss_path=../mpfss/

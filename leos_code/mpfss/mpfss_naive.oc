@@ -10,10 +10,10 @@
 /*one block: 16 byte -> Blockmultiple allow longer */
 size_t blockmultiple=1;
 
-/*  Creates management structure for MPFSS_naive.
+/*  Creates management structure for MPFSS_naive. Tested.
 	Input 
-	  t: Number of points in mpfss
-	  size: Size of the field the points can be taken from 
+	t: Number of points in mpfss
+	size: Size of the field the points can be taken from 
 
 */
 mpfss * new_mpfss_naive( int t, size_t size){
@@ -24,7 +24,7 @@ mpfss * new_mpfss_naive( int t, size_t size){
 
 }
 
-/*  Creates a Distributed Point Function using the fss_cprg.oh.
+/*  Creates a Distributed Point Function using the fss_cprg.oh. Tested.
 	Input
 	  size_t size: Size of the input field
 	  obliv size_t index: Used as x value for the point function
@@ -81,7 +81,7 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
   obliv uint8_t *active_block_delta = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
 
 
-  	#ifndef TESTING
+  	//#ifndef TESTING
 
 	/*  fss_getblockvector 
 		Calls fss gen and eval.
@@ -99,7 +99,7 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 							local_bit_output, 
 							my_fss, 
 							index);
-	#else
+	/*#else
 		bool fill_data_bit[20]={1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1 };
 		uint8_t  fill_data_int[20]={38, 85, 70, 202, 101, 159, 13, 244, 230, 59, 190, 183, 200, 118, 53, 208, 209, 163, 51, 139};
 		obliv int index_int_t= (obliv int) index;
@@ -120,7 +120,7 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 		}
 		int y_val=10;
 		*active_block_delta= (obliv uint8_t) feedOblivInt( y_val, 1);
-	  #endif
+	  #endif*/
 
 		//Debug
 	  #ifdef DEBUG
@@ -230,7 +230,7 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 } 
 
 
-/*  Interface for calling MPFSS. 
+/*  Interface for calling MPFSS. Tested. 
 	Creates a obliv multi-point function. 
 	Input: 
 	  mpfss *mpfss: Struct holing generall input information for the MPFSS
@@ -286,11 +286,10 @@ void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors
 
   
   //free(vector);
-
 }
 
 
-/*  Example for creating a MPFSS Schema. 
+/*  Example for creating a MPFSS Schema. Not Tested. 
 	Callable from execYaoProtocol().
 	Input:
 	  void* args -> mpfss *mpfss
@@ -312,7 +311,7 @@ void mpfss_naive(void* args){
   	srand(time(NULL)); 
   	for(int i=0; i<t; i++){
 		int r = rand(); 
-		indices_notobliv[i]=r % (int)mpfss->size;
+		indices_notobliv[i]=r % (int)size;
   	}
 
   	#ifdef DEBUG
@@ -332,7 +331,6 @@ void mpfss_naive(void* args){
 
   	get_mpfss_vectors(mpfss, indices, vectors, values);
 
-
 	#ifdef DEBUG
 		printf("results\n");
 	  	for(int i=0; i<t; i++){
@@ -346,6 +344,8 @@ void mpfss_naive(void* args){
 			free(vdpf2);
 	  	}
   	#endif
+
+
 
   	free(vectors);
   	free(values);
