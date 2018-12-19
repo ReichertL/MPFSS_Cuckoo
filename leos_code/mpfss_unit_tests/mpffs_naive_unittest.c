@@ -13,25 +13,39 @@
 #include <fss_cprg.oh>
 
 bool TEST_get_mpfss_vectors(int t, size_t size){
-  mpfss *m=new_mpfss_naive(t, size);
-	int *indices_notobliv = calloc(t, sizeof(int));
-	obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
+	mpfss *m1=new_mpfss_naive(t, size);
+	int *indices_notobliv1 = calloc(t, sizeof(int));
+	obliv size_t *indices1 = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
 	for(int i=0; i<t; i++){
-    	indices_notobliv[i]=i;
-  }
-  feedOblivIntArray(indices, indices_notobliv, t, 1);
-  obliv bool **vectors= calloc(t, sizeof(int *));
-  obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
-  get_mpfss_vectors(m, indices, vectors, values);
+    	indices_notobliv1[i]=i;
+  	}
+  	feedOblivIntArray(indices1, indices_notobliv1, t, 1);
+  	obliv bool **vectors1= calloc(t, sizeof(int *));
+  	obliv uint8_t *values1 = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+  	get_mpfss_vectors(m1, indices1, vectors1, values1);
 
+  	bool succ=true;
+  	bool print=false;
+  	for(int i=0; i<t; i++){
+  		for(int j=0; j<size; j++){
 
-  free(values);
-  free(m);
-  free(indices_notobliv);
-  free(indices);
-  free(vectors);
+ 	    	int val=vectors1[i][j];
+ 	    	if(j==indices1[i] && val!=1){
+ 	    		succ=false;
+ 	    		print=true;
+				printf("TEST_get_mpfss_vectors: Resulting Dpf %d is not 1 at index %d.\n", i, j);
 
-  return false;
+ 	    	}
+
+  		}
+  	} 
+  	free(m1);
+  	free(indices_notobliv1);
+  	free(indices1);
+  	free(vectors1);
+  	free(values1);
+
+  	return succ;
 }
 
 bool TEST_new_mpfss_naive( int t, size_t size){
@@ -123,13 +137,10 @@ void TEST_ALL(void* args){
     }
 
     //---------------------------------------------------------  
-   /* if(!TEST_get_mpfss_vectors( 5, (size_t) 10)){
+   if(!TEST_get_mpfss_vectors( 5, (size_t) 10)){
         printf("%s\n", "TEST_get_mpfss_vectors( 5, (size_t) 10) failed" );
         *err=1;
-    }*/
-
-
-    *err=0;
+    }
   }
 
 
@@ -159,12 +170,13 @@ int main(int argc, char *argv[]) {
     cp = (argv[2][0]=='1'? 1 : 2);
     log_info("-----Party %d-------\n", cp);
     setCurrentParty(&pd, cp); // only checks for a '1' 
-    bool err=1;  
+    bool err=0;  
    	execYaoProtocol(&pd, TEST_ALL, &err);
     cleanupProtocol(&pd);
     if(!err){
-      printf("%s\n","Success!" );
+      printf("%s\n","Success! %d", err );
     }
+
     return err;
 	} else {
     log_info("Usage: %s <hostname:port> <1|2> <t> <size> \n" 

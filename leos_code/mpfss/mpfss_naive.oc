@@ -278,8 +278,7 @@ void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors
 
   }
   free(vector);
-  free(vectors);
-  free(values);
+  free(vdpf2);
 
 }
 
@@ -311,5 +310,8 @@ void mpfss_naive(void* args){
   obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
   feedOblivIntArray(indices, indices_notobliv, t, 1);
   get_mpfss_vectors(mpfss, indices, vectors, values);
-
+  free(vectors);
+  free(values);
+  free(indices);
+  free(indices_notobliv);
 }

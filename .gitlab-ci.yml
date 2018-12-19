@@ -15,13 +15,8 @@ job1:
     - export OBLIVC_PATH=../obliv-c/
     - CFLAGS=-D_Float128=double make --always-make
     - cd ../leos_code/mpfss
-
-
-job2:
-  stage: test
-  script:
-    - ls
-    - cd leos_code/mpfss_unit_tests/
+    - make
+    - cd ../mpfss_unit_tests/
     - ls
     - make
     - ls
