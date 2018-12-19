@@ -27,6 +27,8 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 
   	bool succ=true;
   	bool print=false;
+
+  	//Testing the vectors
   	for(int i=0; i<t; i++){
 		bool *vdpf= calloc(size, sizeof(bool));
         revealOblivBoolArray(vdpf, vectors1[i], size, 0);
@@ -41,21 +43,39 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 
  	    	}
   		}
-
         free(vdpf);
-  	} 
+  	}
 
+  	// Testing the values
+  	for(int i; i<t; i++){
+  		int v_value;
+        int *v_value_ptr=&v_value;
+        revealOblivInt(v_value_ptr, values1[i], 0);
+        if(v_value==0){
+        	succ=false;
+ 	    	print=true;
+			printf("TEST_get_mpfss_vectors: Value for DPF %d was zero, but should be != zero.", i);
+        }
+  	}
+
+  	//Print all values and vectors if there has been an error
   	if(print){
-  		for(int i; i< size; i++){
+  		for(int i; i< t; i++){
 			bool *vdpf= calloc(size, sizeof(bool));
         	revealOblivBoolArray(vdpf, vectors1[i], size, 0);
   			printf("dpf #%d: ", i);  
 	        for(int j = 0; j <size ; j++) {
 	          printf("%d ", vdpf[j]);  
 	        }
-	        printf(" \n"); 
 	    	free(vdpf);      
+
+	   		int v_value;
+        	int *v_value_ptr=&v_value;
+        	revealOblivInt(v_value_ptr, values1[i], 0);
+        	printf("	Value: %d",  v_value );
+        	printf(" \n"); 
 	  	}
+		
   	}
 
   	free(m1);
