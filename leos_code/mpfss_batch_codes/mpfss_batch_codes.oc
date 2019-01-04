@@ -1,0 +1,202 @@
+#include <stdlib.h>
+#include <obliv.oh>
+#include "dbg.h"
+#include <string.h>
+#include <math.h>
+#include "mpfss_batch_codes.h"
+#include <fss_cprg.oh>
+#include <time.h>
+
+typedef struct node {
+    obliv int batchindex;
+    //obliv int batch;
+    obliv int index_for_dpf;
+} node_t;
+
+
+
+mpfss_batch * new_mpfss_batch( int t, size_t size){
+  mpfss_batch * mpfss = malloc(sizeof(mpfss_batch));
+  mpfss->t = t;
+  mpfss->size = size;
+  return mpfss;
+
+}
+
+/*one block: 16 byte -> Blockmultiple allow longer */
+size_t blockmultiple=1;
+
+void create_batches(obliv size_t *indices, mpfss_batch *mpfss){
+	int t=mpfss->t;
+  	int size=mpfss->size;
+
+/*
+  	obliv int *patched_indices = calloc(no_batches, sizeof(obliv int));
+  	for(int i=0; i<no_batches; i++){
+  		if(i<t){
+  			patched_indices[i]=indices[i];
+  		}else{
+  			patched_indices[i]=size+1;
+  		}
+
+  	}*/
+  	//shuffel
+	
+/*	obliv int *batch = calloc(no_batches, size*sizeof(obliv int));
+	 int *batch_len = calloc(no_batches, sizeof( int));
+
+	srand(time(NULL)); 
+	for(int i=0; i<size; i++){
+
+		int r = rand(); 
+		int selected_batch= r % (int)no_batches;
+		int position=batch_len[selected_batch];
+		batch_len[selected_batch]=position+1;
+		int sb;
+		revealOblivInt(&sb, selected_batch,0);
+		printf("selected_batch  %d\n", sb );	
+		int p;
+		revealOblivInt(&p, position,0);
+		printf("position %d\n", p);
+			//batch[selected_batch][position]=i;
+
+	}
+	
+
+  	free(selected_batches);
+*/
+
+	int batch1[5]={2,4,3, 5,0};
+	int batch2[5]={1,2,3,6,7};
+	int batch3[5]={1,4,9,8,0};
+	int batch4[5]={5,6,7,8,9};
+
+	int* batchofbatches[4]={batch1,batch2,batch3,batch4};
+	int rep=2;
+
+	int no_batches=4;
+	for(int h; h<no_batches;h++){
+
+		printf("Batch no %d\n", h );
+		int batchlenght=5;
+		node_t * list= calloc(batchlenght, sizeof(node_t));
+		for (int j=0; j<batchlenght; j++){
+			list[j].batchindex=-1;
+		}
+
+		for (int j = 0; j < t; ++j){
+			printf("indices no %d\n", j );
+
+			for(int i=0; i<batchlenght; i++){
+
+				//according to obliv-c documentation: variables set inside will remain hidden
+				obliv if(batchofbatches[h][i]==indices[j] ){
+					list[i].index_for_dpf=indices[j];
+					list[i].batchindex=i;
+				}
+			
+				int in;
+				revealOblivInt(&in, list[i].batchindex,0);
+				printf( " %d ", in);
+
+			}
+			printf( " /n ");
+
+		}
+		for(int k; k<batchlenght; k++){
+			node_t  n =list[k];
+			int in;
+			revealOblivInt(&in, n.batchindex,0);
+			printf( " %d ", in);
+		}
+		printf("\n");
+	}
+
+		
+		
+	
+
+
+	/*	do: call dpf with that index, remove the covered index from the list
+		additional overhead:
+			z is the avarage batchsize
+			O(t^2*z) -> can do a bit better, because after each batch indices will be one element shorter
+			=> =(0.5*t^2*z)
+		other solution:
+		 create batches, recieve back a list containing (batches & indice in batch)
+		 make lookup for each indice O(t*1) in obliv function
+		 select for each indices a batch that has not been selected.
+		 	-> use array with simple true-false 
+		 	=>O(t*d)
+		setup fails, if for one indice all available batches are already taken
+	*/ 
+
+}
+
+
+
+
+
+/*  Example for creating a MPFSS Schema. Not Tested. 
+	Callable from execYaoProtocol().
+	Input:
+	  void* args -> mpfss *mpfss
+
+	Output
+	  No return type.
+*/
+void mpfss_batch_codes(void* args){
+
+  	mpfss_batch *mpfss = (mpfss_batch*) args;
+  	int t=mpfss->t;
+  	int size=mpfss->size;
+		/*Array of pointers: Length of pointers depend on system*/
+  	obliv bool **vectors= calloc(t, sizeof(int *));
+  	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+  	int *indices_notobliv = calloc(t, sizeof(int));
+
+		/*Creates pseudo-random indices*/
+  	srand(time(NULL)); 
+  	for(int i=0; i<t; i++){
+		int r = rand(); 
+		indices_notobliv[i]=r % (int)size;
+  	}
+  	indices_notobliv[1]=3;
+
+  	#ifdef DEBUG
+		printf("Indices before feedObliv\n");
+		for(int i=0; i<t; i++){
+	  		printf(" %d ", indices_notobliv[i]);
+		}
+		printf("\n");
+  	#endif
+  
+		//feed indices one by one because target type is not int but size_t
+  	obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
+	for(int i=0; i<t; i++){
+		obliv size_t k_obliv= feedOblivInt(indices_notobliv[i], 1);
+		indices[i]=k_obliv;
+	}
+
+	create_batches(indices,mpfss);
+	/*#ifdef DEBUG
+		printf("results\n");
+	  	for(int i=0; i<t; i++){
+	  				
+	  		bool *vdpf2= calloc(size, sizeof(bool));
+			revealOblivBoolArray(vdpf2, vectors[i], size, 0);
+	  		for(int j=0; j<size; j++){
+	  			printf("%d ", vdpf2[j]);  
+			}
+			printf(" \n");        
+			free(vdpf2);
+	  	}
+  	#endif
+	*/
+
+
+  	free(vectors);
+  	free(values);
+  	free(indices);
+  	free(indices_notobliv);
+}

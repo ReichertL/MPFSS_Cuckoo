@@ -13,5 +13,5 @@ typedef struct {
     int t; // number of points in mpfss
     size_t size; //size of input field
 
-} mpfss;
+} mpfss_batch;
 
