@@ -6,117 +6,147 @@
 #include "mpfss_batch_codes.h"
 #include <fss_cprg.oh>
 #include <time.h>
+#include <bcrandom.h>
+
+/*one block: 16 byte -> Blockmultiple allow longer */
+size_t blockmultiple=1;
 
 typedef struct node {
-    obliv int batchindex;
-    //obliv int batch;
-    obliv int index_for_dpf;
+
+	//index of batch
+    int right_node;
+    int left_node;
+    bool is_head;
+    struct node * next;
 } node_t;
 
 
 
 mpfss_batch * new_mpfss_batch( int t, size_t size){
-  mpfss_batch * mpfss = malloc(sizeof(mpfss_batch));
-  mpfss->t = t;
-  mpfss->size = size;
-  return mpfss;
+  	mpfss_batch * mpfss = malloc(sizeof(mpfss_batch));
+  	mpfss->t = t;
+  	mpfss->size = size;
+    return mpfss;
 
 }
 
-/*one block: 16 byte -> Blockmultiple allow longer */
-size_t blockmultiple=1;
 
-void create_batches(obliv size_t *indices, mpfss_batch *mpfss){
-	int t=mpfss->t;
-  	int size=mpfss->size;
+void create_batches(obliv size_t *indices, mpfss_batch *mpfss, char *random_str[]){
 
-/*
-  	obliv int *patched_indices = calloc(no_batches, sizeof(obliv int));
-  	for(int i=0; i<no_batches; i++){
-  		if(i<t){
-  			patched_indices[i]=indices[i];
-  		}else{
-  			patched_indices[i]=size+1;
+  	double t = mpfss->t;
+  	double size=mpfss->size;
+  	double epsilon= 0.1;
+  	//expansion factor
+  	double s=4.0;
+  	double d_exact=(1+s)*epsilon+1;
+  	double m_exact= pow(t, 1+epsilon);
+  	double m_r=round(m_exact);
+  	double d_r=round(d_exact);
+  	//probability of failure
+  	double p=pow(t,-2*(d_exact-1));
+  	double p_real=pow(t,-2*(d_r-1)); //d needs to be double
+
+  	#ifdef DEBUG
+  	  	printf("t %f, size %f, epsilon %f, s %f \n",t,size,epsilon,s);
+	  	printf("d %f, m %f, p %f\n",d_exact, m_exact, p );
+	  	printf("d %f, m %f, p %f\n",d_r, m_r, p_real );
+  	#endif
+
+  	int m= m_r;
+  	int d=d_r;
+
+  	//random number generator of obliv-c library  
+  	obliv char i_A[20];
+  	obliv char i_B[20];
+  	obliv char obliv_key[20];
+ 	feedOblivCharArray(i_A, random_str, 20, 1);
+ 	feedOblivCharArray(i_B, random_str, 20, 2);
+  	
+  	/*for (int i = 0; i < 20; i++) {
+ 		obliv_key[i]=i_A[i]^i_B[i];
+ 	}*/
+	const char key[30]="1234567890sdfghjkliu";
+  	//revealOblivCharArray(key, i_A,20,0);
+  
+  	//printf("%s\n", key );
+
+  	//Problem: Zufallszahlen sind nicht bei beiden gleich. Was machen?
+  	//beide seiten sollen gleichen graph bekommen
+  	//	1. in obliv erstellen
+  	//	2. gleiche zufallszahlen garantieren
+	BCipherRandomGen *random_gen= newBCipherRandomGen(&key);
+
+  	node_t **heads = calloc(m, sizeof(node_t *));
+  	node_t **tails = calloc(m, sizeof(node_t *));
+  	int len_arr[m];
+
+
+  	for(int i=0; i<m; i++){
+		node_t *head = calloc(1,sizeof(node_t));
+		head->is_head=true;
+		heads[i]=head;
+		tails[i]=head;
+		len_arr[i]=0;
+  	}
+
+  	for(int i=0; i<size; i++){
+  		for(int j=0; j<d;j++){
+  			node_t *this_node=calloc(1, sizeof(node_t));
+  			unsigned long long rand= bcRandomInt(random_gen, (unsigned long long) m);
+  			int r_a;
+  			int r_b;
+
+  			/*	bcrandom generates different values for both parties (even with same seed),
+  			 	so they need to be broadcasted. 
+  			*/
+  			r_a=ocBroadcastInt((int)rand, 1);
+  			r_b=ocBroadcastInt((int)rand, 2);
+			int r= (r_a+r_b)% m;
+
+			this_node->right_node=r;
+			this_node->left_node=i;
+
+			this_node->is_head=false;
+			node_t *current=tails[r];
+			current->next=this_node;
+			tails[r]= this_node;
+			len_arr[r]=len_arr[r]+1;
   		}
+  	}
 
-  	}*/
-  	//shuffel
-	
-/*	obliv int *batch = calloc(no_batches, size*sizeof(obliv int));
-	 int *batch_len = calloc(no_batches, sizeof( int));
+  	#ifdef DEBUG
+	  	printf("\n");
+	  	for(int i=0; i<m; i++){
+	  		printf("Bucket %d: %d \n ", i , len_arr[i] );
+	  	}
+	  	printf("successfully created graph\n");
 
-	srand(time(NULL)); 
-	for(int i=0; i<size; i++){
+	  	for(int i=0; i<m; i++){
+	  		node_t *current=heads[i];
+	  		while(current!=NULL){
+	  			if(!current->is_head){
+	  				printf(" ( %d , %d)", current->left_node, current->right_node );
+	  			}
+	  			current=current->next;
+	  		}
+	  	}
+  	#endif
 
-		int r = rand(); 
-		int selected_batch= r % (int)no_batches;
-		int position=batch_len[selected_batch];
-		batch_len[selected_batch]=position+1;
-		int sb;
-		revealOblivInt(&sb, selected_batch,0);
-		printf("selected_batch  %d\n", sb );	
-		int p;
-		revealOblivInt(&p, position,0);
-		printf("position %d\n", p);
-			//batch[selected_batch][position]=i;
+	// Free allocated memory  	
 
-	}
-	
-
-  	free(selected_batches);
-*/
-
-	int batch1[5]={2,4,3, 5,0};
-	int batch2[5]={1,2,3,6,7};
-	int batch3[5]={1,4,9,8,0};
-	int batch4[5]={5,6,7,8,9};
-
-	int* batchofbatches[4]={batch1,batch2,batch3,batch4};
-	int rep=2;
-
-	int no_batches=4;
-	for(int h; h<no_batches;h++){
-
-		printf("Batch no %d\n", h );
-		int batchlenght=5;
-		node_t * list= calloc(batchlenght, sizeof(node_t));
-		for (int j=0; j<batchlenght; j++){
-			list[j].batchindex=-1;
-		}
-
-		for (int j = 0; j < t; ++j){
-			printf("indices no %d\n", j );
-
-			for(int i=0; i<batchlenght; i++){
-
-				//according to obliv-c documentation: variables set inside will remain hidden
-				obliv if(batchofbatches[h][i]==indices[j] ){
-					list[i].index_for_dpf=indices[j];
-					list[i].batchindex=i;
-				}
-			
-				int in;
-				revealOblivInt(&in, list[i].batchindex,0);
-				printf( " %d ", in);
-
-			}
-			printf( " /n ");
-
-		}
-		for(int k; k<batchlenght; k++){
-			node_t  n =list[k];
-			int in;
-			revealOblivInt(&in, n.batchindex,0);
-			printf( " %d ", in);
-		}
-		printf("\n");
+	for(int i=0; i<m; i++){
+	  		node_t *current_H=heads[i];
+	  		node_t *next_H;
+	  		while(current_H!=NULL){
+		  		next_H=current_H->next;
+		  		free(current_H);
+	  			current_H=next_H;
+	  		}
 	}
 
-		
-		
+  	free(heads);
+  	free(tails);
 	
-
-
 	/*	do: call dpf with that index, remove the covered index from the list
 		additional overhead:
 			z is the avarage batchsize
@@ -177,8 +207,15 @@ void mpfss_batch_codes(void* args){
 		obliv size_t k_obliv= feedOblivInt(indices_notobliv[i], 1);
 		indices[i]=k_obliv;
 	}
+	char random_str[20];
+	if(cp==1){
+		strncpy(random_str, "1234567890sdfghjkliu00",20);
+	}else{
+		strncpy(random_str, "sdfghhjkkkwertzhnujmww",20);
 
-	create_batches(indices,mpfss);
+	}
+	printf("%s\n", random_str );
+	create_batches(indices,mpfss, random_str);
 	/*#ifdef DEBUG
 		printf("results\n");
 	  	for(int i=0; i<t; i++){
