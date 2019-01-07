@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
         int t = atoi(argv[3]);
         int size = atoi(argv[4]);
 
-        mpfss_batch *m=new_mpfss_batch(t, size);
+        mpfss_batch *m=new_mpfss_batch(t, size, 0.1 , 4.0 );
         lap = wallClock();        
 
          // Execute Yao's protocol and cleanup

@@ -12,6 +12,14 @@ int cp;
 typedef struct {
     int t; // number of points in mpfss
     size_t size; //size of input field
+    double epsilon;
+    double s; //expansion factor
+    double m_exact;
+    double m_rounded;
+    double d_exact;
+    double d_rounded;
+    double p; //probability of failure
+    double p_real;
 
 } mpfss_batch;
 

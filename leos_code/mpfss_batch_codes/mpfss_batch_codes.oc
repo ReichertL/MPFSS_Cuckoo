@@ -20,74 +20,192 @@ typedef struct node {
     struct node * next;
 } node_t;
 
+typedef struct dd_node {
+
+	int val;
+	bool is_head;
+    struct dd_node * prev;
+    struct dd_node * next;
+} dd_node_t;
+
+typedef struct batch {
+
+	int index;
+	bool is_head;
+	node_t *list;
+    struct batch * prev;
+    struct batch * next;
+} batch_t;
+
+typedef struct pointinfo {
+
+	int val;
+	int batch;
+	int index_in_batch;
+} pointinfo_t;
+
+/*	Deletes given dd_node_t form list and returns next element in list. 
+	If deleted element was last element in list, Null will be returned
+*/
+dd_node_t *del_dd_node(dd_node_t *to_delete){
 
 
-mpfss_batch * new_mpfss_batch( int t, size_t size){
+	dd_node_t *for_free=to_delete;
+	dd_node_t *new_dd_current;
+	if(to_delete->next!=NULL && to_delete->prev!=NULL){
+		#ifdef DEBUG
+			printf("Deleting middle node\n"); 
+		#endif
+		//normal middle node
+		dd_node_t *prev= to_delete->prev;
+		dd_node_t *next=to_delete->next;
+		prev->next=next;
+		next->prev=prev;
+		new_dd_current=next;
+
+	}else if(to_delete->prev==NULL && to_delete->next!=NULL){
+		//unlikely to happen
+		#ifdef DEBUG
+			printf("Deleting first/head node\n"); 
+		#endif
+		//head node
+		dd_node_t *next=to_delete->next;
+		next->prev=NULL;
+		next->is_head=1;
+		new_dd_current=next;
+
+	}else if(to_delete->prev!=NULL &&to_delete->next==NULL) {
+		#ifdef DEBUG
+			printf("Deleting last node\n"); 
+		#endif
+		//last node
+		batch_t *prev=to_delete->prev;
+		prev->next=NULL;
+		new_dd_current=to_delete->prev;
+
+	}else{
+		#ifdef DEBUG
+			printf("Deleting node that is first and last node\n"); 
+		#endif
+		new_dd_current=NULL;
+
+	}
+
+	free(for_free);
+	return new_dd_current;
+	
+}
+
+
+void *del_batch(batch_t *to_delete){
+
+
+	if(to_delete->next!=NULL && to_delete->prev!=NULL){
+		#ifdef DEBUG
+			printf("Deleting middle node\n"); 
+		#endif
+		//normal middle node
+		batch_t *prev= to_delete->prev;
+		batch_t *next=to_delete->next;
+		prev->next=next;
+		next->prev=prev;
+
+	}else if(to_delete->prev==NULL && to_delete->next!=NULL){
+		//unlikely to happen
+		#ifdef DEBUG
+			printf("Deleting first/head node\n"); 
+		#endif
+		//head node
+		batch_t *next=to_delete->next;
+		next->prev=NULL;
+		next->is_head=1;
+
+	}else if(to_delete->prev!=NULL &&to_delete->next==NULL) {
+		#ifdef DEBUG
+			printf("Deleting last node\n"); 
+		#endif
+		//last node
+		batch_t *prev=to_delete->prev;
+		prev->next=NULL;
+
+	}
+
+	free(to_delete);
+	
+}
+
+mpfss_batch * new_mpfss_batch( int t, size_t size, double epsilon, double s ){
   	mpfss_batch * mpfss = malloc(sizeof(mpfss_batch));
   	mpfss->t = t;
   	mpfss->size = size;
+  	mpfss->epsilon= epsilon;
+  	mpfss->s=s;
+  	mpfss->d_exact=(1+s)*epsilon+1;
+  	mpfss->m_exact= pow(t, 1+epsilon);
+  	mpfss->m_rounded=round(mpfss->m_exact);
+  	mpfss->d_rounded=round(mpfss->d_exact);
+  	mpfss->p=1/pow(t,mpfss->d_exact);
+  	mpfss->p_real=1/pow(t,mpfss->d_rounded);
+
+  	#ifdef DEBUG
+  	  	printf("t %d, size %d, epsilon %f, s %f \n",t,size, epsilon,s);
+	  	printf("d %f, m %f, p %f\n",mpfss->d_exact, mpfss->m_exact, mpfss->p );
+	  	printf("d %f, m %f, p %f\n",mpfss->d_rounded, mpfss->m_rounded, mpfss->p_real );
+  	#endif
+
     return mpfss;
 
 }
 
+/*	Creates batches of the input field.
+	There will be m batches, each can have a different length.
+	Over all batches on element from the input field will appear d times.
+	
+	Input: 
+		The mpfss_batch "mpfss" input will contain values for execution, such as d and m.
+		"random_str" hold a seed for the random number generator. Can be different for both sides.
+	Output: After return "bachtes" will hold a pointer to an array of list heads.
+	Each head point to a list of node_t elements which represents one batch.
+	
+*/
+void create_batches( mpfss_batch *mpfss, char *random_str[], node_t **batches, batch_t *batch_head ){
 
-void create_batches(obliv size_t *indices, mpfss_batch *mpfss, char *random_str[]){
-
-  	double t = mpfss->t;
   	double size=mpfss->size;
-  	double epsilon= 0.1;
-  	//expansion factor
-  	double s=4.0;
-  	double d_exact=(1+s)*epsilon+1;
-  	double m_exact= pow(t, 1+epsilon);
-  	double m_r=round(m_exact);
-  	double d_r=round(d_exact);
-  	//probability of failure
-  	double p=pow(t,-2*(d_exact-1));
-  	double p_real=pow(t,-2*(d_r-1)); //d needs to be double
+  	int m= mpfss->m_rounded;
+  	int d= mpfss-> d_rounded;
 
-  	#ifdef DEBUG
-  	  	printf("t %f, size %f, epsilon %f, s %f \n",t,size,epsilon,s);
-	  	printf("d %f, m %f, p %f\n",d_exact, m_exact, p );
-	  	printf("d %f, m %f, p %f\n",d_r, m_r, p_real );
-  	#endif
+	BCipherRandomGen *random_gen= newBCipherRandomGen(random_str);
 
-  	int m= m_r;
-  	int d=d_r;
-
-  	//random number generator of obliv-c library  
-  	obliv char i_A[20];
-  	obliv char i_B[20];
-  	obliv char obliv_key[20];
- 	feedOblivCharArray(i_A, random_str, 20, 1);
- 	feedOblivCharArray(i_B, random_str, 20, 2);
-  	
-  	/*for (int i = 0; i < 20; i++) {
- 		obliv_key[i]=i_A[i]^i_B[i];
- 	}*/
-	const char key[30]="1234567890sdfghjkliu";
-  	//revealOblivCharArray(key, i_A,20,0);
-  
-  	//printf("%s\n", key );
-
-  	//Problem: Zufallszahlen sind nicht bei beiden gleich. Was machen?
-  	//beide seiten sollen gleichen graph bekommen
-  	//	1. in obliv erstellen
-  	//	2. gleiche zufallszahlen garantieren
-	BCipherRandomGen *random_gen= newBCipherRandomGen(&key);
-
-  	node_t **heads = calloc(m, sizeof(node_t *));
+  	//node_t **heads = calloc(m, sizeof(node_t *));
   	node_t **tails = calloc(m, sizeof(node_t *));
   	int len_arr[m];
 
+	batch_head->is_head=1;
+	batch_head->prev=NULL;
+	batch_head->next=NULL;
+	batch_head->index=-1;
+	batch_t *previous_batch=batch_head;
 
   	for(int i=0; i<m; i++){
 		node_t *head = calloc(1,sizeof(node_t));
 		head->is_head=true;
-		heads[i]=head;
+		head->next=NULL;
+		batches[i]=head;
 		tails[i]=head;
 		len_arr[i]=0;
+
+		//creating linked list containing all batches
+		batch_t *batch_current=calloc(1,sizeof(batch_t));
+		batch_current->index=i;
+		batch_current->list=head;
+		batch_current->prev=previous_batch;
+		previous_batch->next=batch_current;
+		batch_current->next=NULL;
+		previous_batch=batch_current;
+	
   	}
+
+
 
   	for(int i=0; i<size; i++){
   		for(int j=0; j<d;j++){
@@ -105,6 +223,7 @@ void create_batches(obliv size_t *indices, mpfss_batch *mpfss, char *random_str[
 
 			this_node->right_node=r;
 			this_node->left_node=i;
+			this_node->next=NULL;
 
 			this_node->is_head=false;
 			node_t *current=tails[r];
@@ -114,26 +233,219 @@ void create_batches(obliv size_t *indices, mpfss_batch *mpfss, char *random_str[
   		}
   	}
 
+
+
+	
+
   	#ifdef DEBUG
 	  	printf("\n");
 	  	for(int i=0; i<m; i++){
 	  		printf("Bucket %d: %d \n ", i , len_arr[i] );
 	  	}
-	  	printf("successfully created graph\n");
 
 	  	for(int i=0; i<m; i++){
-	  		node_t *current=heads[i];
+	  		node_t *current=batches[i];
 	  		while(current!=NULL){
 	  			if(!current->is_head){
 	  				printf(" ( %d , %d)", current->left_node, current->right_node );
 	  			}
 	  			current=current->next;
 	  		}
+	  		printf(" | ");
+
 	  	}
+		printf("\n");
+		printf("successfully created graph\n");
   	#endif
 
-	// Free allocated memory  	
+	// Free allocated memory: kann ich für tails free machen?  	
 
+}
+
+void print_dd_list(dd_node_t *head){
+
+	dd_node_t *current=head->next;
+	bool tailfound=false;
+	while(!tailfound){
+		printf("%d ", current->val );
+		if(current->next!=NULL){
+			current=current->next;
+
+		}else{
+			tailfound=true;
+		}
+
+	}
+	printf("\n");
+}
+
+void print_batch_list(batch_t *head){
+
+	batch_t *current=head->next;
+
+	bool tailfound=false;
+	while(!tailfound){
+		
+		printf("%d ", current->index );
+		if(current->next!=NULL){
+			current=current->next;
+
+		}else{
+			tailfound=true;
+		}
+
+	}
+	printf("\n");
+}
+
+void check_this_batch(dd_node_t *dd_current, node_t *current, pointinfo_t *matches, int *match_no, int *index, batch_t *batch_current,  int *no_available_batches,  int *found, int *i){
+		//In case a batch holds no values
+		  	if(current->next!=NULL){
+			  	current=current->next;
+				int j=0;
+
+			  	while(current!=NULL){
+
+			  		int left_node=current->left_node;
+			  		if(left_node==index){
+
+			  			pointinfo_t p=matches[match_no];
+			  			p.val=index;
+			  			p.batch=batch_current->index;
+			  			p.index_in_batch=j;
+			  			#ifdef DEBUG
+			  				printf("val %d batch %d index %d\n", index, p.batch, j);
+			  			#endif
+				  		dd_current=del_dd_node(dd_current);
+				  		no_available_batches=no_available_batches-1;
+				  		del_batch(batch_current);
+				  		found=1;
+				  		i=-1; 
+				  		match_no=match_no+1;
+				  		break;
+			  		}
+			  		if(current->next !=NULL){
+			  			//not last index in batch
+			  			current=current->next;
+			  			j=j+1;
+			  		}else if(dd_current->is_head){
+			  			//no more indices left
+				  		printf("successfully matched indices and batches\n");
+			  			return true;
+			  		}else{
+			  			//last index in batch reached
+			  			break;
+			  		}
+			  	}
+			}else{
+				//skip empty batches
+				i=m;
+			} 
+}
+
+bool combine_batches_indices(node_t **batches, mpfss_batch *mpfss, dd_node_t *head, batch_t *batch_head){
+	int t=mpfss->t;
+
+	/* Batches lists do not use header for infos, same goes for indices list*/
+	int m=mpfss->m_rounded;
+	dd_node_t *dd_current=head->next;
+
+	
+	pointinfo_t *matches=calloc(t, sizeof(pointinfo_t));
+	int match_no=0; 
+	int no_available_batches=m;
+
+	while(dd_current !=NULL){
+		int index=dd_current->val;
+		bool found=false;
+		int i=0;
+		batch_t *batch_current=batch_head;
+
+		while( i<m){
+			#ifdef DEBUG
+				printf("index:%d i:%d\n", index, i );
+				print_dd_list(head);
+				print_batch_list(batch_head);
+			#endif
+
+			batch_current=batch_current->next;
+		  	node_t *current=batch_current->list;
+
+		  	//In case a batch holds no values
+		  	if(current->next!=NULL){
+			  	current=current->next;
+				int j=0;
+
+			  	while(current!=NULL){
+
+			  		int left_node=current->left_node;
+			  		if(left_node==index){
+
+			  			pointinfo_t p=matches[match_no];
+			  			p.val=index;
+			  			p.batch=batch_current->index;
+			  			p.index_in_batch=j;
+			  			#ifdef DEBUG
+			  				printf("val %d batch %d index %d\n", index, p.batch, j);
+			  			#endif
+				  		dd_current=del_dd_node(dd_current);
+				  		no_available_batches=no_available_batches-1;
+				  		del_batch(batch_current);
+				  		found=1;
+				  		i=-1; 
+				  		match_no=match_no+1;
+				  		break;
+			  		}
+			  		if(current->next !=NULL){
+			  			//not last index in batch
+			  			current=current->next;
+			  			j=j+1;
+			  		}else if(dd_current->is_head){
+			  			//no more indices left
+				  		printf("successfully matched indices and batches\n");
+			  			return true;
+			  		}else{
+			  			//last index in batch reached
+			  			break;
+			  		}
+			  	}
+			}else{
+				//skip empty batches
+				i=m;
+			} 
+
+			//Batch is finished
+			printf("no_available_batches %d \n", no_available_batches);
+			if((i+1)==no_available_batches && found==false){
+				//if this was the last batch and we have not found anything: setup failed
+			  	#ifdef DEBUG
+	  				printf("No available batch found for index %d \n", index );
+	  			#endif
+				return false;
+
+			}else if(found==true){
+				//finding batch for this index worked, therefore continue with next index
+				break;
+			}else if(match_no==t){
+		  		printf("successfully matched indices and batches\n");
+				return true;
+
+			}
+			i=i+1;
+		}			
+	}
+	printf("successfully matched indices and batches\n");
+
+	return true;
+}
+
+
+
+/*	
+	Frees memory for a array of containing the heads of list data structures. 
+	Lists have to be node_t lists.
+*/
+void free_nodet_list(node_t **heads, int m){
 	for(int i=0; i<m; i++){
 	  		node_t *current_H=heads[i];
 	  		node_t *next_H;
@@ -145,26 +457,38 @@ void create_batches(obliv size_t *indices, mpfss_batch *mpfss, char *random_str[
 	}
 
   	free(heads);
-  	free(tails);
-	
-	/*	do: call dpf with that index, remove the covered index from the list
-		additional overhead:
-			z is the avarage batchsize
-			O(t^2*z) -> can do a bit better, because after each batch indices will be one element shorter
-			=> =(0.5*t^2*z)
-		other solution:
-		 create batches, recieve back a list containing (batches & indice in batch)
-		 make lookup for each indice O(t*1) in obliv function
-		 select for each indices a batch that has not been selected.
-		 	-> use array with simple true-false 
-		 	=>O(t*d)
-		setup fails, if for one indice all available batches are already taken
-	*/ 
-
 }
 
 
+void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv,  dd_node_t *head, int t , int size){
+	
+	head->is_head=1;
+	head->prev=NULL;
+	dd_node_t *previous=head;
+	unsigned long long rand; 
+	for(int i=0; i<t; i++){
+		rand= bcRandomInt(random_gen, (unsigned long long) size);
+		indices_notobliv[i]=(int) rand;
+	
+		//filling indice list
+		dd_node_t *current=calloc(1,sizeof(dd_node_t));
+		current->val=(int) rand;
+		current->prev=previous;
+		previous->next=current;
+		current->next=NULL;
+		previous=current;
+	}
 
+
+  	#ifdef DEBUG
+		printf("Indices before feedObliv\n");
+		for(int i=0; i<t; i++){
+	  		printf(" %d ", indices_notobliv[i]);
+		}
+		printf("\n");
+	#endif
+
+}
 
 
 /*  Example for creating a MPFSS Schema. Not Tested. 
@@ -180,60 +504,39 @@ void mpfss_batch_codes(void* args){
   	mpfss_batch *mpfss = (mpfss_batch*) args;
   	int t=mpfss->t;
   	int size=mpfss->size;
+  	int m= mpfss->m_rounded;
+
 		/*Array of pointers: Length of pointers depend on system*/
   	obliv bool **vectors= calloc(t, sizeof(int *));
   	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
-  	int *indices_notobliv = calloc(t, sizeof(int));
+  	node_t **batches = calloc(m, sizeof(node_t *));
+  	batch_t *batch_head=calloc(1,sizeof(batch_t));
 
-		/*Creates pseudo-random indices*/
-  	srand(time(NULL)); 
-  	for(int i=0; i<t; i++){
-		int r = rand(); 
-		indices_notobliv[i]=r % (int)size;
-  	}
-  	indices_notobliv[1]=3;
+  	/*Generating Random Seed: ist das notwendig??*/
+	BCipherRandomGen *random_gen= newBCipherRandomGen();
+	unsigned long long rand= bcRandomInt(random_gen, pow(2,63));
+	char random_str[50];
+	sprintf(random_str, "%d",rand );
 
-  	#ifdef DEBUG
-		printf("Indices before feedObliv\n");
-		for(int i=0; i<t; i++){
-	  		printf(" %d ", indices_notobliv[i]);
-		}
-		printf("\n");
-  	#endif
-  
-		//feed indices one by one because target type is not int but size_t
-  	obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
-	for(int i=0; i<t; i++){
-		obliv size_t k_obliv= feedOblivInt(indices_notobliv[i], 1);
-		indices[i]=k_obliv;
-	}
-	char random_str[20];
-	if(cp==1){
-		strncpy(random_str, "1234567890sdfghjkliu00",20);
+	/*Peer 1 generates indices at random*/
+  	if(cp==1){
+  		int *indices_notobliv = calloc(t, sizeof(int));
+		dd_node_t *head=calloc(1,sizeof(dd_node_t));
+	   	create_indices(random_gen, indices_notobliv, head, t , size);
+
+		
+		create_batches(mpfss, random_str, batches, batch_head);
+		combine_batches_indices(batches, mpfss, head, batch_head);
+
+	  	//free(indices_notobliv);
+
+
 	}else{
-		strncpy(random_str, "sdfghhjkkkwertzhnujmww",20);
-
+		create_batches(mpfss, random_str, batches, batch_head);
 	}
-	printf("%s\n", random_str );
-	create_batches(indices,mpfss, random_str);
-	/*#ifdef DEBUG
-		printf("results\n");
-	  	for(int i=0; i<t; i++){
-	  				
-	  		bool *vdpf2= calloc(size, sizeof(bool));
-			revealOblivBoolArray(vdpf2, vectors[i], size, 0);
-	  		for(int j=0; j<size; j++){
-	  			printf("%d ", vdpf2[j]);  
-			}
-			printf(" \n");        
-			free(vdpf2);
-	  	}
-  	#endif
-	*/
+	
 
-
+	/*free_nodet_list(batches, m);
   	free(vectors);
-  	free(values);
-  	free(indices);
-  	free(indices_notobliv);
+  	free(values);*/
 }
