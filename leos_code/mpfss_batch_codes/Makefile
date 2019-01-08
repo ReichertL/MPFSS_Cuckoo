@@ -15,7 +15,7 @@ bcrandom_paht=../../obliv-c/src/ext/oblivc/
 INCLUDE=-I$(ACKLIB_FFSL) -I$(Mpfss_path) -I$(Util_path) -I$(bcrandom_paht)
 
 
-LOADFILES= ../util/util.c 
+LOADFILES= ../util/util.c binary_search_tree.c
 
 ACKLIB_PATH=../../absentminded-crypto-kit/build/lib/liback.a 
 #-lgomp flag is very important. Otherwise linking will fail. Does some kind of parallelization.
