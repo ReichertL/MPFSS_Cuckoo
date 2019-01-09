@@ -182,8 +182,8 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 		printf(" \n");
 
 		
-		  obliv bool *v1_lo= calloc(size, sizeof(obliv int));
-		  obliv bool *v2_lo= calloc(size, sizeof(obliv int));
+		  obliv bool *v1_lo= calloc(size, sizeof(obliv bool));
+		  obliv bool *v2_lo= calloc(size, sizeof(obliv bool));
 		  feedOblivIntArray(v1_lo, local_output, size, 1);
 		  feedOblivIntArray(v2_lo, local_output, size, 2);
 		  obliv int *dpf_obliv_lo= calloc(size, sizeof(obliv int));
@@ -265,7 +265,7 @@ void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors
 		revealOblivInt(&in, index, 0);
 		printf("Index from obliv given by get_mpfss_vectors: %d\n",in );
 
-		bool *vdpf2= calloc(size, sizeof(bool));
+		bool *vdpf2= calloc(size, sizeof(bool ));
 		revealOblivBoolArray(vdpf2, vectors[j], size, 0);
 		printf("dpf #%d:               ", j);  
 		for(int i = 0; i <size ; i++) {
@@ -303,9 +303,9 @@ void mpfss_naive(void* args){
   	int t=mpfss->t;
   	int size=mpfss->size;
 		/*Array of pointers: Length of pointers depend on system*/
-  	obliv bool **vectors= calloc(t, sizeof(int *));
+  	obliv bool **vectors= calloc(t, sizeof(obliv bool *));
   	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
-  	int *indices_notobliv = calloc(t, sizeof(int));
+  	int *indices_notobliv = calloc(t, sizeof(int ));
 
 		/*Creates pseudo-random indices*/
   	srand(time(NULL)); 
@@ -329,6 +329,7 @@ void mpfss_naive(void* args){
 		indices[i]=k_obliv;
 	}
 
+	//TODO: Write function that will return only a single vector !
   	get_mpfss_vectors(mpfss, indices, vectors, values);
 
 	#ifdef DEBUG
