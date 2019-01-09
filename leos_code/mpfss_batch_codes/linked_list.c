@@ -96,6 +96,56 @@ dllnode_t *del_dllnode(dllnode_t *to_delete){
 	
 }
 
+/*		
+	Like del_dllnode but does not free the memory.
+*/
+dllnode_t *delink_dllnode(dllnode_t *to_delete){
+
+
+	dllnode_t *new_dllcurrent;
+	if(to_delete->next!=NULL && to_delete->prev!=NULL){
+		#ifdef DEBUG
+			//printf("Deleting middle node\n"); 
+		#endif
+		//normal middle node
+		dllnode_t *prev= to_delete->prev;
+		dllnode_t *next=to_delete->next;
+		prev->next=next;
+		next->prev=prev;
+		new_dllcurrent=next;
+
+	}else if(to_delete->prev==NULL && to_delete->next!=NULL){
+		#ifdef DEBUG
+			//printf("Deleting first/head node\n"); 
+		#endif
+		//head node
+		dllnode_t *next=to_delete->next;
+		next->prev=NULL;
+		next->is_head=1;
+		new_dllcurrent=next;
+
+	}else if(to_delete->prev!=NULL &&to_delete->next==NULL) {
+		#ifdef DEBUG
+			//printf("Deleting last node\n"); 
+		#endif
+		//last node
+		dllnode_t *prev=to_delete->prev;
+		prev->next=NULL;
+		new_dllcurrent=to_delete->prev;
+
+	}else{
+		#ifdef DEBUG
+			//printf("Deleting node that is first and last node\n"); 
+		#endif
+		new_dllcurrent=NULL;
+
+	}
+
+	return new_dllcurrent;
+	
+}
+
+
 dllnode_t *get_head(dllnode_t *some_node){
 	dllnode_t *current=some_node;
 	while(!current->is_head){

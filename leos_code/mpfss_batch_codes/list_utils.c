@@ -2,8 +2,8 @@ typedef struct node {
 
 	//index of batch
 	int index_in_batch;
-    int right_node;
-    int left_node;
+    int batch_no;
+    int val;
     bool is_head;
     struct node * next;
 } node_t;

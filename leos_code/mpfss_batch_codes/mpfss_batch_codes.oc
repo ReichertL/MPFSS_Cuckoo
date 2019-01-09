@@ -10,9 +10,7 @@
 #include "binary_search_tree.h"
 #include "list_utils.c"
 #include "linked_list.c"
-
-/*one block: 16 byte -> Blockmultiple allow longer */
-size_t blockmultiple=1;
+#include "mpfss_naive.oc"
 
 
 
@@ -40,422 +38,6 @@ mpfss_batch * new_mpfss_batch( int t, size_t size, double epsilon, double s ){
 
 }
 
-/*	Creates batches of the input field.
-	There will be m batches, each can have a different length.
-	Over all batches on element from the input field will appear d times.
-	
-	Input: 
-		The mpfss_batch "mpfss" input will contain values for execution, such as d and m.
-		"random_str" hold a seed for the random number generator. Can be different for both sides.
-	Output: After return "bachtes" will hold a pointer to an array of list heads.
-	Each head point to a list of node_t elements which represents one batch.
-	
-*/
-void create_batches( mpfss_batch *mpfss, char *random_str[], node_t **batches, batch_t *batch_head, dllnode_t **bt_roots ){
-
-  	double size=mpfss->size;
-  	int m= mpfss->m_rounded;
-  	int d= mpfss-> d_rounded;
-
-	BCipherRandomGen *random_gen= newBCipherRandomGen(random_str);
-
-  	//node_t **heads = calloc(m, sizeof(node_t *));
-  	node_t **tails = calloc(m, sizeof(node_t *));
-  	int len_arr[m];
-
-	batch_head->is_head=1;
-	batch_head->prev=NULL;
-	batch_head->next=NULL;
-	batch_head->index=-1;
-	batch_t *previous_batch=batch_head;
-
-  	dllnode_t *list_prev;
-
-  	for(int i=0; i<m; i++){
-		node_t *head = calloc(1,sizeof(node_t));
-		head->is_head=true;
-		head->next=NULL;
-		batches[i]=head;
-		tails[i]=head;
-		len_arr[i]=0;
-
-		//creating linked list containing all batches
-		batch_t *batch_current=calloc(1,sizeof(batch_t));
-		batch_current->index=i;
-		batch_current->list=head;
-		batch_current->prev=previous_batch;
-		previous_batch->next=batch_current;
-		batch_current->next=NULL;
-		previous_batch=batch_current;
-
-		//creating linked list holding roots of binary search trees
-			struct bt_node *batch_root = NULL; 
-		if(i==0){
-			dllnode_t *first=create_head(batch_root, 0);
-			list_prev=first;
-			bt_roots[0]=first;
-		
-		}else{
-			dllnode_t *element=insert_dllnode( list_prev, batch_root, i);
-			list_prev=element;
-			bt_roots[i]=element;
-
-
-		}
-  	}
-
-
-
-
-
-
-  	for(int i=0; i<size; i++){
-  		for(int j=0; j<d;j++){
-  			node_t *this_node=calloc(1, sizeof(node_t));
-  			unsigned long long rand= bcRandomInt(random_gen, (unsigned long long) m);
-  			int r_a;
-  			int r_b;
-
-  			/*	bcrandom generates different values for both parties (even with same seed),
-  			 	so they need to be broadcasted. 
-  			*/
-  			r_a=ocBroadcastInt((int)rand, 1);
-  			r_b=ocBroadcastInt((int)rand, 2);
-			int r= (r_a+r_b)% m;
-
-			this_node->right_node=r;
-			this_node->left_node=i;
-			this_node->next=NULL;
-			this_node->is_head=false;
-			node_t *current=tails[r];
-			current->next=this_node;
-			tails[r]= this_node;
-			len_arr[r]=len_arr[r]+1;
-			this_node->index_in_batch= len_arr[r]-1;
-
-
-			//create one big binary search tree: O(log(n) pro insert)
-		
-			dllnode_t *element =bt_roots[r]; 
-			struct bt_node *batch_root=element->s;
-
-			batchelement_t *batchelem=calloc(1, sizeof(batchelement_t));
-			batchelem->index_in_batch=len_arr[r]-1;
-			batchelem->batch_no=r;
-			batchelem->val=i;
-
-			if(batch_root==NULL){
-				element->s=insert( NULL, batchelem, i);
-
-			}else{
-				insert(batch_root,batchelem, i);
-
-			}
-			
-
-  		}
-  		
-  	}
-
-
-
- 
-
-  	#ifdef DEBUG
-
-
-
-	  	printf("\n");
-	  	int N=0;
-	  	for(int i=0; i<m; i++){
-	  		printf("Bucket %d: %d \n", i , len_arr[i] );
-	  		N=N+len_arr[i];
-	  	}
-
-	  	printf("N: \n", N);
-	  	for(int i=0; i<m; i++){
-	  		node_t *current=batches[i];
-	  		while(current!=NULL){
-	  			if(!current->is_head){
-	  				printf(" ( %d , %d)", current->left_node, current->right_node );
-	  			}
-	  			current=current->next;
-	  		}
-	  		printf(" | ");
-
-	  	}
-		printf("\n");
-
-
-		dllnode_t *batch_root=bt_roots[0];
-  		while(true){
-	  		printf("batch %d :", batch_root->val );
-			struct bt_node *this_batch=batch_root->s;
-
-	  		inorder(this_batch);
-	  		printf("\n");
-	  		if(batch_root->next==NULL){
-	  			break;
-  		}
-  		batch_root=batch_root->next;
-
-  	}
-
-		printf("successfully created graph\n");
-  	#endif
-
-	// Free allocated memory: kann ich für tails free machen?  	
-
-}
-
-void create_batches_bst( mpfss_batch *mpfss, char *random_str[], dllnode_t **bt_roots ){
-
-  	double size=mpfss->size;
-  	int m= mpfss->m_rounded;
-  	int d= mpfss-> d_rounded;
-
-	BCipherRandomGen *random_gen= newBCipherRandomGen(random_str);
-	int len_arr[m];
-  	dllnode_t *list_prev;
-
-  	for(int i=0; i<m; i++){
-  		len_arr[i]=0;
-
-		//creating linked list holding roots of binary search trees
-			struct bt_node *batch_root = NULL; 
-		if(i==0){
-			dllnode_t *first=create_head(batch_root, 0);
-			list_prev=first;
-			bt_roots[0]=first;
-		}else{
-			dllnode_t *element=insert_dllnode( list_prev, batch_root, i);
-			list_prev=element;
-			bt_roots[i]=element;
-		}
-  	}
-
-  	for(int i=0; i<size; i++){
-  		for(int j=0; j<d;j++){
-  			node_t *this_node=calloc(1, sizeof(node_t));
-  			unsigned long long rand= bcRandomInt(random_gen, (unsigned long long) m);
-  			int r_a;
-  			int r_b;
-
-  			/*	bcrandom generates different values for both parties (even with same seed),
-  			 	so they need to be broadcasted. 
-  			*/
-  			r_a=ocBroadcastInt((int)rand, 1);
-  			r_b=ocBroadcastInt((int)rand, 2);
-			int r= (r_a+r_b)% m;
-
-			len_arr[r]=len_arr[r]+1;
-			this_node->index_in_batch= len_arr[r]-1;
-
-			//create one big binary search tree: O(log(n) pro insert)
-			dllnode_t *element =bt_roots[r]; 
-			struct bt_node *batch_root=element->s;
-			batchelement_t *batchelem=calloc(1, sizeof(batchelement_t));
-			batchelem->index_in_batch=len_arr[r]-1;
-			batchelem->batch_no=r;
-			batchelem->val=i;
-
-			if(batch_root==NULL){
-				element->s=insert( NULL, batchelem, i);
-
-			}else{
-				insert(batch_root,batchelem, i);
-			}
-  		}
-  	}
-
-  	#ifdef DEBUG
-
-	  	printf("\n");
-	  	int N=0;
-	  	for(int i=0; i<m; i++){
-	  		printf("Bucket %d: %d \n", i , len_arr[i] );
-	  		N=N+len_arr[i];
-	  	}
-
-
-		dllnode_t *batch_root=bt_roots[0];
-  		while(true){
-	  		printf("batch %d :", batch_root->val );
-			struct bt_node *this_batch=batch_root->s;
-
-	  		inorder(this_batch);
-	  		printf("\n");
-	  		if(batch_root->next==NULL){
-	  			break;
-  			}
-  			batch_root=batch_root->next;
-  		}
-		printf("successfully created graph\n");
-  	#endif
-}
-
-
-void check_this_batch(dllnode_t **ptr_dllcurrent, node_t *current, pointinfo_t **matches, int index, batch_t *batch_current,  int *no_available_batches,  bool *found, int *i, int m){
-
-		  	if(current->next!=NULL){
-
-			  	current=current->next;
-				int j=0;
-
-			  	while(current!=NULL){
-
-			  		int left_node=current->left_node;
-			  		if(left_node==index){
-
-			  			int count=m-*no_available_batches;
-			  			printf(" count %d\n", count  );
-			  			pointinfo_t *p=calloc(1, sizeof(pointinfo_t));
-			  			p->val=index;
-			  			p->batch=batch_current->index;
-			  			p->index_in_batch=j;
-			  			matches[count]=p;
-
-				  		*no_available_batches=*no_available_batches-1;
-						*found=true;
-				  		*i=-1; 
-
-			  			#ifdef DEBUG
-			  				printf(" Match found! index:%d, batch:%d, index_in_batch:%d \n", index, p->batch, p->index_in_batch);
-			  			#endif
-
-				  		del_batch(batch_current);
-				  		*ptr_dllcurrent=del_dllnode(*ptr_dllcurrent);
-				  		break;
-			  		}
-
-			  		if(current->next !=NULL){
-			  			//not last index in batch
-			  			current=current->next;
-			  			j=j+1;
-			  		}else{
-			  			//last index in batch reached
-			  			break;
-			  		}
-			  	}
-			}else{
-				//skip empty batches
-				*i=m;
-			} 
-}
-
-bool combine_batches_indices(node_t **batches, mpfss_batch *mpfss, dllnode_t *head, batch_t *batch_head){
-	int t=mpfss->t;
-
-	/* Batches lists do not use header for infos, same goes for indices list*/
-	int m=mpfss->m_rounded;
-	dllnode_t *dllcurrent=head->next;
-	int no_available_batches=m;
-	
-	pointinfo_t **matches=calloc(t, sizeof(pointinfo_t *));
-
-	while(dllcurrent !=NULL){
-		int index=dllcurrent->val;
-		bool found=false;
-		int i=0;
-		batch_t *batch_current=batch_head;
-
-		while( i<m){
-			#ifdef DEBUG
-				printf("index:%d i:%d\n", index, i );
-				print_dll(head);
-				print_batch_list(batch_head);
-			#endif
-
-			batch_current=batch_current->next;
-		  	node_t *current=batch_current->list;
-
-		 	check_this_batch(&dllcurrent, current, matches, index, batch_current,  &no_available_batches,  &found, &i, m);
-			//printf("dllcurrent val %d wert des pointer %p add des pointers %p\n", dllcurrent->val, dllcurrent , &dllcurrent);
-
-
-			//Batch is finished
-			//printf("no_available_batches %d %p \n", no_available_batches, &no_available_batches);
-
-
-			if((i+1)==no_available_batches && found==false){
-				//if this was the last batch and we have not found anything: setup failed
-			  	#ifdef DEBUG
-	  				printf("No available batch found for index %d \n", index );
-	  			#endif
-				return false;
-			}else if(no_available_batches==0){
-
-			  	#ifdef DEBUG
-		  			printf("successfully matched indices and batches\n");
-		  		#endif
-				return true;
-
-			}else if(found==true){
-				//finding batch for this index worked, therefore continue with next index
-				break;
-			}
-			i=i+1;
-		}			
-	}
-	printf("successfully matched indices and batches\n");
-
-	return true;
-}
-
-bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches){
-	int t=mpfss->t;
-	int last_batch=false;
-	dllnode_t *element =bt_roots[0]; 
-
-	for(int j=0; j<t; j++){
-		int index= indices_notobliv[j];
-		//printf("index %d\n", index );
-		while(!last_batch){
-			//printf("element->val %d\n", element-> val);
-			struct bt_node *batch_root=(struct bt_node *)element->s;
-	  		struct bt_node *res=search(batch_root, index);
-	  		//inorder(batch_root);
-	  		//printf("\n");
-
-	  		if(res==NULL && element->next==NULL){
-	  			#ifdef DEBUG
-  					printf("No available batch found for index %d \n", index );
-  				#endif
-	  			return false;
-	  		}else if(res != NULL){
-	  			//key was found in this batch
-
-	  			node_t *this_node=(node_t *)res->s;
-	  			
-				pointinfo_t *p=calloc(1, sizeof(pointinfo_t));
-			  	p->val=index;
-			  	p->batch=element->val;
-				p->index_in_batch=this_node->index_in_batch;
-				matches[j]=p;
-				#ifdef DEBUG
-	  				printf("index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
-	  			#endif
-	  			dllnode_t *some_node=del_dllnode(element);
-	  			if(some_node==NULL){
-	  				//All indices have been assigned
-	  				#ifdef DEBUG
-		  				printf("successfully matched indices and batches\n");
-		  			#endif
-	  				return true;
-	  			}
-				element=get_head(some_node);
-				
-	  			break;
-	  		}
-
-	  		element=element->next;
-
-	  	}
-  	}
-  	return true;
-}
-
-
 /*	
 	Frees memory for a array of containing the heads of list data structures. 
 	Lists have to be node_t lists.
@@ -473,7 +55,6 @@ void free_nodet_list(node_t **heads, int m){
 
   	free(heads);
 }
-
 
 void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv,  dllnode_t *head, int t , int size){
 	
@@ -506,7 +87,267 @@ void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv,  dllnod
 
 }
 
+void create_batches_bst( mpfss_batch *mpfss, char *random_str[], dllnode_t **bt_roots, int *batch_len ){
 
+  	double size=mpfss->size;
+  	int m= mpfss->m_rounded;
+  	int d= mpfss-> d_rounded;
+
+	BCipherRandomGen *random_gen= newBCipherRandomGen(random_str);
+	
+  	dllnode_t *list_prev;
+
+
+  	for(int i=0; i<m; i++){
+  		batch_len[i]=0;
+		//creating linked list holding roots of binary search trees
+			struct bt_node *batch_root = NULL; 
+		if(i==0){
+			dllnode_t *first=create_head(batch_root, 0);
+			list_prev=first;
+			bt_roots[0]=first;
+		}else{
+			dllnode_t *element=insert_dllnode( list_prev, batch_root, i);
+			list_prev=element;
+			bt_roots[i]=element;
+		}
+  	}
+
+
+  	for(int i=0; i<size; i++){
+  		for(int j=0; j<d;j++){
+  			
+  			/*	bcrandom generates different values for both parties (even with same seed),
+  			 	so they need to be broadcasted. 
+  			*/
+  			unsigned long long rand= bcRandomInt(random_gen, (unsigned long long) m);
+  			int r_a;
+  			int r_b;
+  			r_a=ocBroadcastInt((int)rand, 1);
+  			r_b=ocBroadcastInt((int)rand, 2);
+			int r= (r_a+r_b)% m;
+
+			int index_in_batch=batch_len[r];
+			batch_len[r]=batch_len[r]+1;
+
+			//create one big binary search tree: O(log(n) pro insert)
+			dllnode_t *element =bt_roots[r]; 
+			struct bt_node *batch_root=element->s;
+			batchelement_t *batchelem=calloc(1, sizeof(batchelement_t));
+			batchelem->index_in_batch=index_in_batch;
+			batchelem->batch_no=r;
+			batchelem->val=i;
+
+			if(batch_root==NULL){
+				element->s=insert( NULL, batchelem, i);
+
+			}else{
+				insert(batch_root,batchelem, i);
+			}
+  		}
+  	}
+
+  	#ifdef DEBUG
+
+	  	printf("\n");
+	  	int n=0;
+	  	for(int i=0; i<m; i++){
+	  		printf("Bucket %d: %d \n", i , batch_len[i] );
+	  		n+=batch_len[i];
+	  	}
+	  	printf("N: %d\n", n );
+
+
+		dllnode_t *batch_root=bt_roots[0];
+
+  		while(true){
+	  		printf("batch %d :", batch_root->val );
+			struct bt_node *this_batch=batch_root->s;
+
+	  		inorder(this_batch);
+	  		printf("\n");
+
+
+
+	  		if(batch_root->next==NULL){
+	  			break;
+  			}
+  			batch_root=batch_root->next;
+  		}
+		printf("successfully created graph\n");
+  	#endif
+}
+
+
+
+bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches, obliv int *indices ){
+	int t=mpfss->t;
+	int last_batch=false;
+	dllnode_t *element =bt_roots[0]; 
+
+	for(int j=0; j<t; j++){
+		int index= indices_notobliv[j];
+		//printf("index %d\n", index );
+		while(!last_batch){
+			//printf("element->val %d\n", element-> val);
+			struct bt_node *batch_root=(struct bt_node *)element->s;
+	  		struct bt_node *res=search(batch_root, index);
+	  		//inorder(batch_root);
+	  		//printf("\n");
+
+	  		if(res==NULL && element->next==NULL){
+	  			#ifdef DEBUG
+  					printf("No available batch found for index %d \n", index );
+  				#endif
+	  			return false;
+	  		}else if(res != NULL){
+	  			//key was found in this batch
+
+	  			node_t *this_node=(node_t *)res->s;
+	  			
+				pointinfo_t *p=calloc(1, sizeof(pointinfo_t));
+			  	p->val=index;
+			  	p->batch=element->val;
+			  	int index_in_batch=this_node->index_in_batch;
+				p->index_in_batch=index_in_batch;
+				matches[j]=p;
+
+				obliv int index_in_batch_obliv=feedOblivInt(index_in_batch, 1);
+				indices[j]=index_in_batch;
+
+				#ifdef DEBUG
+	  				printf("index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
+	  			#endif
+	  			dllnode_t *some_node=delink_dllnode(element);
+	  			if(some_node==NULL){
+	  				//All indices have been assigned
+	  				#ifdef DEBUG
+		  				printf("successfully matched indices and batches\n");
+		  			#endif
+	  				return true;
+	  			}
+				element=get_head(some_node);
+				
+	  			break;
+	  		}
+
+	  		element=element->next;
+
+	  	}
+  	}
+  	return true;
+}
+
+/* 	Calls DPF for each batch. 
+	Input: 
+	  mpfss *mpfss: Struct holing generall input information for the MPFSS
+	  obliv size_t *indices: Oblive array holding the indices (x values) for the multipoint function. Length of array: t.
+	  obliv bool **vectors: Pointer to an array of pointers, which reference to obliv bool values. Length of array = size in mpfss struct.
+	  obliv uint8_t *values: Pointer to an array of obliv unit8_t values. Length of array = size in mpfss struct.
+	  int *batch_len: Array containing the lenght of each batch
+	
+	Output:
+	  After function termination, vectors will hold a array of vectors which point to obliv bool values. 
+	  Each vector represents a non-obliv array with zeros everywhere, except when index equals to x of the dpf. At this position the non-obliv vector will hold a 1.
+	  Each vector from vectors represents one x value for a point of our multi-point function.  
+	  Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
+	  Return type is void.
+*/
+void get_batch_vectors(mpfss_batch *mpfss, obliv int *indices, obliv bool **vectors, obliv uint8_t *values, int *batch_len){
+
+  	int size=mpfss->size;
+  	int m= mpfss->m_rounded;
+ 	obliv size_t index_in_batch;
+  	obliv bool *batch_vector;
+  	int batchsize;
+
+  	for(int i=0; i<m;i++){
+			int in;
+			revealOblivInt(&in, index_in_batch, 0);
+			printf("Index from obliv given by get_mpfss_vectors: %d\n",in );
+			printf("batchsize %d\n",batchsize );
+
+  		index_in_batch=indices[i];
+  		batchsize=batch_len[i];
+  		dpf(batchsize,index_in_batch, values, i,&batch_vector);
+	  	vectors[i]=batch_vector;
+
+		
+		  #ifdef DEBUG
+			printf("-----------Debug get_batch_vectors()-----------\n",i );
+			int in;
+			revealOblivInt(&in, index_in_batch, 0);
+			printf("Index from obliv given by get_mpfss_vectors: %d\n",in );
+
+			bool *vdpf2= calloc(size, sizeof(bool));
+			revealOblivBoolArray(vdpf2, vectors[i], size, 0);
+			printf("dpf #%d:               ", i);  
+			for(int j = 0; j <size ; j++) {
+			  printf("%d ", vdpf2[j]);  
+			}
+			printf(" \n");        
+			free(vdpf2);
+
+
+			int v_value=0;
+			int *v_value_ptr=&v_value;
+			revealOblivInt(v_value_ptr, values[i], 0);
+			printf("activ_value in get_mpfss_vectors: %d\n", v_value );
+		  #endif
+  	}
+}
+
+/*	Function calls get_batch_vectors() and organizes the output.
+
+*/
+obliv bool *get_mpfss_vector_bc(mpfss_batch *mpfss, obliv int *indices, dllnode_t **bt_roots,  int *batch_len ){
+  	int m= mpfss->m_rounded;
+  	int size=mpfss->size;
+
+  	obliv bool **vectors= calloc(m, sizeof(obliv bool *));
+  	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+	get_batch_vectors(mpfss, indices, vectors, values, batch_len);
+
+	#ifdef DEBUG
+		printf("results\n");
+	  	for(int i=0; i<m; i++){
+	  				
+	  		bool *vdpf2= calloc(size, sizeof(bool));
+			revealOblivBoolArray(vdpf2, vectors[i], size, 0);
+	  		for(int j=0; j<size; j++){
+	  			printf("%d ", vdpf2[j]);  
+			}
+			printf(" \n");        
+			free(vdpf2);
+	  	}
+  	#endif
+  	
+  	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
+
+  	for (int i=0; i<m; i++){
+  		int batchsize=batch_len[i];
+
+  		dllnode_t *batch_root=bt_roots[i];
+  		struct bt_node *this_batch=batch_root->s;
+	  	batchelement_t **array=calloc(batch_len[i], sizeof(batchelement_t *));
+	  	write_in_array(this_batch, array, 1);
+	  	
+	  	for(int j=0; j<batch_len[i]; j++){
+	  		batchelement_t *elem=array[j];
+	  		int x=elem->val;
+	  		int index_in_batch= elem->index_in_batch;
+	  		mpfss_vector[x]=mpfss_vector[x] ^ vectors[i][index_in_batch];
+	  		
+	  	}
+  	}
+
+
+
+  	free(vectors);
+  	free(values);
+
+
+}
 /*  Example for creating a MPFSS Schema. Not Tested. 
 	Callable from execYaoProtocol().
 	Input:
@@ -523,11 +364,12 @@ void mpfss_batch_codes(void* args){
   	int m= mpfss->m_rounded;
 
 		/*Array of pointers: Length of pointers depend on system*/
-  	//obliv bool **vectors= calloc(t, sizeof(int *));
-  	//obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
-  	node_t **batches = calloc(m, sizeof(node_t *));
-  	batch_t *batch_head=calloc(1,sizeof(batch_t));
+
+  	//node_t **batches = calloc(m, sizeof(node_t *));
+  	//batch_t *batch_head=calloc(1,sizeof(batch_t));
 	dllnode_t **bt_roots = calloc(m, sizeof(dllnode_t*));
+  	obliv int *indices = calloc(t, sizeof(obliv int));
+  	int *batch_len=calloc(m, sizeof(int));
 
   	/*Generating Random Seed: ist das notwendig??*/
 	BCipherRandomGen *random_gen= newBCipherRandomGen();
@@ -544,16 +386,17 @@ void mpfss_batch_codes(void* args){
 
 	   	create_indices(random_gen, indices_notobliv, head, t , size);
 		//create_batches(mpfss, random_str, batches, batch_head, bt_roots);
-		create_batches_bst(mpfss,random_str,bt_roots );
+		create_batches_bst(mpfss,random_str,bt_roots, batch_len );
 		//combine_batches_indices(batches, mpfss, head, batch_head);
-		combine_batches_indices_bst(bt_roots,  mpfss , indices_notobliv, matches);
+		combine_batches_indices_bst(bt_roots,  mpfss , indices_notobliv, matches, indices);
 	  	//free(indices_notobliv);
 
 
 	}else{
-		create_batches(mpfss, random_str, batches, batch_head, bt_roots );
+		create_batches_bst(mpfss,random_str,bt_roots, batch_len);
 	}
-	
+	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
+	mpfss_vector=get_mpfss_vector_bc(mpfss, indices, bt_roots, batch_len );
 
 	/*free_nodet_list(batches, m);
   	free(vectors);

@@ -6,7 +6,7 @@
 #include "binary_search_tree.h"
 
 
-
+int counter;
 
 // A utility function to create a new BST bt_node 
 struct bt_node *newBTNode(struct arbitray_struct *s, int key) 
@@ -28,7 +28,30 @@ void inorder(struct bt_node *root)
         inorder(root->right); 
     } 
 } 
-  
+ 
+
+void write_in_array(struct bt_node *root, struct arbitray_struct **arr, int index){
+    counter=0;
+    inorder_array(root, arr);
+}
+
+// writes all key into an array, start index has to be 1
+void inorder_array(struct bt_node *root, struct arbitray_struct **arr) 
+{ 
+    if(root != NULL){
+
+        arr[counter]=root->s;
+        counter++;
+    
+
+        printf("index: %d,  key: %d \n", counter, root->key);
+
+                
+        inorder_array(root->left, arr); 
+        inorder_array(root->right, arr);
+    }
+} 
+
 /* A utility function to insert a new bt_node with given key in BST */
 struct bt_node* insert(struct bt_node* bt_node, struct arbitray_struct *s, int key) 
 { 
