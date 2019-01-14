@@ -3,17 +3,17 @@
 #include "dbg.h"
 #include <string.h>
 #include <math.h>
-#include "mpfss_batch_codes.h"
 #include <fss_cprg.oh>
 #include <time.h>
 #include <bcrandom.h>
+#include "mpfss_batch_codes.h"
 #include "binary_search_tree.h"
 #include "list_utils.c"
-#include "linked_list.c"
-#include "mpfss_naive.oc"
+#include "linked_list.h"
+#include "mpfss_naive.oh"
 
-
-
+/*one block: 16 byte -> block_no allow longer */
+size_t block_no=1;
 
 mpfss_batch * new_mpfss_batch( int t, size_t size, double epsilon, double s ){
   	mpfss_batch * mpfss = malloc(sizeof(mpfss_batch));
@@ -216,7 +216,7 @@ bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int
 				indices[j]=index_in_batch;
 
 				#ifdef DEBUG
-	  				printf("index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
+	  				//printf("index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
 	  			#endif
 	  			dllnode_t *some_node=delink_dllnode(element);
 	  			if(some_node==NULL){
@@ -236,6 +236,10 @@ bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int
 	  	}
   	}
   	return true;
+}
+
+bool try_combine_batches_indices_bst(BCipherRandomGen *random_gen, dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches, obliv int *indices ){
+
 }
 
 /* 	Calls DPF for each batch. 
@@ -305,7 +309,7 @@ obliv bool *get_mpfss_vector_bc(mpfss_batch *mpfss, obliv int *indices, dllnode_
   	int size=mpfss->size;
 
   	obliv bool **vectors= calloc(m, sizeof(obliv bool *));
-  	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+  	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 	get_batch_vectors(mpfss, indices, vectors, values, batch_len);
 
 	#ifdef DEBUG
@@ -345,7 +349,7 @@ obliv bool *get_mpfss_vector_bc(mpfss_batch *mpfss, obliv int *indices, dllnode_
 
   	free(vectors);
   	free(values);
-
+  	return mpfss_vector;
 
 }
 /*  Example for creating a MPFSS Schema. Not Tested. 
@@ -388,15 +392,25 @@ void mpfss_batch_codes(void* args){
 		//create_batches(mpfss, random_str, batches, batch_head, bt_roots);
 		create_batches_bst(mpfss,random_str,bt_roots, batch_len );
 		//combine_batches_indices(batches, mpfss, head, batch_head);
-		combine_batches_indices_bst(bt_roots,  mpfss , indices_notobliv, matches, indices);
+		int success=try_combine_batches_indices_bst(random_gen,bt_roots,  mpfss , indices_notobliv, matches, indices);
 	  	//free(indices_notobliv);
-
+		if(success){
+			ocBroadcastInt(8888, 1);
+		}
 
 	}else{
 		create_batches_bst(mpfss,random_str,bt_roots, batch_len);
+		
+		int ok=0;
+		while( ok!=8888){
+
+			ok=ocBroadcastInt(8888, 1);
+
+		}
 	}
+
 	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
-	mpfss_vector=get_mpfss_vector_bc(mpfss, indices, bt_roots, batch_len );
+	//mpfss_vector=get_mpfss_vector_bc(mpfss, indices, bt_roots, batch_len );
 
 	/*free_nodet_list(batches, m);
   	free(vectors);

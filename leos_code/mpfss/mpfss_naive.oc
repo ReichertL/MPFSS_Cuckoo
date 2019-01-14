@@ -1,5 +1,7 @@
 #include <obliv.oh>
 #include "mpfss_naive.h"
+#include "mpfss_naive.oh"
+
 #include "dbg.h"
 #include <time.h>
 #include <stdlib.h>
@@ -7,8 +9,9 @@
 #include <fss_cprg.oh>
 
 
+
 /*one block: 16 byte -> Blockmultiple allow longer */
-size_t blockmultiple=1;
+size_t block_no=1;
 
 /*  Creates management structure for MPFSS_naive. Tested.
 	Input 
@@ -41,15 +44,15 @@ mpfss * new_mpfss_naive( int t, size_t size){
 void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv bool **vector){
   	log_info("-----------DPF Run: %d -----------\n",j );
 	
-	/*  fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
+	/*  fss_cprg * fss_cprg_new(size_t size, size_t block_no) {
 		Creates new FSS instance
 		size_t size: size of input field
-		size_t blockmultiple: How many Blocks are there in one entry -> 1 should be sufficient
+		size_t block_no: How many Blocks are there in one entry -> 1 should be sufficient
 			uint32_t truncated_levels:  The same as start level -> 0 should be a good value
 			(only needed for fss_new , not for fss_cprg_new)
 	*/
   	fss_cprg *my_fss;
-	my_fss= fss_cprg_new(size, blockmultiple);
+	my_fss= fss_cprg_new(size, block_no);
 
 	
 	/*	The 'fss_getblockvector' function takes the
@@ -60,11 +63,11 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 		Returns: Pointer to memory, NULL if request fails
 		nitems: no. of elements to be allocated
 		size: size of elements
-		Blocksize and blockmultiple inidicates the size of our output field:
-		Blocksize*blockmultiple = 2 ==> only 4 different y values possible.
+		Blocksize and block_no inidicates the size of our output field:
+		Blocksize*block_no = 2 ==> only 4 different y values possible.
 	*/
 
-  	uint8_t *local_output = calloc(size, BLOCKSIZE*blockmultiple);
+  	uint8_t *local_output = calloc(size, BLOCKSIZE*block_no);
  	bool *local_bit_output = calloc(size,  sizeof(bool));
 
 	/* "Finally, you'll have noticed that there's no input for beta. That's because
@@ -73,12 +76,12 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 		returned as a vector of obliv bytes, to the location specified by
 		'active_block_delta' "
 
-		active_block_delta is a single Element of size: Blocksize*blockmultiple. But since these will be
+		active_block_delta is a single Element of size: Blocksize*block_no. But since these will be
 		obliv bits a larger amount of bits need to be allocated. 
 		active_block_delta will later on hold be the b value. This value is not preset in this 
 		case as it will be set by the protocol at random.
 	   */
-  obliv uint8_t *active_block_delta = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+  obliv uint8_t *active_block_delta = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 
 
   	//#ifndef TESTING
@@ -304,7 +307,7 @@ void mpfss_naive(void* args){
   	int size=mpfss->size;
 		/*Array of pointers: Length of pointers depend on system*/
   	obliv bool **vectors= calloc(t, sizeof(obliv bool *));
-  	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+  	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
   	int *indices_notobliv = calloc(t, sizeof(int ));
 
 		/*Creates pseudo-random indices*/
@@ -323,7 +326,7 @@ void mpfss_naive(void* args){
   	#endif
   
 		//feed indices one by one because target type is not int but size_t
-  	obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
+  	obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*block_no);
 	for(int i=0; i<t; i++){
 		obliv size_t k_obliv= feedOblivInt(indices_notobliv[i], 1);
 		indices[i]=k_obliv;

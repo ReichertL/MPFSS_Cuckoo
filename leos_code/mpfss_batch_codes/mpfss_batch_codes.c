@@ -6,9 +6,9 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
-#include "util.h"
+#include "util.c"
+#include "linked_list.h"
 #include "mpfss_batch_codes.h"
-#include "mpfss_batch_codes.oc"
 #include <fss_cprg.oh>
 
 
@@ -47,11 +47,11 @@ int main(int argc, char *argv[]) {
         int t = atoi(argv[3]);
         int size = atoi(argv[4]);
 
-        mpfss_batch *m=new_mpfss_batch(t, size, 0.1 , 4.0 );
+        //mpfss_batch *m=new_mpfss_batch(t, size, 0.1 , 4.0 );
         lap = wallClock();        
 
          // Execute Yao's protocol and cleanup
-        execYaoProtocol(&pd, mpfss_batch_codes, m);
+       // execYaoProtocol(&pd, mpfss_batch_codes, m);
         cleanupProtocol(&pd);
         double runtime = wallClock() - lap; // stop clock here 
 

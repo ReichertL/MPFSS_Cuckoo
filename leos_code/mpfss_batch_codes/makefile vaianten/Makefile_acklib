@@ -1,0 +1,65 @@
+CC ?= gcc
+CPP ?= cpp
+AR ?= ar
+OBLIVC_PATH=../../obliv-c
+OBLIVCC = $(OBLIVC_PATH)/bin/oblivcc
+OBLIVCH = $(OBLIVC_PATH)/src/ext/oblivc
+OBLIVCA = $(OBLIVC_PATH)/_build/libobliv.a
+CFLAGS+= -O3 -march=native -I./include -I . -I $(SRC_PATH) -std=c99 -fopenmp -g -Wall -D _Float128=double -DDEBUG -D_POSIX_C_SOURCE=199309L
+ACKLIB_LIB=../../absentminded-crypto-kit/build/lib/liback.a 
+LDFLAGS += -lm -lgomp -lgcrypt $(ACKLIB_LIB)
+SRC_PATH=.
+ACKLIB=a.out
+#DEPS=mpfss_batch_codes.o mpfss_batch_codes.oo
+INCLUDE_DEPS= util.o binary_search_tree.o dbg.o linked_list.o list_utils.o\
+				list_focused_batch_creation.oo mpfss_naive.o mpfss_naive.oo
+MPB_DEPS = $(INCLUDE_DEPS:%=include/%) 
+#OBJS=$(DEPS) $(ORAM_DEPS)
+OBJS=$(MPB_DEPS)
+
+TEST_PATH=.
+TEST_OUT_PATH=.
+TEST_DEPS=mpfss_batch_codes.o mpfss_batch_codes.oo
+TEST_BINS = mpfss_batch_codes
+
+default: $(ACKLIB) tests
+
+tests: $(TEST_BINS:%=$(TEST_OUT_PATH)/%)
+
+$(TEST_BINS:%=$(TEST_OUT_PATH)/%): $(TEST_OUT_PATH)/%: $(TEST_PATH)/%.oo $(TEST_DEPS:%=$(TEST_PATH)/%) $(ACKLIB)
+	mkdir -p $(TEST_OUT_PATH)
+	$(OBLIVCC) -o $@ $(OBLIVCA) $^ $(LDFLAGS)
+
+$(ACKLIB): $(OBJS:%=$(SRC_PATH)/%)
+	#mkdir -p $(LIB_OUT_PATH)
+	$(AR) rcs $@ $^
+
+-include $($(patsubst %.oo,%.od,$(OBJS:.o=.d)):%=$(SRC_PATH)/%) $(TEST_BINS:%=$(TEST_PATH)/%.od)
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $*.c -o $*.o -I $(OBLIVCH)
+	$(CPP) -MM $(CFLAGS) $*.c -I $(OBLIVCH) > $*.d
+
+%.fssl.oo: %.oc
+	$(OBLIVCC) -c $(CFLAGS) -DORAM_OVERRIDE=ORAM_TYPE_FSSL $*.oc -o $*.sqrt.oo
+	$(CPP) -MM $(CFLAGS) -DORAM_OVERRIDE=ORAM_TYPE_FSSL $*.oc -MT $*.sqrt.oo > $*.sqrt.od
+
+%.sqrt.oo: %.oc
+	$(OBLIVCC) -c $(CFLAGS) -DORAM_OVERRIDE=ORAM_TYPE_SQRT $*.oc -o $*.sqrt.oo
+	$(CPP) -MM $(CFLAGS) -DORAM_OVERRIDE=ORAM_TYPE_SQRT $*.oc -MT $*.sqrt.oo > $*.sqrt.od
+
+%.circuit.oo: %.oc
+	$(OBLIVCC) -c $(CFLAGS) -DORAM_OVERRIDE=ORAM_TYPE_CIRCUIT $*.oc -o $*.circuit.oo
+	$(CPP) -MM $(CFLAGS) -DORAM_OVERRIDE=ORAM_TYPE_CIRCUIT $*.oc -MT $*.circuit.oo > $*.circuit.od
+
+%.linear.oo: %.oc
+	$(OBLIVCC) -c $(CFLAGS) -DORAM_OVERRIDE=ORAM_TYPE_LINEAR $*.oc -o $*.linear.oo
+	$(CPP) -MM $(CFLAGS) -DORAM_OVERRIDE=ORAM_TYPE_LINEAR $*.oc -MT $*.linear.oo > $*.linear.od
+
+%.oo: %.oc
+	$(OBLIVCC) -c $(CFLAGS) $*.oc -o $*.oo
+	$(CPP) -MM $(CFLAGS) $*.oc -MT $*.oo > $*.od
+
+clean:
+	rm -f $(OBJS:%=$(SRC_PATH)/%) $(patsubst %.oo,$(SRC_PATH)/%.od,$(patsubst %.o,$(SRC_PATH)/%.d,$(OBJS))) $(ACKLIB)
+	rm -f $(TEST_BINS:%=$(TEST_OUT_PATH)/%) $(TEST_DEPS:%=$(TEST_PATH)/%) $($(pasubst %.oo, %.od, $(TEST_DEPS)):%=$(TEST_PATH)/%) $(TEST_BINS:%=$(TEST_PATH)/%.oo) $(TEST_BINS:%=$(TEST_PATH)/%.od)

@@ -1,39 +1,3 @@
-typedef struct node {
-
-	//index of batch
-	int index_in_batch;
-    int batch_no;
-    int val;
-    bool is_head;
-    struct node * next;
-} node_t;
-
-
-typedef struct batchelement {
-
-	//index of batch
-	int index_in_batch;
-    int batch_no;
-    int val;
-
-} batchelement_t;
-
-
-typedef struct batch {
-
-	int index;
-	bool is_head;
-	node_t *list;
-    struct batch * prev;
-    struct batch * next;
-} batch_t;
-
-typedef struct pointinfo {
-
-	int val;
-	int batch;
-	int index_in_batch;
-} pointinfo_t;
 
 
 

@@ -1,51 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <obliv.h>
+#include <obliv.oh>
 #include "dbg.h"
 #include <string.h>
 #include <math.h>
 #include <assert.h>
-#include <time.h>
-#include </home/turing/semesterprojekt_code/leos_code/util/util.h>
-#include "/home/turing/semesterprojekt_code/leos_code/mpfss/mpfss_naive.h"
-#include "/home/turing/semesterprojekt_code/leos_code/mpfss/mpfss_naive.oh"
+#include "util.c"
+#include "linked_list.h"
+#include "mpfss_batch_codes.h"
+//#include "mpfss_batch_codes.oc"
+#include <fss_cprg.oh>
 
-
-
-/*void benchmark(double runtime, size_t size, int t){
-
-        char filename[80];
-        sprintf(filename, "benchmark/resutls_t:%d_size:%d", t, (int) size);
-
-
-        FILE *fptr;
-        fptr = fopen(filename,"a+");
-
-        time_t rawtime;
-        struct tm * timeinfo;
-        char current_time[80];
-        time (&rawtime);
-        timeinfo = localtime (&rawtime);
-        strftime (current_time,80,"%d.%m.%Y-%H:%M",timeinfo);
-
-        if(fptr == NULL){
-              printf("Error!");   
-              exit(1);             
-        }
-
-        fseek (fptr, 0, SEEK_END);
-        int len = ftell(fptr);
-        if (0 == len) {
-            fprintf(fptr,"Time, Party number, Runtime in Seconds\n" );
-        }
-        
-        fprintf(fptr,"%s,",current_time);
-        fprintf(fptr,"%d,",cp);
-        fprintf(fptr,"%lf\n",runtime);
-       // fprintf(fptr,"%u/n", yaoGateCount());
-        fclose(fptr);
-
-}*/
 
 
 int main(int argc, char *argv[]) {
@@ -82,23 +48,26 @@ int main(int argc, char *argv[]) {
         int t = atoi(argv[3]);
         int size = atoi(argv[4]);
 
-        mpfss *m=new_mpfss_naive(t, size);
+        //mpfss_batch *m=new_mpfss_batch(t, size, 0.1 , 4.0 );
         lap = wallClock();        
 
          // Execute Yao's protocol and cleanup
-        execYaoProtocol(&pd, mpfss_naive, m);
+       // execYaoProtocol(&pd, mpfss_batch_codes, m);
         cleanupProtocol(&pd);
         double runtime = wallClock() - lap; // stop clock here 
 
         // Print results and gate count
         log_info("Total time: %lf seconds\n", runtime);
         printf("\n");
-        benchmark(runtime, size, t, cp, "Naive");
+        benchmark(runtime, size, t, cp, "Batch_Codes");
+
+
         
    } else {
         log_info("Usage: %s <hostname:port> <1|2> <t> <size> \n" 
                  "\tHostname usage:\n" 
                  "\tlocal -> 'localhost' remote -> IP address or DNS name\n", argv[0]);
     }
+    //return 0;
     exit(0);
 }

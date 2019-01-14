@@ -1,0 +1,5 @@
+void create_batches( mpfss_batch *mpfss, char *random_str[], node_t **batches, batch_t *batch_head, dllnode_t **bt_roots);
+
+void check_this_batch(dllnode_t **ptr_dllcurrent, node_t *current, pointinfo_t **matches, int index, batch_t *batch_current,  int *no_available_batches,  bool *found, int *i, int m);
+
+bool combine_batches_indices(node_t **batches, mpfss_batch *mpfss, dllnode_t *head, batch_t *batch_head);

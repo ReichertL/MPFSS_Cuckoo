@@ -1,0 +1,12 @@
+#include <obliv.oh>
+#include "dbg.h"
+
+//#include "mpfss_batch_codes.h"
+
+#include "linked_list.h"
+//#include "mpfss_naive.oh"
+
+void oc_test(){
+ test();
+ obliv int i=3;
+}

@@ -1,10 +1,4 @@
-typedef struct dllnode {
-	struct arbitray_struct *s;
-	int val;
-	bool is_head;
-    struct dllnode * prev;
-    struct dllnode * next;
-} dllnode_t;
+#include "linked_list.h"
 
 dllnode_t *insert_dllnode( struct dllnode * prev, struct arbitray_struct *s, int val){
 	dllnode_t *current=calloc(1,sizeof(dllnode_t));

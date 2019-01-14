@@ -1,0 +1,72 @@
+testName=mpfss_batch_codes
+
+CC=../../obliv-c/bin/oblivcc
+RUNTIME=../../obliv-c/_build/libobliv.a
+
+#LIB := libmpc-utils.a
+#SOURCES := $(shell find . -type f -name '*.c')
+#OBJECTS := $(patsubst %.c, %.o, $(SOURCES))
+
+#$(LIB): $(OBJECTS)
+#	ar rcs $@ $^
+
+#CILPATH=../../obliv-c/
+#DNDEBUG sets the debug level. 
+
+ACKLIB_FFSL=../../absentminded-crypto-kit/src/oram_fssl/
+#Mpfss_path=../mpfss/
+#Util_path=../util/
+
+#INCLUDE=$(ACKLIB_FFSL) 
+INCLUDE= -I/home/turing/semesterprojekt_code/leos_code/util/ -I/home/turing/semesterprojekt_code/leos_code/mpfss_batch_codes/ -I/home/turing/semesterprojekt_code/leos_code/mpfss/
+CFLAGS=-g -Wall -D _Float128=double -DDEBUG  
+
+ACKLIB=../../absentminded-crypto-kit/build/lib/liback.a 
+#-lgomp flag is very important. Otherwise linking will fail. Does some kind of parallelization.
+LGFLAGS=-fopenmp $(ACKLIB) -lm
+
+#mpfss := $(shell find /home/turing/semesterprojekt_code/leos_code/mpfss/ -type f -name '*.h')
+#mpfss_batch := $(shell find /home/turing/semesterprojekt_code/leos_code/mpfss_batch_codes/  -type f -name '*.h')
+#util := $(shell find /home/turing/semesterprojekt_code/leos_code/util/ -type f -name '*.h')
+
+mpfss := $(/home/turing/semesterprojekt_code/leos_code/mpfss/*.h)
+mpfss_batch := $(/home/turing/semesterprojekt_code/leos_code/mpfss_batch_codes/*.h)
+util := $(/home/turing/semesterprojekt_code/leos_code/util/*.h)
+mpfss_oh := $(/home/turing/semesterprojekt_code/leos_code/mpfss/*.oh)
+mpfss_batch_oh := $(/home/turing/semesterprojekt_code/leos_code/mpfss_batch_codes/*.oh)
+util_oh := $(/home/turing/semesterprojekt_code/leos_code/util/*.oh)
+
+DEPS=  $(mpfss) $(mpfss_batch) $(util) $(mpfss_oh) $(mpfss_batch_oh) $(util_oh) $(RUNTIME) $(ACKLIB)
+
+
+mpfss_src := $(shell find ../mpfss/ -type f -name '*.c')
+mpfss_batch_src := $(shell find . -type f -name '*.c')
+util_src := $(shell find ../util/ -type f -name '*.c')
+
+mpfss_oc := $(shell find ../mpfss/ -type f -name '*.oc')
+mpfss_oc := $(shell find . -type f -name '*.oc')
+util_oc := $(shell find ../util/ -type f -name '*.oc')
+
+src = $(mpfss_src) $(mpfss_batch_src) $(util_src) 
+obj = $(src:.c=.o)
+
+oc = $(mpfss_oc) $(mpfss_batch_oc) $(util_oc)
+obj+= $(src:.oc=.oo)
+
+%.o: %.c $(src) #$(DEPS)
+	$(CC) -o $@ $< $(CFLAGS) $(INCLUDE)
+
+%.oo: %.oc $(oc) #$(DEPS)
+	$(CC) -o $@ $< $(CFLAGS) $(INCLUDE)
+
+
+test: $(obj)
+	$(CC) -o $@ $^ $(LDFLAGS) 	
+
+
+#./a.out: $(testName).c $(RUNTIME) %.h %.oh
+#	$(CC) -o test $(CFLAGS) $(testName).c $(testName).oc -I$(INCLUDE) $(LGFLAGS) 
+
+
+#clean: 
+
