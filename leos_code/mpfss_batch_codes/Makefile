@@ -21,14 +21,18 @@ ACKLIB=a.out
 #OBJS=$(MPB_DEPS)
 
 SOURCES := $(shell find include/ -type f -name '*.c')
+SOURCES += $(shell find ../mpfss/ -type f -name '*.c')
 OBJS := $(patsubst %.c, %.o, $(SOURCES))
+
 SOURCES2 := $(shell find include/ -type f -name '*.oc')
+SOURCES2 += $(shell find ../mpfss/ -type f -name '*.oc')
 OBJS += $(patsubst %.oc, %.oo, $(SOURCES2))
 
 
 DEPS:= $(include/*.h)
 DEPS+= $(src/*.h)
-
+DEPS+= $(../mpfss/*.h)
+DEPS+= $(../mpfss/*.oh)
 
 TEST_PATH=src
 TEST_OUT_PATH=.
