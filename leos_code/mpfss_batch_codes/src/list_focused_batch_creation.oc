@@ -1,3 +1,11 @@
+#include <obliv.oh>
+#include "binary_search_tree.h"
+#include "list_utils.h"
+#include "linked_list.h"
+#include <bcrandom.h>
+
+#include "mpfss_batch_codes.oh"
+
 /*	Creates batches of the input field.
 	There will be m batches, each can have a different length.
 	Over all batches on element from the input field will appear d times.
@@ -27,6 +35,8 @@ void create_batches( mpfss_batch *mpfss, char *random_str[], node_t **batches, b
 	batch_t *previous_batch=batch_head;
 
   	dllnode_t *list_prev;
+
+  	int *len_arr=calloc(m, sizeof(int));
 
   	for(int i=0; i<m; i++){
 		node_t *head = calloc(1,sizeof(node_t));

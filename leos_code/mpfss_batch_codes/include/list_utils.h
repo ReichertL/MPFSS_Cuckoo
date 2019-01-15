@@ -1,12 +1,12 @@
 typedef struct node {
 
-	//index of batch
 	int index_in_batch;
     int batch_no;
     int val;
     bool is_head;
     struct node * next;
 } node_t;
+
 
 
 typedef struct batchelement {

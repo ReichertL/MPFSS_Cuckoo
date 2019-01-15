@@ -1,4 +1,7 @@
-
+#include <stdio.h>
+#include <stdbool.h>
+#include "stdlib.h"
+#include "list_utils.h"
 
 
 /*	Deletes the given batch_t node from a list of batch_t nodes.

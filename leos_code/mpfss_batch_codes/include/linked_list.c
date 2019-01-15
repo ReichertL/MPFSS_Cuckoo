@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include "linked_list.h"
 
 dllnode_t *insert_dllnode( struct dllnode * prev, struct arbitray_struct *s, int val){
