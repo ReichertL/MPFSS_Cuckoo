@@ -5,7 +5,9 @@
 #define ALLOC 128 
 // doubled when needed in load_data()
 
-
+/*one block: 16 byte -> Blockmultiple allow longer */
+//size_t block_no=1;
+#define block_no 1
 
 typedef struct {
     int t; // number of points in mpfss

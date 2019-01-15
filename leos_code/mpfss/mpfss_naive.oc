@@ -10,8 +10,6 @@
 
 
 
-/*one block: 16 byte -> Blockmultiple allow longer */
-size_t block_no=1;
 
 /*  Creates management structure for MPFSS_naive. Tested.
 	Input 
