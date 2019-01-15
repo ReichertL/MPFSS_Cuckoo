@@ -6,9 +6,9 @@
 #include <math.h>
 #include <assert.h>
 #include <time.h>
-#include </home/turing/semesterprojekt_code/leos_code/util/util.h>
-#include "/home/turing/semesterprojekt_code/leos_code/mpfss/mpfss_naive.h"
-#include "/home/turing/semesterprojekt_code/leos_code/mpfss/mpfss_naive.oh"
+#include <util.h>
+#include "mpfss_naive.h"
+#include "mpfss_naive.oh"
 
 
 
