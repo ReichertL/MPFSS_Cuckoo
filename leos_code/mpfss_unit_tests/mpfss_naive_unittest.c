@@ -8,6 +8,7 @@
 #include <assert.h>
 #include "util.h"
 #include "mpfss_naive.h"
+#include "mpfss_naive.oh"
 #include "mpfss_naive.oc"
 #include <fss_cprg.oh>
 
@@ -18,14 +19,14 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 		indices_notobliv1[i]=i;
 	}
 		//feed indices one by one because target type is not int but size_t
-	obliv size_t *indices1 = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*blockmultiple);
+	obliv size_t *indices1 = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*block_no);
 	for(int i=0; i<t; i++){
 		obliv size_t k_obliv= feedOblivInt(indices_notobliv1[i], 1);
 		indices1[i]=k_obliv;
 	}
 
 	obliv bool **vectors1= calloc(t, sizeof(int *));
-	obliv uint8_t *values1 = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+	obliv uint8_t *values1 = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 	get_mpfss_vectors(m1, indices1, vectors1, values1);
 
 	bool succ=true;
@@ -131,7 +132,7 @@ bool TEST_new_mpfss_naive( int t, size_t size){
 
 bool TEST_dpf(size_t size, int index){
 	obliv bool *vector= calloc(1, sizeof(int));
-	obliv uint8_t *values = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*blockmultiple);
+	obliv uint8_t *values = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 	obliv size_t index_obliv;
 	index_obliv=feedOblivInt(index, 1);
 
