@@ -64,4 +64,6 @@ void benchmark(double runtime, size_t size, int t, int cp, char type[]){
        // fprintf(fptr,"%u/n", yaoGateCount());
         fclose(fptr);
 
+
 }
+

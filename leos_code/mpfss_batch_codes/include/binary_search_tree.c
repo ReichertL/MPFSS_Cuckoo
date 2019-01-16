@@ -29,13 +29,12 @@ void inorder(struct bt_node *root)
     } 
 } 
  
-
+// writes all key into an array, start index has to be 1
 void write_in_array(struct bt_node *root, struct arbitray_struct **arr, int index){
     counter=0;
     inorder_array(root, arr);
 }
 
-// writes all key into an array, start index has to be 1
 void inorder_array(struct bt_node *root, struct arbitray_struct **arr) 
 { 
     if(root != NULL){
@@ -44,7 +43,7 @@ void inorder_array(struct bt_node *root, struct arbitray_struct **arr)
         counter++;
     
 
-        printf("index: %d,  key: %d \n", counter, root->key);
+        //printf("index: %d,  key: %d \n", counter, root->key);
 
                 
         inorder_array(root->left, arr); 

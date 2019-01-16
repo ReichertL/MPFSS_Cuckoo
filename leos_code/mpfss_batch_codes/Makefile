@@ -38,7 +38,11 @@ TEST_OUT_PATH=.
 TEST_DEPS=mpfss_batch_codes.o #mpfss_batch_codes.oo
 TEST_BINS = mpfss_batch_codes
 
-default: $(LIB) tests clean
+
+default: tests clean
+
+all: $(LIB) tests clean 
+
 
 tests: $(TEST_BINS:%=$(TEST_OUT_PATH)/%)
 
@@ -51,13 +55,14 @@ $(LIB): $(OBJS:%=%)
 
 -include $($(patsubst %.oo,%.od,$(OBJS:.o=.d)):%=%) $(TEST_BINS:%=$(SRC_PATH)/%.od)
 
+
 %.o: %.c $(DEPS)
-	$(OBLIVCC) -c $(CFLAGS) $*.c -o $*.o $< $(ACKLIB) 
-	$(CPP) -MM $(CFLAGS) $*.c -I $(OBLIVCH)  > $*.d
+	$(OBLIVCC) -c $(CFLAGS) $*.c -o $*.o $< $(ACKLIB)
+	$(CPP) -MM $(CFLAGS) $*.c -I $(OBLIVCH)  > $*.d 
 
 %.oo: %.oc $(DEPS)
-	$(OBLIVCC) -c $(CFLAGS) $*.oc -o $*.oo -I $(OBLIVCH) $(ACKLIB)
-	$(CPP) -MM $(CFLAGS) $*.oc -MT $*.oo > $*.od
+	$(OBLIVCC) -c $(CFLAGS) $*.oc -o $*.oo $< -I $(OBLIVCH) $(ACKLIB) 
+	$(CPP) -MM $(CFLAGS) $*.oc -MT $*.oo > $*.od 
 
 
 clean:
@@ -65,3 +70,4 @@ clean:
 	rm -f $(OBJS) $(shell find $(SRC_PATH)/ -type f -name '*.d') $(shell find $(SRC_PATH)/ -type f -name '*.od')
 	rm -f $(OBJS) $(shell find $(SRC_PATH)/ -type f -name '*.oo') $(shell find $(SRC_PATH)/ -type f -name '*.o')
 	rm -f $(LIB)
+
