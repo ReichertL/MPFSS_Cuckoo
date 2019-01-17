@@ -77,16 +77,21 @@ void create_batches_bst( mpfss_batch *mpfss, BCipherRandomGen *random_gen, dllno
 		struct bt_node *batch_root = NULL; 
 		if(i==0){
 			dllnode_t *first=create_head(batch_root, 0);
+			
 			list_prev=first;
 			bt_roots[0]=first;
 		}else{
 			dllnode_t *element=insert_dllnode( list_prev, batch_root, i);
+			
 			list_prev=element;
 			bt_roots[i]=element;
 		}
   	}
 
-
+  	printf("vals of bt roots\n");
+  	for(int i=0;i<m;i++){
+  		printf("%d \n", bt_roots[i]->val);
+  	}
 
   	for(int i=0; i<size; i++){
   		for(int j=0; j<d;j++){
@@ -182,7 +187,10 @@ bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int
 			  	p->batch=element->val;
 			  	int index_in_batch=this_node->index_in_batch;
 				p->index_in_batch=index_in_batch;
-				matches[j]=p;
+				//sorting matches by their corresponding batch number
+				matches[p->batch]=p;
+
+				printf("p->batch %d\n", p->batch );
 
 				obliv int index_in_batch_obliv=feedOblivInt(index_in_batch, 1);
 				indices[j]=index_in_batch;
@@ -216,6 +224,7 @@ bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int
 	If never successful, return false.
 */
 bool try_combine_batches_indices_bst(BCipherRandomGen *random_gen, dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches, obliv int *indices ){
+	
 	int max=3;
 	bool succ=false;
 	for(int i=0; i<max;i++){
@@ -229,7 +238,7 @@ bool try_combine_batches_indices_bst(BCipherRandomGen *random_gen, dllnode_t **b
 		}
 
 	}
-	log_err("Matching indices and batches failed %d times", max);
+	log_err("Matching indices and batches failed %d times\n", max);
 	return false;
 }
 
@@ -252,11 +261,12 @@ void get_batch_vectors(mpfss_batch *mpfss, pointinfo_t **matches, obliv bool **v
 
   	int size=mpfss->size;
   	int m= mpfss->m_rounded;
+  	int t=mpfss->t;
  	obliv size_t index_in_batch;
   	obliv bool *batch_vector;
   	int batchsize;
 
-  	for(int i=0; i<m;i++){
+  	for(int i=0; i<t;i++){
   		int j=0;
   		if(ocCurrentParty()==1){
   			j=matches[i]->index_in_batch;
@@ -300,12 +310,11 @@ void get_batch_vectors(mpfss_batch *mpfss, pointinfo_t **matches, obliv bool **v
 
 /*	Function calls get_batch_vectors() and organizes the output.
 */
-obliv bool *get_mpfss_vector_bc(mpfss_batch *mpfss, pointinfo_t **matches, dllnode_t **bt_roots,  int *batch_len ){
+void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *mpfss_vector, pointinfo_t **matches, dllnode_t **bt_roots,  int *batch_len ){
   	int m= mpfss->m_rounded;
   	int size=mpfss->size;
 
   	obliv bool **vectors= calloc(m, sizeof(obliv bool *));
-  	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 	get_batch_vectors(mpfss, matches, vectors, values, batch_len);
 
 	#ifdef DEBUG
@@ -322,8 +331,10 @@ obliv bool *get_mpfss_vector_bc(mpfss_batch *mpfss, pointinfo_t **matches, dllno
 	  	}
   	#endif
   	
-  	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
 
+	/*	Going trough each batch and figuring out for each element in batch the values from the encrypted vector
+	 	Then xor that value with the corresponding value of an array of length 'size', called mpfss_vector.
+	  */
   	for (int i=0; i<m; i++){
   		int batchsize=batch_len[i];
 
@@ -336,12 +347,16 @@ obliv bool *get_mpfss_vector_bc(mpfss_batch *mpfss, pointinfo_t **matches, dllno
 	  	batchelement_t **array=calloc(batch_len[i], sizeof(batchelement_t *));
 	  	//writes batchelement-structs from binary search tree version of batch to an array of batchelements
 	  	write_in_array(this_batch, array, 1);
-	  	
+	  	//printf("batch %d",i);
 	  	for(int j=0; j<batch_len[i]; j++){
+
 	  		batchelement_t *elem=array[j];
 	  		int x=elem->val;
 	  		int index_in_batch= elem->index_in_batch;
 	  		mpfss_vector[x]=mpfss_vector[x] ^ vectors[i][index_in_batch];
+	  		int v_value=0;
+	  		revealOblivInt(&v_value, vectors[i][index_in_batch], 0);
+	  		//printf("x %d, value in batch %d at index %d: %d \n", x, i,index_in_batch, v_value );
 	  	}
   	}
 
@@ -351,17 +366,23 @@ obliv bool *get_mpfss_vector_bc(mpfss_batch *mpfss, pointinfo_t **matches, dllno
 		printf("Final Revealed MPFSS Value\n");
 
 		for(int i=0; i<size;i++){
-			printf("%d", vdpf2[i]);
+			printf("%d ", vdpf2[i]);
 		}
 		free(vdpf2);
+		printf("\n");
+		for(int i=0;i<m;i++){
+			int v_value=0;
+			int *v_value_ptr=&v_value;
+			revealOblivInt(v_value_ptr, values[i], 0);
+			printf("%d ", v_value );
+		}
+		printf("\n");
 	#endif
 
 
 
 
   	free(vectors);
-  	free(values);
-  	return mpfss_vector;
 
 }
 
@@ -430,16 +451,33 @@ void mpfss_batch_codes(void* args){
 		obliv size_t k_obliv= feedOblivInt(indices_notobliv[i], 1);
 		indices[i]=k_obliv;
 	}*/
-
+  	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
-	mpfss_vector=get_mpfss_vector_bc(mpfss, matches, bt_roots, batch_len );
+	get_mpfss_vector_bc(mpfss, values, mpfss_vector,  matches, bt_roots, batch_len );
 
-	/*
-  	free(vectors);
-  	free(values);*/
+	#ifdef DEBUG
+		bool *vdpf2= calloc(size, sizeof(bool));
+		revealOblivBoolArray(vdpf2, mpfss_vector, size, 0);
+		printf("Final Revealed MPFSS Value\n");
+
+		for(int i=0; i<size;i++){
+			printf("%d ", vdpf2[i]);
+		}
+		free(vdpf2);
+		printf("\n");
+		for(int i=0;i<m;i++){
+			int v_value=0;
+			int *v_value_ptr=&v_value;
+			revealOblivInt(v_value_ptr, values[i], 0);
+			printf("%d ", v_value );
+		}
+		printf("\n");
+	#endif
+
+
   	free(random_gen);
   	free(indices_notobliv);
-  	free(indices); // @suppress("Symbol is not resolved")
+  	free(indices);
   	free(batch_len);
   	for(int i=0; i<m;i++){
   		free(bt_roots[i]);
