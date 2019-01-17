@@ -20,8 +20,8 @@ job1:
     - ls
     - make
     - ls
-    - ./a.out localhost:88888 1 &
-    - ./a.out localhost:88888 2
+    - ./test_main localhost:88888 1 &
+    - ./test_main localhost:88888 2
 
 
 
