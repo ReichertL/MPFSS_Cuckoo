@@ -9,7 +9,7 @@
 #include "util.h"
 #include "mpfss_naive.h"
 #include "mpfss_naive.oh"
-#include "mpfss_naive.oc"
+//#include "mpfss_naive.oc"
 #include <fss_cprg.oh>
 
 bool TEST_get_mpfss_vectors(int t, size_t size){
@@ -59,9 +59,8 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 		int *v_value_ptr=&v_value;
 		revealOblivInt(v_value_ptr, values1[i], 0);
 		if(v_value==0){
-			succ=false;
 			print=true;
-			printf("TEST_get_mpfss_vectors: Value for DPF %d was zero, but should be != zero.", i);
+			printf("TEST_get_mpfss_vectors: Warning! Value for DPF %d was zero, but should be != zero.\n", i);
 		}
 	}
 
@@ -187,8 +186,10 @@ bool TEST_dpf(size_t size, int index){
 }
 
 
-void TEST_ALL(void* args){
-	bool *err=(bool *) args;
+void TEST_ALL_mpfss_naive(bool *err){
+
+	printf("\n\nTesting MPFSS Naive-----------------------------------------------.----\n");
+
 
 	printf("TEST_dpf---------------------------------------------------------\n" );
 	if(!TEST_dpf(10, 3 )){
@@ -214,44 +215,3 @@ void TEST_ALL(void* args){
 }
 
 
-int main(int argc, char *argv[]) {
-  if (argc == 3) {
-	// Initialize protocols and obtain connection information
-	const char *remote_host = strtok(argv[1], ":");
-	const char *port = strtok(NULL, ":");
-	ProtocolDesc pd;
-		
-	// Make connection between two shells
-	// Modified ocTestUtilTcpOrDie() function from obliv-c/test/oblivc/common/util.c
-	log_info("Connecting to %s on port %s ...\n", remote_host, port);
-	if(argv[2][0] == '1') {
-	  if(protocolAcceptTcp2P(&pd,port)!=0) {
-		log_err("TCP accept from %s failed\n", remote_host);
-		exit(1);
-			}
-	} else {
-	  if(protocolConnectTcp2P(&pd,remote_host,port)!=0) {
-		log_err("TCP connect to %s failed\n", remote_host);
-		exit(1);
-	  }
-	}
-
-	// Final initializations before entering protocol
-	cp = (argv[2][0]=='1'? 1 : 2);
-	log_info("-----Party %d-------\n", cp);
-	setCurrentParty(&pd, cp); // only checks for a '1' 
-	bool err=0;  
-	execYaoProtocol(&pd, TEST_ALL, &err);
-	cleanupProtocol(&pd);
-	if(!err){
-	  printf("%s\n","Success! ");
-	}
-
-	return err;
-	} else {
-	log_info("Usage: %s <hostname:port> <1|2> <t> <size> \n" 
-			"\tHostname usage:\n" 
-			"\tlocal -> 'localhost' remote -> IP address or DNS name\n", argv[0]);
-	exit(1);
-  }
-}

@@ -39,8 +39,11 @@ mpfss_batch * new_mpfss_batch( int t, size_t size, double epsilon, double s ){
 
 }
 
+/*	Uses the obliv-c random number generator to fill the array indices_notobliv
+	with integer values. No value will be larger than size.
+	Duplicate values can occur!
 
-
+*/
 void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv, int t , int size){
 	
 
@@ -88,10 +91,10 @@ void create_batches_bst( mpfss_batch *mpfss, BCipherRandomGen *random_gen, dllno
 		}
   	}
 
-  	printf("vals of bt roots\n");
+  	/*printf("vals of bt roots\n");
   	for(int i=0;i<m;i++){
   		printf("%d \n", bt_roots[i]->val);
-  	}
+  	}*/
 
   	for(int i=0; i<size; i++){
   		for(int j=0; j<d;j++){
@@ -159,7 +162,7 @@ void create_batches_bst( mpfss_batch *mpfss, BCipherRandomGen *random_gen, dllno
 	
 }
 
-bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches, obliv int *indices ){
+bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches){
 	int t=mpfss->t;
 	int last_batch=false;
 	dllnode_t *element =bt_roots[0]; 
@@ -190,11 +193,6 @@ bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int
 				//sorting matches by their corresponding batch number
 				matches[p->batch]=p;
 
-				printf("p->batch %d\n", p->batch );
-
-				obliv int index_in_batch_obliv=feedOblivInt(index_in_batch, 1);
-				indices[j]=index_in_batch;
-
 				
 	  				//debug("index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
 	  		
@@ -223,13 +221,13 @@ bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int
 	If successful once, returns true.
 	If never successful, return false.
 */
-bool try_combine_batches_indices_bst(BCipherRandomGen *random_gen, dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches, obliv int *indices ){
+bool try_combine_batches_indices_bst(BCipherRandomGen *random_gen, dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches){
 	
 	int max=3;
 	bool succ=false;
 	for(int i=0; i<max;i++){
 		//debug("Try: %d",i );
-		succ= combine_batches_indices_bst(bt_roots,  mpfss , indices_notobliv, matches, indices );
+		succ= combine_batches_indices_bst(bt_roots,  mpfss , indices_notobliv, matches );
 		if(succ){
 			return true;	
 		}else{
@@ -274,11 +272,12 @@ void get_batch_vectors(mpfss_batch *mpfss, pointinfo_t **matches, obliv bool **v
   		index_in_batch=feedOblivInt(j,1);
 		batchsize=batch_len[i];
 
-		int in;
-		revealOblivInt(&in, index_in_batch, 0);
-		printf("Index from obliv given by get_mpfss_vectors: %d\n",in );
-		printf("batchsize %d\n",batchsize );
-
+		#ifdef DEBUG
+			int in;
+			revealOblivInt(&in, index_in_batch, 0);
+			printf("Index from obliv given by get_mpfss_vectors: %d\n",in );
+			printf("batchsize %d\n",batchsize );
+		#endif
 
   		dpf(batchsize,index_in_batch, values, i,&batch_vector);
 	  	vectors[i]=batch_vector;
@@ -353,7 +352,7 @@ void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *m
 	  		batchelement_t *elem=array[j];
 	  		int x=elem->val;
 	  		int index_in_batch= elem->index_in_batch;
-	  		mpfss_vector[x]=mpfss_vector[x] ^ vectors[i][index_in_batch];
+	  		mpfss_vector[x]=mpfss_vector[x] + vectors[i][index_in_batch];
 	  		int v_value=0;
 	  		revealOblivInt(&v_value, vectors[i][index_in_batch], 0);
 	  		//printf("x %d, value in batch %d at index %d: %d \n", x, i,index_in_batch, v_value );
@@ -406,7 +405,6 @@ void mpfss_batch_codes(void* args){
   	//node_t **batches = calloc(m, sizeof(node_t *));
   	//batch_t *batch_head=calloc(1,sizeof(batch_t));
 	dllnode_t **bt_roots = calloc(m, sizeof(dllnode_t *));
-  	obliv int *indices = calloc(t, sizeof(obliv int));
 	int *indices_notobliv = calloc(t, sizeof(int));
   	int *batch_len=calloc(m, sizeof(int));
 	pointinfo_t **matches=calloc(t, sizeof(pointinfo_t *));
@@ -420,7 +418,7 @@ void mpfss_batch_codes(void* args){
 
 	   	create_indices(random_gen, indices_notobliv, t , size);
 		create_batches_bst(mpfss,random_gen,bt_roots, batch_len );
-		int success=try_combine_batches_indices_bst(random_gen,bt_roots,  mpfss , indices_notobliv, matches, indices);
+		int success=try_combine_batches_indices_bst(random_gen,bt_roots,  mpfss , indices_notobliv, matches);
 
 
   		ocBroadcastInt(success, 1);
@@ -440,17 +438,14 @@ void mpfss_batch_codes(void* args){
 
 		}
 		if(ok==0){
-			log_err("Matching indices and batches failed multiple times.");
+			log_err("Matching indices and batches failed multiple times.\n");
 			exit(1);
 		}
 	
 	}	
 
 
-	/*for(int i=0; i<t; i++){
-		obliv size_t k_obliv= feedOblivInt(indices_notobliv[i], 1);
-		indices[i]=k_obliv;
-	}*/
+
   	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
 	get_mpfss_vector_bc(mpfss, values, mpfss_vector,  matches, bt_roots, batch_len );
@@ -477,7 +472,6 @@ void mpfss_batch_codes(void* args){
 
   	free(random_gen);
   	free(indices_notobliv);
-  	free(indices);
   	free(batch_len);
   	for(int i=0; i<m;i++){
   		free(bt_roots[i]);

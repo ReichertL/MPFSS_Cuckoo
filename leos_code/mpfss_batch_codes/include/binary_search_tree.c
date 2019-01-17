@@ -147,3 +147,23 @@ struct bt_node* search(struct bt_node* root, int key)
     // Key is smaller than root's key 
     return search(root->left, key); 
 }  
+
+
+// returns no of elements in binary search tree
+int get_size(struct bt_node *root){
+    counter=0;
+    bool works=increase_counter(root);
+    return counter;
+}
+
+bool increase_counter(struct bt_node *root) 
+{ 
+    if(root != NULL){
+
+        counter++;
+                
+        increase_counter(root->left); 
+        increase_counter(root->right);
+    }
+    return true;
+} 

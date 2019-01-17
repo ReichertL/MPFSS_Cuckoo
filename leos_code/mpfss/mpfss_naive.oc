@@ -183,8 +183,10 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 		printf(" \n");
 
 		
-		  obliv bool *v1_lo= calloc(size, sizeof(obliv bool));
-		  obliv bool *v2_lo= calloc(size, sizeof(obliv bool));
+		  /*
+				Causes seg fault for some reasons. but lines are not even essential for debugging.
+		    obliv bool *v1_lo= calloc(size, sizeof(obliv bool)*BLOCKSIZE*block_no);
+		  obliv bool *v2_lo= calloc(size, sizeof(obliv bool)*BLOCKSIZE*block_no);
 		  feedOblivIntArray(v1_lo, local_output, size, 1);
 		  feedOblivIntArray(v2_lo, local_output, size, 2);
 		  obliv int *dpf_obliv_lo= calloc(size, sizeof(obliv int));
@@ -196,14 +198,14 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 		  printf("dpf from local_output: ");
 
 		  for(int i = 0; i <size ; i++) {
-			printf("%d ", dpf[i]);  
+			printf("%d ", dpf_local_output[i]);
 		  }
 		  printf(" \n");
 		  free(v1_lo);
 		  free(v2_lo);
 		  free(dpf_obliv_lo);
-		  free(dpf_local_output);
-
+		 free(dpf_local_output);
+			*/
 
 		int activ_value=0;
 		int *activ_value_ptr=&activ_value;

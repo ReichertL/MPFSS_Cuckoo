@@ -21,3 +21,5 @@ struct bt_node* insert(struct bt_node* bt_node, struct arbitray_struct *s, int k
 struct bt_node * minValueBTNode(struct bt_node* bt_node); 
 struct bt_node* deleteBTNode(struct bt_node* root, int key);  
 struct bt_node* search(struct bt_node* root, int key);
+int get_size(struct bt_node *root);
+bool increase_counter(struct bt_node *root);
