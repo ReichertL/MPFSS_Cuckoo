@@ -12,7 +12,7 @@
 //#include "mpfss_naive.oc"
 #include <fss_cprg.oh>
 
-bool TEST_get_mpfss_vectors(int t, size_t size){
+bool TEST_get_mpfss_vector(int t, size_t size){
 	mpfss *m1=new_mpfss_naive(t, size);
 	int *indices_notobliv1 = calloc(t, sizeof(int));
 	for(int i=0; i<t; i++){
@@ -25,29 +25,40 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 		indices1[i]=k_obliv;
 	}
 
-	obliv bool **vectors1= calloc(t, sizeof(int *));
+	obliv bool **vector= calloc(size, sizeof(obliv bool));
 	obliv uint8_t *values1 = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
-	get_mpfss_vectors(m1, indices1, vectors1, values1);
+	get_mpfss_vector(m1, indices1, vector, values1);
 
 	bool succ=true;
 	bool print=false;
-	//Testing the vectors
-	for(int i=0; i<t; i++){
-		bool *vdpf= calloc(size, sizeof(bool));
-		revealOblivBoolArray(vdpf, vectors1[i], size, 0);
-
-		for(int j=0; j<size; j++){
-			int val=vdpf[j];
-			if(j==indices_notobliv1[i] && val!=1){
-				succ=false;
-				print=true;
-				printf("TEST_get_mpfss_vectors: Resulting Dpf %d is not 1 at index %d.\n", i, j);
-
+	
+	//Testing the vector
+	bool *vdpf= calloc(size, sizeof(bool));
+	revealOblivBoolArray(vdpf, vector, size, 0);
+	for(int i=0; i<size; i++){
+		if(vdpf[i]==1){
+			bool found=false;
+			for(int j=0; j<t;j++){
+				if(indices_notobliv1[j]==i){
+					found=true;
+				}
 			}
-			if(j!=indices_notobliv1[i] && val==1){
+			if(found==false){
 				succ=false;
 				print=true;
-				printf("TEST_get_mpfss_vectors: Resulting Dpf %d is 1 at index %d.\n", i, j);
+				printf("TEST_get_mpfss_vector: Resulting MPF is not 1 at index %d, but should be.\n", i);
+			}
+		}else{
+			bool found=false;
+			for(int j=0; j<t;j++){
+				if(indices_notobliv1[j]==i){
+					found=true;
+				}
+			}
+			if(found==true){
+				succ=false;
+				print=true;
+				printf("TEST_get_mpfss_vector: Resulting MPF is 1 at index %d, but should not be.\n", i);
 			}
 		}
 		free(vdpf);
@@ -60,11 +71,11 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 		revealOblivInt(v_value_ptr, values1[i], 0);
 		if(v_value==0){
 			print=true;
-			printf("TEST_get_mpfss_vectors: Warning! Value for DPF %d was zero, but should be != zero.\n", i);
+			printf("TEST_get_mpfss_vector: Warning! Value at one point of MPF was zero, but should be != zero.\n");
 		}
 	}
 
-	//Print all values and vectors if there has been an error
+	//Print all values and vector if there has been an error
 	if(print){
 		printf("indices (expected)	: ");
 		for(int i=0; i<t; i++){
@@ -73,7 +84,7 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 		}
 		printf("\n");
 
-	//Do not use revealOblivIntArray() when obliv type is size_t
+		//Do not use revealOblivIntArray() when obliv type is size_t
 		int *indices_revealed = calloc(t, sizeof(int));
 		printf("indices (revealed)	: ");
 		for(int i=0; i<t; i++){
@@ -84,14 +95,15 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 		printf("\n");
 		free(indices_revealed);
 
-		for(int i=0; i< t; i++){
-			bool *vdpf= calloc(size, sizeof(bool));
-			revealOblivBoolArray(vdpf, vectors1[i], size, 0);
-			printf("dpf #%d: ", i);  
-			for(int j = 0; j <size ; j++) {
-			  printf("%d ", vdpf[j]);  
-			}
-			free(vdpf);      
+		bool *vdpf= calloc(size, sizeof(bool));
+		revealOblivBoolArray(vdpf, vector, size, 0);
+		printf("MPF: ");  
+		for(int j = 0; j <size ; j++) {
+		  printf("%d ", vdpf[j]);  
+		}
+		free(vdpf); 
+
+		for(int i=0; i< t; i++){     
 
 			int v_value;
 			int *v_value_ptr=&v_value;
@@ -105,7 +117,7 @@ bool TEST_get_mpfss_vectors(int t, size_t size){
 	free(m1);
 	free(indices_notobliv1);
 	free(indices1);
-	free(vectors1);
+	free(vector);
 	free(values1);
 
 	return succ;
@@ -207,9 +219,9 @@ void TEST_ALL_mpfss_naive(bool *err){
 		*err=1;
 	}
 
-	printf("TEST_get_mpfss_vectors---------------------------------------------------------\n" );
-	if(!TEST_get_mpfss_vectors( 4, (size_t) 10)){
-		printf("%s\n", "TEST_get_mpfss_vectors( 4, (size_t) 10) failed" );
+	printf("TEST_get_mpfss_vector---------------------------------------------------------\n" );
+	if(!TEST_get_mpfss_vector( 4, (size_t) 10)){
+		printf("%s\n", "TEST_get_mpfss_vector( 4, (size_t) 10) failed" );
 		*err=1;
 	}
 }

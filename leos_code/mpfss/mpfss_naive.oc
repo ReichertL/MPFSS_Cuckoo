@@ -30,7 +30,7 @@ mpfss * new_mpfss_naive( int t, size_t size){
 	  size_t size: Size of the input field
 	  obliv size_t index: Used as x value for the point function
 	  obliv uint8_t *values: Pointer to array of obliv integers
-	  int j : current run in loop (see loop in get_mpfss_vectors) 
+	  int j : current run in loop (see loop in get_mpfss_vector) 
 	  obliv bool **vector: pointer to a pointer 
 
 	Output
@@ -238,7 +238,7 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 	Input: 
 	  mpfss *mpfss: Struct holing generall input information for the MPFSS
 	  obliv size_t *indices: Oblive array holding the indices (x values) for the multipoint function. Length of array: t.
-	  obliv bool **vectors: Pointer to an array of pointers, which reference to obliv bool values. Length of array = size in mpfss struct.
+	  obliv bool **vector: Pointer to an array of obliv bool values. Length of array = size in mpfss struct.
 	  obliv uint8_t *values: Pointer to an array of obliv unit8_t values. Length of array = size in mpfss struct.
 	
 	Output:
@@ -248,28 +248,32 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, obliv b
 	  Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
 	  Return type is void.
 */
-void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors, obliv uint8_t *values ){
+void get_mpfss_vector(mpfss *mpfss, obliv size_t *indices, obliv bool *vector, obliv uint8_t *values ){
   size_t size=mpfss->size;
   int t=mpfss->t;
   debug("t %d\n", t );
   obliv size_t index;
-  obliv bool *vector;
+  
+  obliv bool *this_vector;
 
   for (int j=0; j<t;j++){
 
 	  index=indices[j];
-	  dpf(size,index, values, j,&vector);
-	  vectors[j]=vector;
+	  dpf(size,index, values, j,&this_vector);
+
+	  for (int i = 0; i < size; i++){
+	  	vector[i]=vector[i]|this_vector[i];
+	  }
 
 		//Debug
 	  #ifdef DEBUG
-		printf("-----------Debug get_mpfss_vectors()-----------\n",j );
-		int in;
+		printf("-----------Debug get_mpfss_vector()-----------\n",j );
+		/*int in;
 		revealOblivInt(&in, index, 0);
-		printf("Index from obliv given by get_mpfss_vectors: %d\n",in );
+		printf("Index from obliv given by get_mpfss_vector: %d\n",in );
 
 		bool *vdpf2= calloc(size, sizeof(bool ));
-		revealOblivBoolArray(vdpf2, vectors[j], size, 0);
+		revealOblivBoolArray(vdpf2, this_vector, size, 0);
 		printf("dpf #%d:               ", j);  
 		for(int i = 0; i <size ; i++) {
 		  printf("%d ", vdpf2[i]);  
@@ -281,14 +285,22 @@ void get_mpfss_vectors(mpfss *mpfss, obliv size_t *indices, obliv bool **vectors
 		int v_value=0;
 		int *v_value_ptr=&v_value;
 		revealOblivInt(v_value_ptr, values[j], 0);
-		printf("activ_value in get_mpfss_vectors: %d\n", v_value );
+		printf("activ_value in get_mpfss_vector: %d\n", v_value );*/
+	  
+		bool *vdpf2= calloc(size, sizeof(bool ));
+		revealOblivBoolArray(vdpf2, vector, size, 0);
+		printf("vector round #%d:               ", j);  
+		for(int i = 0; i <size ; i++) {
+		  printf("%d ", vdpf2[i]);  
+		}
+		printf(" \n");        
+		free(vdpf2);
 	  #endif
 
-  }
-
-
   
-  //free(vector);
+
+
+  }
 }
 
 
@@ -306,7 +318,7 @@ void mpfss_naive(void* args){
   	int t=mpfss->t;
   	int size=mpfss->size;
 		/*Array of pointers: Length of pointers depend on system*/
-  	obliv bool **vectors= calloc(t, sizeof(obliv bool *));
+  	obliv bool *vector=calloc(size, sizeof(obliv bool));
   	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
   	int *indices_notobliv = calloc(t, sizeof(int ));
 
@@ -333,25 +345,25 @@ void mpfss_naive(void* args){
 	}
 
 	//TODO: Write function that will return only a single vector !
-  	get_mpfss_vectors(mpfss, indices, vectors, values);
+  	get_mpfss_vector(mpfss, indices, vector, values);
 
 	#ifdef DEBUG
 		printf("results\n");
-	  	for(int i=0; i<t; i++){
+	  	
 	  				
-	  		bool *vdpf2= calloc(size, sizeof(bool));
-			revealOblivBoolArray(vdpf2, vectors[i], size, 0);
-	  		for(int j=0; j<size; j++){
-	  			printf("%d ", vdpf2[j]);  
-			}
-			printf(" \n");        
-			free(vdpf2);
-	  	}
+	  	bool *vdpf2= calloc(size, sizeof(bool));
+		revealOblivBoolArray(vdpf2, vector, size, 0);
+	  	for(int j=0; j<size; j++){
+	  		printf("%d ", vdpf2[j]);  
+		}
+		printf(" \n");        
+		free(vdpf2);
+	  	
   	#endif
 
 
 
-  	free(vectors);
+  	free(vector);
   	free(values);
   	free(indices);
   	free(indices_notobliv);
