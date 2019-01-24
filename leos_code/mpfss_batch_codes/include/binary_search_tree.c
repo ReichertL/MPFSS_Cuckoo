@@ -152,11 +152,11 @@ struct bt_node* search(struct bt_node* root, int key)
 // returns no of elements in binary search tree
 int get_size(struct bt_node *root){
     counter=0;
-    bool works=increase_counter(root);
+    increase_counter(root);
     return counter;
 }
 
-bool increase_counter(struct bt_node *root) 
+void increase_counter(struct bt_node *root) 
 { 
     if(root != NULL){
 
@@ -165,5 +165,4 @@ bool increase_counter(struct bt_node *root)
         increase_counter(root->left); 
         increase_counter(root->right);
     }
-    return true;
 } 

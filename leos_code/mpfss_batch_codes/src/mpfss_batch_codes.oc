@@ -64,39 +64,22 @@ void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv, int t ,
 
 }
 
-void create_batches_bst( mpfss_batch *mpfss, BCipherRandomGen *random_gen, dllnode_t **bt_roots, int *batch_len ){
-
+void create_batches(mpfss_batch *mpfss, BCipherRandomGen *random_gen,   int *batch_len, batchelement_t ***inputfield){
   	double size=mpfss->size;
   	int m= mpfss->m_rounded;
   	int d= mpfss-> d_rounded;
-	
-  	dllnode_t *list_prev;
 
+  	#ifdef DEBUG
+  		dllnode_t **heads=calloc(m, sizeof(dllnode_t));
+  		dllnode_t **tails=calloc(m, sizeof(dllnode_t));
+  	#endif
 
-  	for(int i=0; i<m; i++){
-  		batch_len[i]=0;
-		
-		//creating linked list holding roots of binary search trees
-		struct bt_node *batch_root = NULL; 
-		if(i==0){
-			dllnode_t *first=create_head(batch_root, 0);
-			
-			list_prev=first;
-			bt_roots[0]=first;
-		}else{
-			dllnode_t *element=insert_dllnode( list_prev, batch_root, i);
-			
-			list_prev=element;
-			bt_roots[i]=element;
-		}
-  	}
+	for(int i=0; i<size; i++){
 
-  	/*printf("vals of bt roots\n");
-  	for(int i=0;i<m;i++){
-  		printf("%d \n", bt_roots[i]->val);
-  	}*/
+		batchelement_t **member_of_batches=calloc(d, sizeof(batchelement_t *));
+		//printf("Value %d: ", i);
 
-  	for(int i=0; i<size; i++){
+		inputfield[i]=member_of_batches;
   		for(int j=0; j<d;j++){
   			
   			/*	bcrandom generates different values for both parties (even with same seed),
@@ -109,112 +92,90 @@ void create_batches_bst( mpfss_batch *mpfss, BCipherRandomGen *random_gen, dllno
   			r_b=ocBroadcastInt((int)rand, 2);
 			int r= (r_a+r_b)% m;
 
+			//printf(" %d ", r);
+
 			int index_in_batch=batch_len[r];
 			batch_len[r]=batch_len[r]+1;
 
-			//create one big binary search tree: O(log(n) pro insert)
-			dllnode_t *element =bt_roots[r]; 
-			struct bt_node *batch_root=element->s;
 			batchelement_t *batchelem=calloc(1, sizeof(batchelement_t));
 			batchelem->index_in_batch=index_in_batch;
 			batchelem->batch_no=r;
-			batchelem->val=i;
+			//batchelem->val=i;
+			batchelem->val=0;
+			member_of_batches[j]=batchelem;
 
-			//printf("index_in_batch %d batch_no %d val %d\n",batchelem->index_in_batch,batchelem->batch_no,  batchelem->val );
-			if(batch_root==NULL){
-				element->s=insert( NULL, batchelem, i);
 
-			}else{
-				insert(batch_root,batchelem, i);
-			}
+			#ifdef DEBUG
+				if(heads[r]==NULL){
+					dllnode_t *first=create_head(batchelem, i);
+					heads[r]=first;
+					tails[r]=first;
+				}else{
+					dllnode_t *element=insert_dllnode( tails[r], batchelem, i);		
+					tails[r]=element;
+				}
+			#endif
+
   		}
+  		//printf("\n");
   	}
 
   	#ifdef DEBUG
-
-	  	printf("\n");
-	  	int n=0;
-	  	for(int i=0; i<m; i++){
-	  		printf("Bucket %d: %d \n", i , batch_len[i] );
-	  		n+=batch_len[i];
-	  	}
-	  	printf("N: %d\n", n );
-
-
-		dllnode_t *batch_root=bt_roots[0];
-
-  		while(true){
-	  		printf("batch %d :", batch_root->val );
-			struct bt_node *this_batch=batch_root->s;
-
-	  		inorder(this_batch);
-	  		printf("\n");
-
-
-
-	  		if(batch_root->next==NULL){
-	  			break;
+  		for (int i = 0; i < m; ++i){
+  	
+  			printf("Batch no %d : ", i);
+  			dllnode_t *current= heads[i];
+  			while(current!=NULL){
+  				printf("%d ", current->val);
+  				current=current->next;
   			}
-  			batch_root=batch_root->next;
+  			printf("\n");
   		}
   	#endif
-	//log_info("successfully created graph\n");
-	
 }
 
-bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches){
+bool combine_batches_indices(batchelement_t ***inputfield, mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches){
 	int t=mpfss->t;
+  	double size=mpfss->size;
+  	int m= mpfss->m_rounded;
+  	int d= mpfss-> d_rounded;
 	int last_batch=false;
-	dllnode_t *element =bt_roots[0]; 
+	int *batches_used=calloc(m, sizeof(int));
 
 	for(int j=0; j<t; j++){
 		int index= indices_notobliv[j];
-		//printf("index %d\n", index );
-		while(!last_batch){
-			//printf("element->val %d\n", element-> val);
-			struct bt_node *batch_root=(struct bt_node *)element->s;
-	  		struct bt_node *res=search(batch_root, index);
-	  		//inorder(batch_root);
-	  		//printf("\n");
-
-	  		if(res==NULL && element->next==NULL){
-  				//debug("No available batch found for index %d \n", index );
-	  			return false;
-	  		}else if(res != NULL){
-	  			//key was found in this batch
-
-	  			batchelement_t *this_node=(batchelement_t *)res->s;
-	  			
+		
+		batchelement_t **member_of_batches= inputfield[index];
+		int i=0;
+		bool matched=false;
+		while(i<d){
+			batchelement_t *batchelem=member_of_batches[i];
+			int batch_no=batchelem->batch_no;
+			//if this bachtelement has not been matched with a batch yet
+			if(batchelem->val==0 && batches_used[batch_no]==0){
 				pointinfo_t *p=calloc(1, sizeof(pointinfo_t));
-			  	p->val=index;
-			  	p->batch=element->val;
-			  	int index_in_batch=this_node->index_in_batch;
-				p->index_in_batch=index_in_batch;
-				//sorting matches by their corresponding batch number
+				p->val=index;
+				p->batch=batch_no;
+				p->index_in_batch=batchelem->index_in_batch;
 				matches[p->batch]=p;
 
-				
-	  				//debug("index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
-	  		
-	  			dllnode_t *some_node=delink_dllnode(element);
-	  			if(some_node==NULL){
-	  				//All indices have been assigned
-	  				
-		  			log_info("successfully matched indices and batches\n");
-		  			
-	  				return true;
-	  			}
-				element=get_head(some_node);
-				
-	  			break;
-	  		}
-
-	  		element=element->next;
-
-	  	}
+				batches_used[batch_no]=1;
+				matched=true;
+ 				debug("Index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
+ 				batchelem->val=1;
+				break;
+			}
+			i++;
+		}
+		if(!matched){
+			log_info("Matching indices and batches failed for index %d.\n", index);
+			return false;
+		}
   	}
+	log_info("Successfully matched indices and batches\n");
   	return true;
 }
+
 
 /*	Will call combine_batches_indices_bst at most three times.
 	Permutes indices_notobliv between the calls.
@@ -309,9 +270,10 @@ void get_batch_vectors(mpfss_batch *mpfss, pointinfo_t **matches, obliv bool **v
 
 /*	Function calls get_batch_vectors() and organizes the output.
 */
-void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *mpfss_vector, pointinfo_t **matches, dllnode_t **bt_roots,  int *batch_len ){
+void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *mpfss_vector, pointinfo_t **matches, batchelement_t ***inputfield,  int *batch_len ){
   	int m= mpfss->m_rounded;
   	int size=mpfss->size;
+  	int d= mpfss-> d_rounded;
 
   	obliv bool **vectors= calloc(m, sizeof(obliv bool *));
 	get_batch_vectors(mpfss, matches, vectors, values, batch_len);
@@ -320,7 +282,7 @@ void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *m
 		printf("results\n");
 	  	for(int i=0; i<m; i++){
 	  				
-	  		bool *vdpf2= calloc(size, sizeof(bool));
+	  		bool *vdpf2= calloc(batch_len[i], sizeof(bool));
 			revealOblivBoolArray(vdpf2, vectors[i], size, 0);
 	  		for(int j=0; j<batch_len[i]; j++){
 	  			printf("%d ", vdpf2[j]);  
@@ -332,25 +294,21 @@ void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *m
   	
 
 	/*	Going trough each batch and figuring out for each element in batch the values from the encrypted vector
-	 	Then xor that value with the corresponding value of an array of length 'size', called mpfss_vector.
+	 	Then OR that value with the corresponding value of an array of length 'size', called mpfss_vector.
 	  */
-  	for (int i=0; i<m; i++){
-  		//int batchsize=batch_len[i];
-  		dllnode_t *batch_root=bt_roots[i];
+  	for (int i=0; i<size; i++){
+  		
+		batchelement_t **member_of_batches= inputfield[i];
+	  	int j=0;
+	  	while(j<d){
 
-  		//binary search tree version of batch
-  		struct bt_node *this_batch=batch_root->s;
-  		//empty array, to be filled
-	  	batchelement_t **array=calloc(batch_len[i], sizeof(batchelement_t *));
-	  	//writes batchelement-structs from binary search tree version of batch to an array of batchelements
-	  	write_in_array(this_batch, array, 1);
-	  	//printf("batch %d",i);
-	  	for(int j=0; j<batch_len[i]; j++){
+			batchelement_t *elem=member_of_batches[j];
 
-	  		batchelement_t *elem=array[j];
-	  		int x=elem->val;
+			int batch_no=elem->batch_no;
 	  		int index_in_batch= elem->index_in_batch;
-	  		mpfss_vector[x]=mpfss_vector[x] | vectors[i][index_in_batch];
+	  		mpfss_vector[i]=mpfss_vector[i] | vectors[batch_no][index_in_batch];
+	  		
+	  		j++;
 	  	}
   	}
 
@@ -395,26 +353,18 @@ void mpfss_batch_codes(void* args){
   	int size=mpfss->size;
   	int m= mpfss->m_rounded;
 
-		/*Array of pointers: Length of pointers depend on system*/
-
-  	//node_t **batches = calloc(m, sizeof(node_t *));
-  	//batch_t *batch_head=calloc(1,sizeof(batch_t));
-	dllnode_t **bt_roots = calloc(m, sizeof(dllnode_t *));
 	int *indices_notobliv = calloc(t, sizeof(int));
   	int *batch_len=calloc(m, sizeof(int));
 	pointinfo_t **matches=calloc(t, sizeof(pointinfo_t *));
-
-
+	int success =false;
+	batchelement_t ***inputfield=calloc(size, sizeof(batchelement_t **));
   	BCipherRandomGen *random_gen= newBCipherRandomGen();
 
 	/*Peer 1 generates indices at random*/
   	if(ocCurrentParty()==1){
-		//dllnode_t *head=calloc(1,sizeof(dllnode_t));
-
 	   	create_indices(random_gen, indices_notobliv, t , size);
-		create_batches_bst(mpfss,random_gen,bt_roots, batch_len );
-		int success=try_combine_batches_indices_bst(random_gen,bt_roots,  mpfss , indices_notobliv, matches);
-
+		create_batches(mpfss, random_gen, batch_len,inputfield);
+		success=combine_batches_indices(inputfield, mpfss , indices_notobliv, matches);
 
   		ocBroadcastInt(success, 1);
   		printf("success %d\n", success);
@@ -423,27 +373,21 @@ void mpfss_batch_codes(void* args){
   		}
 
 	}else{
-		create_batches_bst(mpfss,random_gen,bt_roots, batch_len);
+		create_batches(mpfss, random_gen, batch_len,inputfield);
 	
 		int ok=3;
 		while(!( ok==1 || ok==0)){
-
 			ok= ocBroadcastInt(1, 1);
-			//printf("%d \n", ok);
-
 		}
 		if(ok==0){
 			log_err("Matching indices and batches failed multiple times.\n");
 			exit(1);
 		}
-	
 	}	
-
-
 
   	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
-	get_mpfss_vector_bc(mpfss, values, mpfss_vector,  matches, bt_roots, batch_len );
+	get_mpfss_vector_bc(mpfss, values, mpfss_vector,  matches, inputfield, batch_len );
 
 	#ifdef DEBUG
 		bool *vdpf2= calloc(size, sizeof(bool));

@@ -22,11 +22,14 @@ typedef struct {
 
 
 mpfss_batch *new_mpfss_batch( int t, size_t size, double epsilon, double s );
-
+void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv, int t , int size);
+void create_batches_bst( mpfss_batch *mpfss, BCipherRandomGen *random_gen, dllnode_t **bt_roots, int *batch_len );
+void create_batches(mpfss_batch *mpfss, BCipherRandomGen *random_gen,   int *batch_len, batchelement_t ***inputfield);
+bool combine_batches_indices(batchelement_t ***inputfield, mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches);
 bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches);
 bool try_combine_batches_indices_bst(BCipherRandomGen *random_gen, dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches );
 void get_batch_vectors(mpfss_batch *mpfss, pointinfo_t **matches, obliv bool **vectors, obliv uint8_t *values, int *batch_len);
-void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *mpfss_vector, pointinfo_t **matches, dllnode_t **bt_roots,  int *batch_len );
-void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv, int t , int size);
-void create_batches_bst( mpfss_batch *mpfss, BCipherRandomGen *random_gen, dllnode_t **bt_roots, int *batch_len );
+void get_mpfss_vector_bc_bst(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *mpfss_vector, pointinfo_t **matches, dllnode_t **bt_roots,  int *batch_len );
+void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *mpfss_vector, pointinfo_t **matches, batchelement_t ***inputfield,  int *batch_len );
+
 void mpfss_batch_codes(void* args);
