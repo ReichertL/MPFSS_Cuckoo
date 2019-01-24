@@ -304,7 +304,8 @@ void mpfss_batch_codes_bst(void* args){
 
   	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
 	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
-	get_mpfss_vector_bc(mpfss, values, mpfss_vector,  matches, inputfield, batch_len );
+	get_mpfss_vector_bc_bst(mpfss,values, mpfss_vector, matches, bt_roots, batch_len );
+
 
 	#ifdef DEBUG
 		bool *vdpf2= calloc(size, sizeof(bool));

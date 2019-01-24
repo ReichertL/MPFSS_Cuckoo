@@ -17,7 +17,7 @@
 	Each head point to a list of node_t elements which represents one batch.
 	
 */
-void create_batches( mpfss_batch *mpfss, char *random_str[], node_t **batches, batch_t *batch_head, dllnode_t **bt_roots){
+void create_batches_ll( mpfss_batch *mpfss, char *random_str[], node_t **batches, batch_t *batch_head, dllnode_t **bt_roots){
 
   	double size=mpfss->size;
   	int m= mpfss->m_rounded;
@@ -175,7 +175,7 @@ void create_batches( mpfss_batch *mpfss, char *random_str[], node_t **batches, b
 
 }
 
-void check_this_batch(dllnode_t **ptr_dllcurrent, node_t *current, pointinfo_t **matches, int index, batch_t *batch_current,  int *no_available_batches,  bool *found, int *i, int m){
+void check_this_batch_ll(dllnode_t **ptr_dllcurrent, node_t *current, pointinfo_t **matches, int index, batch_t *batch_current,  int *no_available_batches,  bool *found, int *i, int m){
 
 		  	if(current->next!=NULL){
 
@@ -223,7 +223,7 @@ void check_this_batch(dllnode_t **ptr_dllcurrent, node_t *current, pointinfo_t *
 			} 
 }
 
-bool combine_batches_indices(node_t **batches, mpfss_batch *mpfss, dllnode_t *head, batch_t *batch_head){
+bool combine_batches_indices_ll(node_t **batches, mpfss_batch *mpfss, dllnode_t *head, batch_t *batch_head){
 	int t=mpfss->t;
 
 	/* Batches lists do not use header for infos, same goes for indices list*/
@@ -249,7 +249,7 @@ bool combine_batches_indices(node_t **batches, mpfss_batch *mpfss, dllnode_t *he
 			batch_current=batch_current->next;
 		  	node_t *current=batch_current->list;
 
-		 	check_this_batch(&dllcurrent, current, matches, index, batch_current,  &no_available_batches,  &found, &i, m);
+		 	check_this_batch_ll(&dllcurrent, current, matches, index, batch_current,  &no_available_batches,  &found, &i, m);
 			//printf("dllcurrent val %d wert des pointer %p add des pointers %p\n", dllcurrent->val, dllcurrent , &dllcurrent);
 
 

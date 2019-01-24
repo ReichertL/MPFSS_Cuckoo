@@ -24,25 +24,24 @@ bool TEST_get_mpfss_vector_bc(int t, size_t size, double epsilon, double s){
 	bool print=true;
 	int count=0;
 
-	mpfss_batch *mpfss=new_mpfss_batch( t, size,  epsilon,  s );
-	int m= mpfss->m_rounded;
-	dllnode_t **bt_roots = calloc(m, sizeof(dllnode_t *));
-	obliv int *indices = calloc(t, sizeof(obliv int));
+  	mpfss_batch *mpfss=new_mpfss_batch( t, size,  epsilon,  s );
+  	int t=mpfss->t;
+  	int size=mpfss->size;
+  	int m= mpfss->m_rounded;
+	int d= mpfss->d_rounded;
 	int *indices_notobliv = calloc(t, sizeof(int));
-	int *batch_len=calloc(m, sizeof(int));
+  	int *batch_len=calloc(m, sizeof(int));
 	pointinfo_t **matches=calloc(t, sizeof(pointinfo_t *));
-	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
-	int *values_nonobliv = calloc(m, sizeof(int));
-	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
-	int success=0;
-	BCipherRandomGen *random_gen= newBCipherRandomGen();
+	int success =false;
+	batchelement_t ***inputfield=calloc(size, sizeof(batchelement_t **));
+  	BCipherRandomGen *random_gen= newBCipherRandomGen();
 	
 	while(count<(m*10)){
 		count++;
 		if(ocCurrentParty()==1){
 		 	create_indices(random_gen, indices_notobliv, t , size);
-			create_batches_bst(mpfss,random_gen,bt_roots, batch_len );
-			success=try_combine_batches_indices_bst(random_gen,bt_roots,  mpfss , indices_notobliv, matches);
+			create_batches(mpfss, random_gen, batch_len,inputfield);
+			success=try_combine_batches_indices(random_gen, inputfield, mpfss , indices_notobliv, matches);
 
 			ocBroadcastInt(success, 1);
 			if(success==1){
@@ -52,7 +51,7 @@ bool TEST_get_mpfss_vector_bc(int t, size_t size, double epsilon, double s){
 				break;
 		  	}
 		}else{
-			create_batches_bst(mpfss,random_gen,bt_roots, batch_len);
+			create_batches(mpfss, random_gen, batch_len,inputfield);
 			int ok=3;
 			while(!( ok==1 || ok==0)){
 				ok= ocBroadcastInt(1, 1);
@@ -67,8 +66,10 @@ bool TEST_get_mpfss_vector_bc(int t, size_t size, double epsilon, double s){
 		}
 	}	
 	
+	obliv uint8_t *values = calloc(m, BLOCKSIZE*sizeof(obliv uint8_t)*block_no);
+	obliv bool *mpfss_vector= calloc(size, sizeof( obliv bool));
 	if(success==1){
-		get_mpfss_vector_bc(mpfss, values, mpfss_vector,  matches, bt_roots, batch_len );
+		get_mpfss_vector_bc(mpfss, values, mpfss_vector,  matches, inputfield, batch_len );
 	}
 		
 
@@ -84,6 +85,7 @@ bool TEST_get_mpfss_vector_bc(int t, size_t size, double epsilon, double s){
 
 
 	bool *vdpf= calloc(size, sizeof(bool));
+	int *values_nonobliv = calloc(m, sizeof(int));
 	if(success==1){
 
 		revealOblivBoolArray(vdpf, mpfss_vector, size, 0);
@@ -144,14 +146,41 @@ bool TEST_get_mpfss_vector_bc(int t, size_t size, double epsilon, double s){
 		}
 		printf("\n");
 
-		for (int i = 0; i < m; ++i){
-			dllnode_t *batch_root=bt_roots[i];
-			printf("batch no: %d, batch val %d (Shoud be equal) \n",i, batch_root->val );
-			dllnode_t *batch_root=bt_roots[i];
-			struct bt_node *this_batch=batch_root->s;
-	  		inorder(this_batch);
-	  		printf("\n");
-		}
+		printf("Batches\n");
+	  	dllnode_t **heads=calloc(m, sizeof(dllnode_t));
+	  	dllnode_t **tails=calloc(m, sizeof(dllnode_t));
+	  
+		for(int i=0; i<size; i++){
+
+			batchelement_t **member_of_batches=inputfield[i];
+	  		for(int j=0; j<d;j++){
+	  	
+				batchelement_t *batchelem=member_of_batches[j];
+				int batch_no=batchelem->batch_no;
+				if(heads[batch_no]==NULL){
+					dllnode_t *first=create_head(batchelem, i);
+					heads[batch_no]=first;
+					tails[batch_no]=first;
+				}else{
+					dllnode_t *element=insert_dllnode( tails[batch_no], batchelem, i);		
+					tails[batch_no]=element;
+				}
+	  		}
+	  	}
+
+  
+  		for (int i = 0; i < m; ++i){
+  			printf("Batch no %d : ", i);
+  			dllnode_t *current= heads[i];
+  			while(current!=NULL){
+  				printf("%d ", current->val);
+  				current=current->next;
+  			}
+  			printf("\n");
+  		}
+  		free(heads);
+  		free(tails);
+
 		printf("success: %d\n",success );
 
 
@@ -181,16 +210,17 @@ bool TEST_get_mpfss_vector_bc(int t, size_t size, double epsilon, double s){
 	free(vdpf);
  	free(random_gen);
   	free(indices_notobliv);
-  	free(indices);
   	free(batch_len);
-  	for(int i=0; i<m;i++){
-  		free(bt_roots[i]);
-  	}
-  	free(bt_roots);
   	free(mpfss_vector);
   	free(matches);
   	free(values_nonobliv);
 
+  	for (int i = 0; i < size; ++i)
+  	{		
+  		batchelement_t **member_of_batches= inputfield[i];
+  		free(member_of_batches);
+  	}
+ 	free(inputfield);
 	return succ;
 }
 
@@ -261,7 +291,7 @@ bool TEST_create_indices(int t, size_t size){
 	return succ;
 }
 
-bool TEST_create_batches(int t, size_t size, double epsilon, double s){
+/*bool TEST_create_batches_bst(int t, size_t size, double epsilon, double s){
 	bool succ=true;
 	bool print=false;
 
@@ -401,9 +431,104 @@ bool TEST_create_batches(int t, size_t size, double epsilon, double s){
 	free(batch_len);
 
 	return succ;
+}*/
+
+bool TEST_create_batches(int t, size_t size, double epsilon, double s){
+	bool succ=true;
+	bool print=false;
+
+	mpfss_batch *mpfss=new_mpfss_batch( t, size,  epsilon,  s );
+	int m= mpfss->m_rounded;
+	int d=mpfss->d_rounded;
+
+	batchelement_t ***inputfield=calloc(size, sizeof(batchelement_t **));
+	int *indices_notobliv = calloc(t, sizeof(int));
+	int *batch_len=calloc(m, sizeof(int));
+	BCipherRandomGen *random_gen= newBCipherRandomGen();
+
+	create_indices(random_gen, indices_notobliv, t , size);
+	create_batches(mpfss, random_gen, batch_len,inputfield);
+
+	int N=0;
+
+	for (int i = 0; i<size; ++i)
+	{
+		batchelement_t **member_of_batches= inputfield[i];
+		if(member_of_batches==NULL){
+			printf("TEST_create_batches:Member_of_batches was Null at position %d .\n",i );
+			succ=false;
+			print=true;
+		}else{
+			for(int j=0; j<d;j++){
+				batchelement_t *batchelem=member_of_batches[j];
+				int batch_no=batchelem->batch_no;
+				if(batch_no>(m-1) || batch_no<0){
+					printf("TEST_create_batches:Batch_no for position %d, entry %d  was %d, but this is an illegal value.\n",i,j,batch_no );
+					succ=false;
+					print=true;
+				}
+				int index_in_batch=batchelem->index_in_batch;
+				if(batch_len[batch_no]<index_in_batch){
+					printf("TEST_create_batches:Index_in_batch for position %d, entry %d  was %d, but the batch is only %d long.\n",i,j,batch_no, batch_len[batch_no] );
+					succ=false;
+					print=true;
+				}
+			}
+		}
+	}
+
+	if(print){
+
+		
+	  	dllnode_t **heads=calloc(m, sizeof(dllnode_t));
+	  	dllnode_t **tails=calloc(m, sizeof(dllnode_t));
+	  
+		for(int i=0; i<size; i++){
+
+			batchelement_t **member_of_batches=inputfield[i];
+	  		for(int j=0; j<d;j++){
+	  	
+				batchelement_t *batchelem=member_of_batches[j];
+				int batch_no=batchelem->batch_no;
+				if(heads[batch_no]==NULL){
+					dllnode_t *first=create_head(batchelem, i);
+					heads[batch_no]=first;
+					tails[batch_no]=first;
+				}else{
+					dllnode_t *element=insert_dllnode( tails[batch_no], batchelem, i);		
+					tails[batch_no]=element;
+				}
+	  		}
+	  	}
+
+  
+  		for (int i = 0; i < m; ++i){
+  			printf("Batch no %d : ", i);
+  			dllnode_t *current= heads[i];
+  			while(current!=NULL){
+  				printf("%d ", current->val);
+  				current=current->next;
+  			}
+  			printf("\n");
+  		}
+  		free(heads);
+  		free(tails);
+	}
+
+	free(random_gen);
+  	free(indices_notobliv);
+  	free(batch_len);
+  	for (int i = 0; i < size; ++i)
+  	{		
+  		batchelement_t **member_of_batches= inputfield[i];
+  		free(member_of_batches);
+  	}
+ 	free(inputfield);
+
+	return succ;
 }
 
-bool TEST_combine_batches_indices_bst(int t, size_t size, double epsilon, double s){
+/*bool TEST_combine_batches_indices_bst(int t, size_t size, double epsilon, double s){
 
 	int succ=true;
 	int print=false;
@@ -536,6 +661,177 @@ bool TEST_combine_batches_indices_bst(int t, size_t size, double epsilon, double
 	free(matches);
 
 	return succ;
+}*/
+
+bool TEST_combine_batches_indices(int t, size_t size, double epsilon, double s){
+
+	int succ=true;
+	int print=false;
+	mpfss_batch *mpfss=new_mpfss_batch( t, size,  epsilon,  s );
+	int m= mpfss->m_rounded;
+	int d= mpfss->d_rounded;
+	int i=0;
+
+	batchelement_t ***inputfield=calloc(size, sizeof(batchelement_t **));
+	int *indices_notobliv = calloc(t, sizeof(int));
+	BCipherRandomGen *random_gen= newBCipherRandomGen();
+	int *batch_len=calloc(m, sizeof(int));
+	pointinfo_t **matches=calloc(t, sizeof(pointinfo_t *));
+
+	int matched=false;
+	int *batch_no_test=calloc(t, sizeof(int));
+	int success;
+
+	while(i<(m*10)){
+		i++;
+
+	   	create_indices(random_gen, indices_notobliv, t , size);
+		create_batches(mpfss, random_gen, batch_len,inputfield);
+		success=try_combine_batches_indices(random_gen, inputfield, mpfss , indices_notobliv, matches);;
+
+
+		if(matched){
+			
+			for (int i = 0; i < t; ++i)
+			{
+				pointinfo_t *p=matches[i];
+
+					int val=p->val;
+					int batch=p->batch;
+					int index_in_batch=p->index_in_batch;
+					bool found;
+					for (int j = 0; j < t; ++j)
+					{
+						if(val==indices_notobliv[j]){
+							found=true;
+						}
+					}
+					if(!found){
+						printf("TEST_combine_batches_indices: Value of match was %d, but this indice was not selected.\n",val);
+						succ=false;
+						print=true;	
+					}
+					
+					if(batch>=m){
+						printf("TEST_combine_batches_indices: Batch no was %d, but max number is %d. \n",batch, m-1);
+						succ=false;
+						print=true;	
+					}
+					for (int j = 0; j < i; ++j)
+					{
+						if(batch==batch_no_test[j]){
+							printf("TEST_combine_batches_indices: Batch no was %d, but this batch is already taken by another indice. \n",batch);
+							succ=false;
+							print=true;	
+						}
+					}
+					
+		
+					batchelement_t *found_elem=NULL;
+					batchelement_t **member_of_batches= inputfield[val];
+					for(int k=0;k<d;k++){
+						batchelement_t *batchelem=member_of_batches[k];
+						if(batchelem->batch_no==batch){
+							found_elem=batchelem;
+						}
+
+					}
+					if(found_elem==NULL){
+
+						printf("TEST_combine_batches_indices: Match for val %d (batch no %d, index_in_batch %d) is illegal because the value is not in this batch. \n",val, batch, index_in_batch);
+						succ=false;
+						print=true;	
+					}
+					if(found_elem!=NULL && found_elem->index_in_batch!=index_in_batch){
+						printf("TEST_combine_batches_indices: Match for val %d (batch no %d, index_in_batch %d) is illegal because actual index_in_batch is %d. \n",val, batch, index_in_batch, found_elem->index_in_batch);
+						succ=false;
+						print=true;	
+					}
+			
+			}
+
+			break;
+		}
+		
+	}
+
+	if(i==(m*10)){
+		printf("TEST_combine_batches_indices: Matching indices and batches failed %d times. Possibly broken.\n",m*10);
+		succ=false;
+		print=true;
+	}	
+
+	if(print){
+		printf("Indices of last run \n");
+		for (int i = 0; i < t; ++i)
+		{
+			printf("%d ", indices_notobliv[i] );
+		}
+		printf("\n");
+
+
+		printf("Batches of last run\n");
+	  	dllnode_t **heads=calloc(m, sizeof(dllnode_t));
+	  	dllnode_t **tails=calloc(m, sizeof(dllnode_t));
+	  
+		for(int i=0; i<size; i++){
+
+			batchelement_t **member_of_batches=inputfield[i];
+	  		for(int j=0; j<d;j++){
+	  	
+				batchelement_t *batchelem=member_of_batches[j];
+				int batch_no=batchelem->batch_no;
+				if(heads[batch_no]==NULL){
+					dllnode_t *first=create_head(batchelem, i);
+					heads[batch_no]=first;
+					tails[batch_no]=first;
+				}else{
+					dllnode_t *element=insert_dllnode( tails[batch_no], batchelem, i);		
+					tails[batch_no]=element;
+				}
+	  		}
+	  	}
+
+  
+  		for (int i = 0; i < m; ++i){
+  			printf("Batch no %d : ", i);
+  			dllnode_t *current= heads[i];
+  			while(current!=NULL){
+  				printf("%d ", current->val);
+  				current=current->next;
+  			}
+  			printf("\n");
+  		}
+  		free(heads);
+  		free(tails);
+
+		if(matched){
+
+			printf("Matches\n");
+			for (int i = 0; i < t; ++i)
+			{
+				pointinfo_t *p=matches[i];
+
+				int val=p->val;
+				int batch=p->batch;
+				int index_in_batch=p->index_in_batch;
+
+				printf("Match %d (batch %d, index_in_batch %d, val %d)\n", i, batch, index_in_batch, val );
+			}
+		}
+	}
+
+	free(random_gen);
+  	free(indices_notobliv);
+  	free(batch_len);
+  	for (int i = 0; i < size; ++i)
+  	{		
+  		batchelement_t **member_of_batches= inputfield[i];
+  		free(member_of_batches);
+  	}
+ 	free(inputfield);
+
+	return succ;
 }
 
 void TEST_ALL_mpfss_batch_codes(bool *err){
@@ -565,9 +861,9 @@ void TEST_ALL_mpfss_batch_codes(bool *err){
 		*err=1;
 	}
 
-	printf("TEST_combine_batches_indices_bst---------------------------------------------------------\n" );
-	if(!TEST_combine_batches_indices_bst(2, (size_t) 10, 0.1 , 4 )){
-		printf("%s\n", "TEST_combine_batches_indices_bst(4, (size_t) 10, 0.1 , 4 )failed" );
+	printf("TEST_combine_batches_indices---------------------------------------------------------\n" );
+	if(!TEST_combine_batches_indices(2, (size_t) 10, 0.1 , 4 )){
+		printf("%s\n", "TEST_combine_batches_indices(4, (size_t) 10, 0.1 , 4 )failed" );
 		*err=1;
 	}
 
