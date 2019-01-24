@@ -75,7 +75,9 @@ $(LIB): $(OBJS:%=%)
 
 clean:
 	rm -f $(OBJS) $(shell find $(INCLUDE_Path)/ -type f -name '*.d') $(shell find $(INCLUDE_Path) -type f -name '*.od')
+	rm -f $(OBJS) $(shell find $(mpfss_bc_PATH)/ -type f -name '*.d') $(shell find $(mpfss_bc_PATH)/ -type f -name '*.od')
 	rm -f $(OBJS) $(shell find $(SRC_PATH)/ -type f -name '*.d') $(shell find $(SRC_PATH)/ -type f -name '*.od')
+	rm -f $(OBJS) $(shell find $(mpfss_PATH)/ -type f -name '*.d') $(shell find $(mpfss_PATH)/ -type f -name '*.od')
 	rm -f $(OBJS) $(shell find $(SRC_PATH)/ -type f -name '*.oo') $(shell find $(SRC_PATH)/ -type f -name '*.o')
 	rm -f $(LIB)
 

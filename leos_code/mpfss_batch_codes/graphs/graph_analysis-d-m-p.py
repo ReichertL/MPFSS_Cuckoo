@@ -14,13 +14,7 @@ def plot_this(p, x_value_exact, y_values_exact, name_xaxis, name_yaxis, title_ad
   if(p==plt):
   	p.xlabel(name_xaxis)
   p.ylabel(name_yaxis)
- # print("set_ticks: "+str(set_ticks)+" existing ticks: "+str(list(plt.yticks()[0])))
-  #if set_ticks==1:
-  #	for tick in y_values_exact:
-  #		if tick not in plt.yticks()[0]:
-  #			plt.yticks(list(plt.yticks()[0])+[tick])
-  #			print("new tick"+str(tick))
-  #print("set_ticks: "+str(set_ticks)+" existing ticks: "+str(list(plt.yticks()[0])))
+
   p.margins(0.05, 0.1)
   p.title(name_xaxis+" vs. "+name_yaxis + "\n"+title_addition)
 

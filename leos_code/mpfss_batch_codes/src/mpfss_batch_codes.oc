@@ -258,7 +258,7 @@ bool try_combine_batches_indices_bst(BCipherRandomGen *random_gen, dllnode_t **b
 void get_batch_vectors(mpfss_batch *mpfss, pointinfo_t **matches, obliv bool **vectors, obliv uint8_t *values, int *batch_len){
 
   	int size=mpfss->size;
-  	int m= mpfss->m_rounded;
+  	//int m= mpfss->m_rounded;
   	int t=mpfss->t;
  	obliv size_t index_in_batch;
   	obliv bool *batch_vector;
@@ -335,9 +335,7 @@ void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *m
 	 	Then xor that value with the corresponding value of an array of length 'size', called mpfss_vector.
 	  */
   	for (int i=0; i<m; i++){
-  		int batchsize=batch_len[i];
-
-
+  		//int batchsize=batch_len[i];
   		dllnode_t *batch_root=bt_roots[i];
 
   		//binary search tree version of batch
@@ -352,10 +350,7 @@ void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *m
 	  		batchelement_t *elem=array[j];
 	  		int x=elem->val;
 	  		int index_in_batch= elem->index_in_batch;
-	  		mpfss_vector[x]=mpfss_vector[x] + vectors[i][index_in_batch];
-	  		int v_value=0;
-	  		revealOblivInt(&v_value, vectors[i][index_in_batch], 0);
-	  		//printf("x %d, value in batch %d at index %d: %d \n", x, i,index_in_batch, v_value );
+	  		mpfss_vector[x]=mpfss_vector[x] | vectors[i][index_in_batch];
 	  	}
   	}
 
