@@ -44,7 +44,7 @@ def main():
 	rt_list=list()
 	rt_list_bst=list()
 	rt_list_ll=list()
-	rt_list_naive=[n*t for t in t_list]
+	rt_list_naive=[n*n*t for t in t_list]
 	t_to_n_list=[t/n for t in t_list]
 
 	for t in t_list:
@@ -60,13 +60,13 @@ def main():
 		m=pow(t, 1+e)
 		m_list.append(m)
 
-		rt= t*n*(d+1)/m+m*m+t*d
+		rt= t*n*(d+1)/m+n*d+t*d
 		rt_list.append(rt)
 
-		rt_bst= t*n*(d+1)/m+m*m+t*m/2*((n*d)/m)
+		rt_bst= t*n*(d+1)/m+n*d+t*m/2*((n*d)/m)
 		rt_list_bst.append(rt_bst)
 
-		rt_ll= t*n*(d+1)/m+m*m+t*n*m/2
+		rt_ll= t*n*(d+1)/m+n*d+t*n*m/2
 		rt_list_ll.append(rt_ll)
 
 

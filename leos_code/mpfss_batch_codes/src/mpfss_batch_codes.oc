@@ -77,7 +77,6 @@ void create_batches(mpfss_batch *mpfss, BCipherRandomGen *random_gen,   int *bat
 	for(int i=0; i<size; i++){
 
 		batchelement_t **member_of_batches=calloc(d, sizeof(batchelement_t *));
-		//printf("Value %d: ", i);
 
 		inputfield[i]=member_of_batches;
   		for(int j=0; j<d;j++){
@@ -92,15 +91,12 @@ void create_batches(mpfss_batch *mpfss, BCipherRandomGen *random_gen,   int *bat
   			r_b=ocBroadcastInt((int)rand, 2);
 			int r= (r_a+r_b)% m;
 
-			//printf(" %d ", r);
-
 			int index_in_batch=batch_len[r];
 			batch_len[r]=batch_len[r]+1;
 
 			batchelement_t *batchelem=calloc(1, sizeof(batchelement_t));
 			batchelem->index_in_batch=index_in_batch;
 			batchelem->batch_no=r;
-			//batchelem->val=i;
 			batchelem->val=0;
 			member_of_batches[j]=batchelem;
 
@@ -117,7 +113,6 @@ void create_batches(mpfss_batch *mpfss, BCipherRandomGen *random_gen,   int *bat
 			#endif
 
   		}
-  		//printf("\n");
   	}
 
   	#ifdef DEBUG
@@ -131,6 +126,9 @@ void create_batches(mpfss_batch *mpfss, BCipherRandomGen *random_gen,   int *bat
   			}
   			printf("\n");
   		}
+  		free(heads);
+  		free(tails);
+
   	#endif
 }
 
@@ -182,13 +180,13 @@ bool combine_batches_indices(batchelement_t ***inputfield, mpfss_batch *mpfss , 
 	If successful once, returns true.
 	If never successful, return false.
 */
-bool try_combine_batches_indices_bst(BCipherRandomGen *random_gen, dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches){
+bool try_combine_batches_indices(BCipherRandomGen *random_gen, batchelement_t ***inputfield, mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches){
 	
 	int max=3;
 	bool succ=false;
 	for(int i=0; i<max;i++){
 		//debug("Try: %d",i );
-		succ= combine_batches_indices_bst(bt_roots,  mpfss , indices_notobliv, matches );
+		succ= combine_batches_indices(inputfield, mpfss , indices_notobliv, matches);
 		if(succ){
 			return true;	
 		}else{
@@ -352,7 +350,8 @@ void mpfss_batch_codes(void* args){
   	int t=mpfss->t;
   	int size=mpfss->size;
   	int m= mpfss->m_rounded;
-
+	int d= mpfss->d_rounded;
+	
 	int *indices_notobliv = calloc(t, sizeof(int));
   	int *batch_len=calloc(m, sizeof(int));
 	pointinfo_t **matches=calloc(t, sizeof(pointinfo_t *));
@@ -364,7 +363,7 @@ void mpfss_batch_codes(void* args){
   	if(ocCurrentParty()==1){
 	   	create_indices(random_gen, indices_notobliv, t , size);
 		create_batches(mpfss, random_gen, batch_len,inputfield);
-		success=combine_batches_indices(inputfield, mpfss , indices_notobliv, matches);
+		success=try_combine_batches_indices(random_gen, inputfield, mpfss , indices_notobliv, matches);
 
   		ocBroadcastInt(success, 1);
   		printf("success %d\n", success);
@@ -412,10 +411,17 @@ void mpfss_batch_codes(void* args){
   	free(random_gen);
   	free(indices_notobliv);
   	free(batch_len);
-  	for(int i=0; i<m;i++){
-  		free(bt_roots[i]);
+  	for (int i = 0; i < size; ++i)
+  	{		
+  		batchelement_t **member_of_batches= inputfield[i];
+  		free(member_of_batches);
   	}
-  	free(bt_roots);
+ 	free(inputfield);
   	free(mpfss_vector);
+  	for (int i = 0; i < t; ++i)
+  	{
+  		pointinfo_t *p=matches[i];
+  		free(p);
+  	}
   	free(matches);
 }
