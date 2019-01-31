@@ -33,13 +33,6 @@ int main(int argc, char *argv[]) {
         const char *port = strtok(NULL, ":");
         ProtocolDesc pd;
         
-        int t = atoi(argv[3]);
-        int size = atoi(argv[4]);
-        //Can't make p smaller, because will be interpreted as zero, which breaks the following calculations
-        long double p_inverse=(long double)pow(2.0,-20.0);
-        long double p=(long double)1.0-p_inverse;
-        //printf(" p: %LG p_inverse: %LG\n", p, p_inverse);
-        
         // Make connection between two shells
         // Modified ocTestUtilTcpOrDie() function from obliv-c/test/oblivc/common/util.c
         log_info("Connecting to %s on port %s ...\n", remote_host, port);
@@ -59,10 +52,10 @@ int main(int argc, char *argv[]) {
         cp = (argv[2][0]=='1'? 1 : 2);
         log_info("-----Party %d-------\n", cp);
         setCurrentParty(&pd, cp); // only checks for a '1'        
-    
+        int t = atoi(argv[3]);
+        int size = atoi(argv[4]);
 
-     
-        mpfss_batch *m=new_mpfss_batch(t, size, p);
+        mpfss_batch *m=new_mpfss_batch(t, size, 0.1 , 4.0 );
         lap = wallClock();        
 
          // Execute Yao's protocol and cleanup

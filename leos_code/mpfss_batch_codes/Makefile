@@ -8,7 +8,7 @@ OBLIVCA = $(OBLIVC_PATH)/_build/libobliv.a
 
 ACKLIB_FFSL=../../absentminded-crypto-kit/src/oram_fssl/
 CFLAGS+= -O3 -march=native -std=c99 -fopenmp 
-CFLAGS+=-g -Wall -D_Float128=double -DINFO -D_POSIX_C_SOURCE=199309L 
+CFLAGS+=-g -Wall -D_Float128=double -DDEBUG -D_POSIX_C_SOURCE=199309L 
 CFLAGS+=-I$(INCLUDE_Path) -I$(ACKLIB_FFSL) -I$(mpfss_PATH)
 ACKLIB=../../absentminded-crypto-kit/build/lib/liback.a 
 LDFLAGS += -lm -lgomp -lgcrypt $(ACKLIB)
