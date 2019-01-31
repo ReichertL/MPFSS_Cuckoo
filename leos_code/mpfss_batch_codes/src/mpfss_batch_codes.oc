@@ -18,22 +18,42 @@
 
 
 
-mpfss_batch * new_mpfss_batch( int t, size_t size, double epsilon, double s ){
+mpfss_batch * new_mpfss_batch( int t, size_t size,long double p ){
   	mpfss_batch * mpfss = malloc(sizeof(mpfss_batch));
   	mpfss->t = t;
   	mpfss->size = size;
-  	mpfss->epsilon= epsilon;
-  	mpfss->s=s;
-  	mpfss->d_exact=(1+s)*epsilon+1;
-  	mpfss->m_exact= pow(t, 1+epsilon);
-  	mpfss->m_rounded=round(mpfss->m_exact);
+  	
+  	/*double d=t;
+  	mpfss->d_exact=t;
+  	mpfss->d_rounded=t;
+  	mpfss->m_exact= t;
+  	mpfss->m_rounded=t;
+   	double s=log((int)size)/log(t);
+	mpfss->s=log((int)size)/log(t);
+  	long double epsilon=((long double)d-(long double)1.0)/((long double)s+(long double)1.0);
+  	mpfss->epsilon= epsilon;	
+  	*/
+
+  	double d= log(1.0-p)/(-2.0*log((double)t))+ 1.0;
+  	mpfss->d_exact= d;
   	mpfss->d_rounded=round(mpfss->d_exact);
-  	mpfss->p=1/pow(t,mpfss->d_exact);
-  	mpfss->p_real=1/pow(t,mpfss->d_rounded);
+
+  	double s=log((int)size)/log(t);
+	mpfss->s=log((int)size)/log(t);
+
+  	long double epsilon=((long double)d-(long double)1.0)/((long double)s+(long double)1.0);
+  	mpfss->epsilon= epsilon;
+  	
+  	
+  	mpfss->m_exact= pow(t, (long double)1.0 + epsilon);
+  	mpfss->m_rounded=round(mpfss->m_exact);
+
+  	mpfss->p=p;
+  	mpfss->p_real=1-1/pow((long double)t,(long double)mpfss->d_rounded);
 	
-  	debug("t %d, size %d, epsilon %f, s %f \n",t,size, epsilon,s);
-	debug("d %f, m %f, p %f\n",mpfss->d_exact, mpfss->m_exact, mpfss->p );
-	debug("d %f, m %f, p %f\n",mpfss->d_rounded, mpfss->m_rounded, mpfss->p_real );
+  	printf("t %d, size %d, epsilon %LG, s %f \n",t,size, epsilon,s);
+	printf("d %f, m %f, p %LG\n",mpfss->d_exact, mpfss->m_exact, mpfss->p );
+	printf("d %f, m %f, p %LG\n",mpfss->d_rounded, mpfss->m_rounded, mpfss->p_real );
   
     return mpfss;
 
@@ -159,7 +179,7 @@ bool combine_batches_indices(batchelement_t ***inputfield, mpfss_batch *mpfss , 
 
 				batches_used[batch_no]=1;
 				matched=true;
- 				debug("Index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
+ 				printf("Index: %d batch_no: %d index_in_batch: %d \n", index, p->batch,p->index_in_batch);
  				batchelem->val=1;
 				break;
 			}
@@ -170,6 +190,18 @@ bool combine_batches_indices(batchelement_t ***inputfield, mpfss_batch *mpfss , 
 			return false;
 		}
   	}
+
+  	for (int i = 0; i < m; ++i){
+  		if(batches_used[i]==0){
+
+  			pointinfo_t *p=calloc(1, sizeof(pointinfo_t));
+			p->val=-1;
+			p->batch=i;
+			p->index_in_batch=size;
+			matches[i]=p;
+  		}
+  	}
+
 	log_info("Successfully matched indices and batches\n");
   	return true;
 }
@@ -219,11 +251,12 @@ void get_batch_vectors(mpfss_batch *mpfss, pointinfo_t **matches, obliv bool **v
   	int size=mpfss->size;
   	//int m= mpfss->m_rounded;
   	int t=mpfss->t;
+  	int m=mpfss->m_rounded;
  	obliv size_t index_in_batch;
   	obliv bool *batch_vector;
   	int batchsize;
 
-  	for(int i=0; i<t;i++){
+  	for(int i=0; i<m;i++){
   		int j=0;
   		if(ocCurrentParty()==1){
   			j=matches[i]->index_in_batch;
@@ -237,10 +270,10 @@ void get_batch_vectors(mpfss_batch *mpfss, pointinfo_t **matches, obliv bool **v
 			printf("Index from obliv given by get_mpfss_vectors: %d\n",in );
 			printf("batchsize %d\n",batchsize );
 		#endif
-
-  		dpf(batchsize,index_in_batch, values, i,&batch_vector);
-	  	vectors[i]=batch_vector;
-
+		if(batchsize > 1){
+	  		dpf(batchsize,index_in_batch, values, i,&batch_vector);
+		  	vectors[i]=batch_vector;
+	  	}
 		
 		  #ifdef DEBUG
 			/*printf("-----------Debug get_batch_vectors()-----------\n",i );
@@ -279,14 +312,15 @@ void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *m
 	#ifdef DEBUG
 		printf("results\n");
 	  	for(int i=0; i<m; i++){
-	  				
-	  		bool *vdpf2= calloc(batch_len[i], sizeof(bool));
-			revealOblivBoolArray(vdpf2, vectors[i], size, 0);
-	  		for(int j=0; j<batch_len[i]; j++){
-	  			printf("%d ", vdpf2[j]);  
-			}
-			printf(" \n");        
-			free(vdpf2);
+	  		if(batch_len[i]>1){			
+		  		bool *vdpf2= calloc(batch_len[i], sizeof(bool));
+				revealOblivBoolArray(vdpf2, vectors[i], size, 0);
+		  		for(int j=0; j<batch_len[i]; j++){
+		  			printf("%d ", vdpf2[j]);  
+				}
+				printf(" \n");        
+				free(vdpf2);
+			}	
 	  	}
   	#endif
   	
@@ -303,9 +337,10 @@ void get_mpfss_vector_bc(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *m
 			batchelement_t *elem=member_of_batches[j];
 
 			int batch_no=elem->batch_no;
-	  		int index_in_batch= elem->index_in_batch;
-	  		mpfss_vector[i]=mpfss_vector[i] | vectors[batch_no][index_in_batch];
-	  		
+			if(batch_len[batch_no]>1){
+		  		int index_in_batch= elem->index_in_batch;
+		  		mpfss_vector[i]=mpfss_vector[i] | vectors[batch_no][index_in_batch];
+	  		}
 	  		j++;
 	  	}
   	}
@@ -354,7 +389,7 @@ void mpfss_batch_codes(void* args){
 	
 	int *indices_notobliv = calloc(t, sizeof(int));
   	int *batch_len=calloc(m, sizeof(int));
-	pointinfo_t **matches=calloc(t, sizeof(pointinfo_t *));
+	pointinfo_t **matches=calloc(m, sizeof(pointinfo_t *));
 	int success =false;
 	batchelement_t ***inputfield=calloc(size, sizeof(batchelement_t **));
   	BCipherRandomGen *random_gen= newBCipherRandomGen();
@@ -418,7 +453,7 @@ void mpfss_batch_codes(void* args){
   	}
  	free(inputfield);
   	free(mpfss_vector);
-  	for (int i = 0; i < t; ++i)
+  	for (int i = 0; i < m; ++i)
   	{
   		pointinfo_t *p=matches[i];
   		free(p);

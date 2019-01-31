@@ -9,19 +9,19 @@
 typedef struct {
     int t; // number of points in mpfss
     size_t size; //size of input field
-    double epsilon;
+    long double epsilon;
     double s; //expansion factor
     double m_exact;
     double m_rounded;
     double d_exact;
     double d_rounded;
-    double p; //probability of failure
-    double p_real;
+    long double p; //probability of failure
+    long double p_real;
 
 } mpfss_batch;
 
 
-mpfss_batch *new_mpfss_batch( int t, size_t size, double epsilon, double s );
+mpfss_batch *new_mpfss_batch( int t, size_t size, long double p );
 
 void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv, int t , int size);
 
