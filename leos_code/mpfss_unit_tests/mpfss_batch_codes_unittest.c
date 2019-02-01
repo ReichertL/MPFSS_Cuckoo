@@ -41,7 +41,7 @@ bool TEST_get_mpfss_vector_bc(int t, size_t size, double epsilon, double s){
 		if(ocCurrentParty()==1){
 		 	create_indices(random_gen, indices_notobliv, t , size);
 			create_batches(mpfss, random_gen, batch_len,inputfield);
-			success=try_combine_batches_indices(random_gen, inputfield, mpfss , indices_notobliv, matches);
+			success=combine_batches_indices( inputfield, mpfss , indices_notobliv, matches);
 
 			ocBroadcastInt(success, 1);
 			if(success==1){
@@ -89,7 +89,7 @@ bool TEST_get_mpfss_vector_bc(int t, size_t size, double epsilon, double s){
 	if(success==1){
 
 		revealOblivBoolArray(vdpf, mpfss_vector, size, 0);
-		//Testing MPF 
+		//Testing MPF by testing combined vector 
 		for(int j=0; j<size; j++){
 			int val=vdpf[j];
 				
@@ -687,7 +687,7 @@ bool TEST_combine_batches_indices(int t, size_t size, double epsilon, double s){
 
 	   	create_indices(random_gen, indices_notobliv, t , size);
 		create_batches(mpfss, random_gen, batch_len,inputfield);
-		success=try_combine_batches_indices(random_gen, inputfield, mpfss , indices_notobliv, matches);;
+		success=combine_batches_indices( inputfield, mpfss , indices_notobliv, matches);;
 
 
 		if(matched){
@@ -853,10 +853,19 @@ void TEST_ALL_mpfss_batch_codes(bool *err){
 		printf("%s\n", "TEST_create_indices(10, 5)" );
 		*err=1;
 	}
+	if(!TEST_create_indices(10, 100000)){
+		printf("%s\n", "TEST_create_indices(10, 5)" );
+		*err=1;
+	}
+
 
 
 	printf("TEST_create_batches---------------------------------------------------------\n" );
 	if(!TEST_create_batches(2, (size_t) 10, 0.1 , 4 )){
+		printf("%s\n", "TEST_create_batches(4, (size_t) 10, 0.1 , 4 )failed" );
+		*err=1;
+	}
+	if(!TEST_create_batches(10, (size_t) 100000, 0.1 , 4 )){
 		printf("%s\n", "TEST_create_batches(4, (size_t) 10, 0.1 , 4 )failed" );
 		*err=1;
 	}
@@ -866,11 +875,19 @@ void TEST_ALL_mpfss_batch_codes(bool *err){
 		printf("%s\n", "TEST_combine_batches_indices(4, (size_t) 10, 0.1 , 4 )failed" );
 		*err=1;
 	}
-
+	if(!TEST_combine_batches_indices(10, (size_t) 100000, 0.1 , 4 )){
+		printf("%s\n", "TEST_combine_batches_indices(4, (size_t) 10, 0.1 , 4 )failed" );
+		*err=1;
+	}
 
 
 	printf("TEST_get_mpfss_vector_bc---------------------------------------------------------\n" );
 	if(!TEST_get_mpfss_vector_bc(2, (size_t) 10, 0.1 , 4 )){
+		printf("%s\n", "TEST_get_mpfss_vector_bc(4, (size_t) 10, 0.1 , 4 )failed" );
+		*err=1;
+	}
+
+		if(!TEST_get_mpfss_vector_bc(10, (size_t) 100000, 0.1 , 4 )){
 		printf("%s\n", "TEST_get_mpfss_vector_bc(4, (size_t) 10, 0.1 , 4 )failed" );
 		*err=1;
 	}

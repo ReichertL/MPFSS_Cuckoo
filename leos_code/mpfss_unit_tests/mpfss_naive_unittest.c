@@ -61,8 +61,9 @@ bool TEST_get_mpfss_vector(int t, size_t size){
 				printf("TEST_get_mpfss_vector: Resulting MPF is 1 at index %d, but should not be.\n", i);
 			}
 		}
-		free(vdpf);
+		
 	}
+	free(vdpf);
 
 	// Testing the values
 	for(int i=0; i<t; i++){
@@ -95,13 +96,13 @@ bool TEST_get_mpfss_vector(int t, size_t size){
 		printf("\n");
 		free(indices_revealed);
 
-		bool *vdpf= calloc(size, sizeof(bool));
-		revealOblivBoolArray(vdpf, vector, size, 0);
+		bool *vdpf2= calloc(size, sizeof(bool));
+		revealOblivBoolArray(vdpf2, vector, size, 0);
 		printf("MPF: ");  
 		for(int j = 0; j <size ; j++) {
-		  printf("%d ", vdpf[j]);  
+		  printf("%d ", vdpf2[j]);  
 		}
-		free(vdpf); 
+		free(vdpf2); 
 
 		for(int i=0; i< t; i++){     
 
