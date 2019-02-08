@@ -102,11 +102,16 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool *
 			fss * fss: instance of fss
 			obliv size_t index: In DPF f(a)=b everywhere else the Function is 0. Index is equal to a.
 	*/
-	fss_cprg_getblockvector( 	active_block_delta, 
+	/*fss_cprg_getblockvector( 	active_block_delta, 
 							local_output, 
 							local_bit_output, 
 							my_fss, 
-							index);
+							index);*/
+
+	
+	if(ocCurrentParty()==1){
+		local_bit_output[index_non_obliv]=1;
+	}
 
 		//Debug
 	  #ifdef DEBUG
@@ -316,12 +321,15 @@ void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv, int t ,
   }
 
 
+
     #ifdef DEBUG
-    printf("Indices before feedObliv\n");
-    for(int i=0; i<t; i++){
-        printf(" %d ", indices_notobliv[i]);
-    }
-    printf("\n");
+  	
+	    printf("Indices before feedObliv\n");
+	    for(int i=0; i<t; i++){
+	        printf(" %d ", indices_notobliv[i]);
+	    }
+	    printf("\n");
+
   #endif
 
 }
@@ -345,17 +353,11 @@ void mpfss_naive(void* args){
   	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t));
   	int *indices_notobliv = calloc(t, sizeof(int ));
   	BCipherRandomGen *random_gen= newBCipherRandomGen();
-
-	create_indices(random_gen, indices_notobliv, t , size);
-
-  	#ifdef DEBUG
-		printf("Indices before feedObliv\n");
-		for(int i=0; i<t; i++){
-	  		printf(" %d ", indices_notobliv[i]);
+		
+		if(ocCurrentParty()==1){
+			create_indices(random_gen, indices_notobliv, t , size);
 		}
-		printf("\n");
-  	#endif
-  
+  	
 		//feed indices one by one because target type is not int but size_t
   	obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t));
 	for(int i=0; i<t; i++){
@@ -389,11 +391,13 @@ void mpfss_naive(void* args){
 		free(vdpf2);
 	  	free(v1);
 	  	free(v2);
+	  	free(dpf_obliv);
 
   	#endif
 
 
-
+	free(mpfss); 	
+	releaseBCipherRandomGen(random_gen);
   	free(vector);
   	free(values);
   	free(indices);
