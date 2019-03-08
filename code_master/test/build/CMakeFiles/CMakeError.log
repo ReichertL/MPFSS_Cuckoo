@@ -1,0 +1,56 @@
+Detecting C [-std=c90] compiler features failed to compile with the following output:
+Change Dir: /home/turing/code_masterarbeit/code_master/test/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_49a50/fast"
+/usr/bin/make -f CMakeFiles/cmTC_49a50.dir/build.make CMakeFiles/cmTC_49a50.dir/build
+make[1]: Entering directory '/home/turing/code_masterarbeit/code_master/test/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_49a50.dir/feature_tests.c.o
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/bin/oblivcc    -std=c90 -o CMakeFiles/cmTC_49a50.dir/feature_tests.c.o   -c /home/turing/code_masterarbeit/code_master/test/build/CMakeFiles/feature_tests.c
+In file included from <command-line>:0:0:
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_bits.h:5:1: error: C++ style comments are not allowed in ISO C90
+ //void* memset(void* s, int c, size_t n); // Hack, had to declare memset
+ ^
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_bits.h:5:1: error: (this will be reported only once per input file)
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_bits.h:6:20: warning: extra tokens at end of #include directive
+ #include<string.h> // memset to zero
+                    ^
+In file included from /home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_types_internal.h:2:0,
+                 from /home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_bits.h:11,
+                 from <command-line>:0:
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_types.h:6:21: warning: extra tokens at end of #include directive
+ #include<stdint.h>  // uint64_t
+                     ^
+In file included from /home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_types_internal.h:2:0,
+                 from /home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_bits.h:11,
+                 from <command-line>:0:
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_types.h:14:1: error: C++ style comments are not allowed in ISO C90
+ // These are the troublesome types that need to be included both in
+ ^
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_types.h:14:1: error: (this will be reported only once per input file)
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_types.h:150:8: warning: extra tokens at end of #endif directive [-Wendif-labels]
+ #endif // OBLIV_TYPES_H
+        ^
+In file included from /home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_bits.h:11:0,
+                 from <command-line>:0:
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_types_internal.h:5:17: error: C++ style comments are not allowed in ISO C90
+   bool unknown; // Will be default initialized with memset(0), 
+                 ^
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_types_internal.h:5:17: error: (this will be reported only once per input file)
+In file included from /home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_bits.h:12:0,
+                 from <command-line>:0:
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_common.h:5:1: error: C++ style comments are not allowed in ISO C90
+ //#include<stdio.h>
+ ^
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_common.h:5:1: error: (this will be reported only once per input file)
+In file included from <command-line>:0:0:
+/home/turing/code_masterarbeit/code_semesterprojekt/obliv-c/src/ext/oblivc/obliv_bits.h:214:8: warning: extra tokens at end of #endif directive [-Wendif-labels]
+ #endif // OBLIV_BITS_H
+        ^
+CMakeFiles/cmTC_49a50.dir/build.make:65: recipe for target 'CMakeFiles/cmTC_49a50.dir/feature_tests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_49a50.dir/feature_tests.c.o] Error 1
+make[1]: Leaving directory '/home/turing/code_masterarbeit/code_master/test/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_49a50/fast' failed
+make: *** [cmTC_49a50/fast] Error 2
+
+
+
