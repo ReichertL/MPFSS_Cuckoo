@@ -19,9 +19,5 @@
 *.rar
 *.tar
 *.zip
+*.png
 
-
-
-leos_code/mpfss/benchmark
-leos_code/mpfss/nbproject
-**/a.out
