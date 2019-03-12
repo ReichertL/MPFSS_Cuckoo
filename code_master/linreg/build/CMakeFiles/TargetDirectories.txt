@@ -1,3 +1,0 @@
-/home/turing/code_masterarbeit/code_master/linreg/build/CMakeFiles/rebuild_cache.dir
-/home/turing/code_masterarbeit/code_master/linreg/build/CMakeFiles/edit_cache.dir
-/home/turing/code_masterarbeit/code_master/linreg/build/CMakeFiles/LinReg.dir

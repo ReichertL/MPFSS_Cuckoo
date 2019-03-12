@@ -1,0 +1,235 @@
+#include <math.h>
+#include "assert.h"
+#include "bcrandom.h"
+#include "idf_precomputation.h"
+#include "oram.oh"
+#include "obliv_logf.oh"
+
+// Converts an array of ints to uniform floats in [0,1].
+void RandIntsToFloats(uint32_t *buf, int n) {
+  for (int i = 0; i < n; i++) {
+    *((float *)&buf[i]) = (float)((double)buf[i] / (1ull << 32));
+  }
+}
+
+// Returns an ORAM type to use for the given size, assuming log2(size) accesses.
+// TODO: This the cutoff point chosen is kind of ad-hoc and should be tuned
+// using experiments.
+int GetOptimalOramForSize(int size, bool allow_floram) {
+  if (allow_floram && (size > (1 << 13))) {
+    return ORAM_TYPE_FSSL_CPRG;
+  } else if (size > 64) {
+    return ORAM_TYPE_SQRT;
+  } else {
+    return ORAM_TYPE_LINEAR;
+  }
+}
+
+// Returns `size` or the minimum allowed ORAM size, whichever is greater.
+int MinOramSize(int size) {
+  // FSS ORAM crashes below that size.
+  int min_oram_size = 8;
+  if (size < min_oram_size) {
+    return min_oram_size;
+  }
+  return size;
+}
+
+void IDFPrecomputationOblivc(void *vargs) {
+  IDFPrecomputationOblivcArgs *args = vargs;
+
+  // Compute number of levels for the tree used for sampling without
+  // replacement.
+  int num_levels = (int)ceil(log2(args->num_inputs)) + 1;
+  int level_size =
+      1 << (num_levels -
+            1);  // Smallest power of 2 greater than vocabulary size.
+  assert(level_size >= args->num_inputs);
+
+  // For each sample, we need one random number per tree level, and one
+  // additional sample for the Laplace noise.
+  int num_rands = args->num_results * (num_levels - 1) + args->num_results;
+
+  // Allocate memory.
+  oram **levels = calloc(num_levels, sizeof(*levels));
+  obliv float *init = calloc(level_size, sizeof(*init));
+  obliv float *probabilities = calloc(args->num_inputs, sizeof(*probabilities));
+  obliv float *probabilities2 =
+      calloc(args->num_inputs, sizeof(*probabilities2));
+  obliv float *counts = calloc(args->num_inputs, sizeof(*counts));
+  obliv float *counts2 = calloc(args->num_inputs, sizeof(*counts2));
+  obliv float *rands = calloc(num_rands, sizeof(*rands));
+  obliv float *rands2 = calloc(num_rands, sizeof(*rands2));
+  OcCopy cpyProbability = ocCopyCharN(sizeof(float));
+  OcCopy cpyCount = ocCopyCharN(sizeof(float));
+
+  // Get inputs and generate random shares.
+  BCipherRandomGen *rng = newBCipherRandomGen();
+  float *rands_local = calloc(num_rands, sizeof(*rands_local));
+  randomizeBuffer(rng, rands_local, num_rands * sizeof(*rands_local));
+  RandIntsToFloats(rands_local, num_rands);
+  feedOblivCharArray((char *)probabilities, args->probabilities,
+                     sizeof(float) * args->num_inputs, 1);
+  feedOblivCharArray((char *)counts, args->values,
+                     sizeof(float) * MinOramSize(args->num_inputs), 1);
+  feedOblivCharArray((char *)rands, rands_local, sizeof(float) * num_rands, 1);
+  feedOblivCharArray((char *)probabilities2, args->probabilities,
+                     sizeof(float) * args->num_inputs, 2);
+  feedOblivCharArray((char *)counts2, args->values,
+                     sizeof(float) * args->num_inputs, 2);
+  feedOblivCharArray((char *)rands2, rands_local, sizeof(float) * num_rands, 2);
+  releaseBCipherRandomGen(rng);
+
+  // Add up random shares, resulting in shares in [0, 2).
+  for (int i = 0; i < num_rands; i++) {
+    rands[i] += rands2[i];
+  }
+
+  // Multiply up probabilities and add up counts.
+  for (int i = 0; i < args->num_inputs; i++) {
+    probabilities[i] *= probabilities2[i];
+    init[i] = probabilities[i];
+    counts[i] += counts2[i];
+  }
+  oram *count_oram = oram_from_array(
+      GetOptimalOramForSize(args->num_inputs, args->allow_floram), &cpyCount,
+      MinOramSize(args->num_inputs), counts);
+
+  // Generate tree.
+  for (int i = num_levels - 1; i >= 0; i--) {
+    levels[i] =
+        oram_from_array(GetOptimalOramForSize(level_size, args->allow_floram),
+                        &cpyProbability, MinOramSize(level_size), init);
+    if (i != 0) {
+      level_size /= 2;
+      obliv float *new_init =
+          calloc(MinOramSize(level_size), sizeof(obliv float));
+      for (int j = 0; j < level_size; j++) {
+        new_init[j] = init[2 * j] + init[2 * j + 1];
+      }
+      free(init);
+      init = new_init;
+    }
+  }
+
+  // // print tree
+  // for(int level = 0; level < num_levels; level++) {
+  //   printf("level %zd:", level);
+  //   int num_nodes = 1ull<<level;
+  //   num_nodes = num_nodes < 10 ? num_nodes : 10;
+  //   for(int node = 0; node < num_nodes; node++) {
+  //     obliv float val;
+  //     float val_clear;
+  //     oram_read(&val, levels[level], node);
+  //     revealOblivFloat(&val_clear, val, 0);
+  //     printf(" %G", val_clear);
+  //   }
+  //   printf("\n");
+  // }
+
+  obliv int *result_indexes = calloc(args->num_results, sizeof(obliv int));
+  obliv float *result_values = calloc(args->num_results, sizeof(obliv float));
+
+  // Sample args->num_results many leaves.
+  for (int sample = 0; sample < args->num_results; sample++) {
+    obliv int *indexes = calloc(num_levels, sizeof(obliv int));
+    obliv int *other_indexes = calloc(num_levels, sizeof(obliv int));
+    for (int level = 0; level < num_levels - 1; level++) {
+      obliv float val_total, val_left, val_right;
+      oram_read(&val_total, levels[level], indexes[level]);
+      oram_read(&val_left, levels[level + 1], indexes[level] * 2);
+      //      oram_read(&val_right, levels[level + 1], indexes[level] * 2 + 1);
+      // TODO: handle overflows
+      obliv float prob_left = val_left / val_total;
+      //      obliv float prob_right = val_right / val_total;
+      obliv float rand = rands[sample * (num_levels - 1) + level];
+      obliv if (rand > 1.0f) { rand -= 1.0f; }  // Reduce to [0,1).
+      //      float rand_clear, prob_left_clear, prob_right_clear;
+      //      float val_left_clear, val_right_clear, val_total_clear;
+      //      revealOblivFloat(&rand_clear, rand, 0);
+      //      revealOblivFloat(&prob_left_clear, prob_left, 0);
+      //      revealOblivFloat(&prob_right_clear, prob_right, 0);
+      //      revealOblivFloat(&val_left_clear, val_left, 0);
+      //      revealOblivFloat(&val_right_clear, val_right, 0);
+      //      revealOblivFloat(&val_total_clear, val_total, 0);
+      //      printf(
+      //          "level: %zd, rand: %f, val_left: %f, val_right: %f,
+      //          val_total: %f " "prob_left: %f, prob_right: %f, rand <
+      //          prob_left: %d\n", level, rand_clear, val_left_clear,
+      //          val_right_clear, val_total_clear, prob_left_clear,
+      //          prob_right_clear, rand_clear < prob_left_clear);
+      obliv if (rand < prob_left) {
+        indexes[level + 1] = (indexes[level] * 2);
+        other_indexes[level + 1] = (indexes[level] * 2) + 1;
+      }
+      else {
+        indexes[level + 1] = (indexes[level] * 2) + 1;
+        other_indexes[level + 1] = (indexes[level] * 2);
+      }
+    }
+
+    // Update Tree.
+    obliv float zero = 0.0f;
+    oram_write(levels[num_levels - 1], &zero, indexes[num_levels - 1]);
+    for (int level = num_levels - 2; level >= 0; level--) {
+      obliv float val, val_other;
+      oram_read(&val, levels[level + 1], indexes[level + 1]);
+      oram_read(&val_other, levels[level + 1], other_indexes[level + 1]);
+      val += val_other;
+      oram_write(levels[level], &val, indexes[level]);
+    }
+    result_indexes[sample] = indexes[num_levels - 1];
+
+    // Get the result and add Laplace noise.
+    oram_read(&result_values[sample], count_oram, indexes[num_levels - 1]);
+    obliv float rand = rands[num_rands - args->num_results + sample];
+    obliv bool negate = (rand >= 1.0f);
+    obliv if (negate) { rand -= 1.0f; }
+    rand = obliv_logf(rand);
+    obliv if (negate) { rand = 0.0f - rand; }
+    result_values[sample] += rand * args->noise_parameter;
+
+    // // print tree
+    // for(int level = 0; level < num_levels; level++) {
+    //   printf("level %zd:", level);
+    //   int num_nodes = 1ull<<level;
+    //   num_nodes = num_nodes < 10 ? num_nodes : 10;
+    //   for(int node = 0; node < num_nodes; node++) {
+    //     obliv float val;
+    //     float val_clear;
+    //     oram_read(&val, levels[level], node);
+    //     revealOblivFloat(&val_clear, val, 0);
+    //     printf(" %G", val_clear);
+    //   }
+    //   printf("\n");
+    // }
+
+    free(indexes);
+    free(other_indexes);
+  }
+
+  for (int party = 1; party <= 2; party++) {
+    revealOblivCharArray(args->result_indexes, result_indexes,
+                         sizeof(int) * args->num_results, party);
+    revealOblivCharArray(args->result_values, result_values,
+                         sizeof(float) * args->num_results, party);
+  }
+  args->num_gates = yaoGateCount();
+
+  // cleanup
+  for (int i = 0; i < num_levels; i++) {
+    oram_free(levels[i]);
+  }
+  oram_free(count_oram);
+  free(levels);
+  free(init);
+  free(rands_local);
+  free(rands);
+  free(rands2);
+  free(probabilities);
+  free(probabilities2);
+  free(counts);
+  free(counts2);
+  free(result_indexes);
+  free(result_values);
+}

@@ -1,3 +1,0 @@
-/home/turing/code_masterarbeit/code_master/test/build/CMakeFiles/edit_cache.dir
-/home/turing/code_masterarbeit/code_master/test/build/CMakeFiles/rebuild_cache.dir
-/home/turing/code_masterarbeit/code_master/test/build/CMakeFiles/Tutorial.dir

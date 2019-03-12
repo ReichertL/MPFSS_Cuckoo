@@ -1,0 +1,3 @@
+#pragma once
+
+obliv float obliv_logf(obliv float a);
