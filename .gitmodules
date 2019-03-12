@@ -1,9 +1,0 @@
-[submodule "obliv-c"]
-	path = obliv-c
-	url = https://github.com/samee/obliv-c
-[submodule "absentminded-crypto-kit"]
-	path= absentminded-crypto-kit
-	url ="https://bitbucket.org/jackdoerner/absentminded-crypto-kit"
-[submodule "googletest"]
-	path= googletest
-	url="https://github.com/google/googletest.git"	
