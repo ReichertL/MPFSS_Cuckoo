@@ -1,0 +1,17 @@
+//ensures header file is only included once
+#pragma once
+
+// initial amount for input data:
+#define ALLOC 128 
+// doubled when needed in load_data()
+
+/*one block: 16 byte -> Blockmultiple allow longer */
+//size_t block_no=1;
+#define block_no 1
+
+
+//void benchmark(double runtime, size_t size, int t);
+
+void create_indices(BCipherRandomGen *random_gen, int *indices_notobliv, int t , int size);
+void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j, bool **vector);
+void get_mpfss_vector(mpfss *mpfss, obliv size_t *indices, bool *vector, obliv uint8_t *values );
