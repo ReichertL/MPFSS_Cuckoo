@@ -6,9 +6,4 @@ build_all:
   stage: build
   script:
     - bazel build ...
-    - bazel test ...
-    - mkdir logs && cp -rL bazel-testlogs/* logs  # Artifacts have to be in the workspace, but bazel-testlogs is a symlink that points outside of it.
-  artifacts:
-    when: always
-    paths:
-      - logs
+    - bazel test ... --test_output=all
