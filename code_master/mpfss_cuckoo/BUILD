@@ -14,8 +14,9 @@ oblivc_library(
 
     ],
     deps = [
-        "//code_master/includes:util",
-        "//code_master/includes:dbg",
+        "//includes:util",
+        "//includes:dbg",
+        "//includes:cuckoo",
         "@ack//:oram_fssl",
     ],
     copts = ["-DDEBUG"], 
@@ -31,8 +32,8 @@ cc_binary(
     visibility = ["//visibility:public"],
 
     deps = [
-        "//code_master/includes:util",
-        "//code_master/includes:dbg",
+        "//includes:util",
+        "//includes:dbg",
         ":mpfss_cuckoo_obliv",
     ],
 

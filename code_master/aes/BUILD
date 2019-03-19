@@ -10,7 +10,7 @@ oblivc_library(
         "aes.h",
     ],
     deps = [
-        "//code_master/includes:util",
+        "//masterarbeit/code_master/includes:util",
 
     ],
 )
@@ -22,7 +22,7 @@ cc_binary(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//code_master/includes:util",
+        "//masterarbeit/code_master/includes:util",
         ":aes_obliv",
     ],
 )

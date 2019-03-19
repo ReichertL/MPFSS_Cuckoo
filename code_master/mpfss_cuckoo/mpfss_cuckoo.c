@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <obliv.h>
 #include <string.h>
 #include <math.h>
 #include <assert.h>
 #include <time.h>
 
-#include "code_master/includes/util.h"
+#include <obliv.h>
 #include "bcrandom.h"
-#include "code_master/includes/dbg.h"
+
+#include "includes/util.h"
+#include "includes/dbg.h"
+
 #include "mpfss_cuckoo.h"
 
 
@@ -16,7 +18,7 @@
 int main(int argc, char *argv[]) {
   // call a function in another file
 
-    printf("MPFSS NAIVE\n");
+    printf("MPFSS CUCKOO\n");
     printf("=================\n\n");
     // Check args
     if (argc == 5) {
@@ -46,12 +48,16 @@ int main(int argc, char *argv[]) {
         setCurrentParty(&pd, cp); // only checks for a '1'        
         int t = atoi(argv[3]);
         int size = atoi(argv[4]);
-
-        mpfss *m=new_mpfss_naive(t, size);
+        //following Angle et al. : PIR..
+        int w= 3;
+        int b= 1.5*t;
+        //making max_loop dependend on the size of the input field
+        int max_loop=size;
+        mpfss_cuckoo *m=new_mpfss_cuckoo(t, size, w, b, max_loop);
         lap = wallClock();        
 
          // Execute Yao's protocol and cleanup
-        execYaoProtocol(&pd, mpfss_naive, m);
+        execYaoProtocol(&pd, mpfss_batch_cuckoo, m);
         cleanupProtocol(&pd);
         double runtime = wallClock() - lap; // stop clock here 
 
