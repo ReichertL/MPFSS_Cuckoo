@@ -1,0 +1,5 @@
+void create_batches_bst( mpfss_batch *mpfss, BCipherRandomGen *random_gen, dllnode_t **bt_roots, int *batch_len );
+bool combine_batches_indices_bst(dllnode_t **bt_roots,  mpfss_batch *mpfss , int *indices_notobliv, pointinfo_t **matches);
+
+void get_mpfss_vector_bc_bst(mpfss_batch *mpfss,obliv uint8_t *values, obliv bool *mpfss_vector, pointinfo_t **matches, dllnode_t **bt_roots,  int *batch_len );
+ mpfss_batch_codes_bst(void* args);
