@@ -25,14 +25,29 @@ mpfss_cuckoo * new_mpfss_cuckoo( int t, size_t size, int w, int b, int max_loop)
   mpfss->w=w;
   mpfss->b=b;
   mpfss->max_loop=max_loop;
+
   return mpfss;
 
 }
 
 
+
 void generate_batches_cuckoo(mpfss_cuckoo *mpfss){
-	int t=mpfss->t;
+
 	int size=mpfss->size;
+	int w=mpfss->w;
+	int b=mpfss->b;
+	int max_loop=mpfss->max_loop;
+
+	int size_hash_tables[b];
+	for (int i = 0; i < b; ++i)
+	{
+		//TODO: THIS is way to small 
+		size_hash_tables[i]=size;
+	}
+
+	void * cuckoo_hashing=initialize( w, b, size_hash_tables, NULL, max_loop);
+	cuckoo_hash_intervall(0, size, cuckoo_hashing);
 }
 
 
@@ -56,7 +71,6 @@ void mpfss_batch_cuckoo(void* args){
 		create_indices(random_gen, indices_notobliv, t , size);
 	}
 
-
-
+	generate_batches_cuckoo(mpfss);
 
 }

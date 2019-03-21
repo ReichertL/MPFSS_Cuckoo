@@ -20,3 +20,10 @@ def code_master_deps():
             strip_prefix = "jackdoerner-absentminded-crypto-kit-5230cef0887e/src",
             build_file = clean_dep("//third_party:ack.BUILD"),
         )
+
+    # if "absl" not in native.existing_rules(): 
+    #     http_archive(
+    #         name = "absl",
+    #         strip_prefix = "abseil-cpp-master",
+    #         urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
+    #     )
