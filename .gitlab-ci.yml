@@ -1,5 +1,10 @@
 variables:
   REGISTRY: gitlab.informatik.hu-berlin.de:4567
+  GIT_SUBMODULE_STRATEGY: recursive
+
+before_script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive --remote
 
 build_all:
   image: $REGISTRY/ti/software/bazel-builder:latest
