@@ -1,0 +1,76 @@
+#include <obliv.oh>
+#include <bcrandom.h>
+#include <stdlib.h>
+#include <fss_cprg.oh>
+
+#include "dbg.h"
+#include "cuckoo.h"
+#include "util.h"
+
+#include "mpfss_cuckoo.h"
+#include "mpfss_cuckoo.oh"
+
+
+
+/*  Creates management structure for MPFSS_cuckoo. Tested.
+	Input 
+	t: Number of points in mpfss
+	size: Size of the field the points can be taken from 
+
+*/
+mpfss_cuckoo * new_mpfss_cuckoo( int t, size_t size, int w, int b, int max_loop){
+  mpfss_cuckoo * mpfss = malloc(sizeof(mpfss_cuckoo));
+  mpfss->t = t;
+  mpfss->size = size;
+  mpfss->w=w;
+  mpfss->b=b;
+  mpfss->max_loop=max_loop;
+
+  return mpfss;
+
+}
+
+
+
+void generate_batches_cuckoo(mpfss_cuckoo *mpfss){
+
+	int size=mpfss->size;
+	int w=mpfss->w;
+	int b=mpfss->b;
+	int max_loop=mpfss->max_loop;
+
+	int size_hash_tables[b];
+	for (int i = 0; i < b; ++i)
+	{
+		//TODO: THIS is way to small 
+		size_hash_tables[i]=size;
+	}
+
+	void * cuckoo_hashing=initialize( w, b, size_hash_tables, NULL, max_loop);
+	cuckoo_hash_intervall(0, size, cuckoo_hashing);
+}
+
+
+
+/*  Example for creating a MPFSS Schema. No unit test for this function. 
+	Callable from execYaoProtocol().
+	Input:
+	  void* args -> mpfss *mpfss
+
+	Output
+	  No return type.
+*/
+void mpfss_batch_cuckoo(void* args){
+	mpfss_cuckoo *mpfss = (mpfss_cuckoo*) args;
+	int t=mpfss->t;
+	int size=mpfss->size;
+
+	int *indices_notobliv = calloc(t, sizeof(int ));
+	BCipherRandomGen *random_gen= newBCipherRandomGen();	
+	if(ocCurrentParty()==1){
+		create_indices(random_gen, indices_notobliv, t , size);
+	}
+
+	generate_batches_cuckoo(mpfss);
+
+}
