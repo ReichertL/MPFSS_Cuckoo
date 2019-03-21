@@ -1,3 +1,3 @@
 [submodule "semesterprojekt"] 
   path = semesterprojekt 
-  url = https://gitlab.informatik.hu-berlin.de/reicherl/semesterprojekt.git
+  url = gitlab.informatik.hu-berlin.de:4567/reicherl/semesterprojekt.git
