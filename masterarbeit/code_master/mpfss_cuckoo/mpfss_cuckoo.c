@@ -50,8 +50,9 @@ int main(int argc, char *argv[]) {
         int size = atoi(argv[4]);
         //following Angle et al. : PIR..
         int w= 3;
-        int b= 1.5*t;
+        int b= 1.5*t; //TODO: AB oder AUF runden
         //making max_loop dependend on the size of the input field
+        //TODO: find good value for max_loop
         int max_loop=size;
         mpfss_cuckoo *m=new_mpfss_cuckoo(t, size, w, b, max_loop);
         lap = wallClock();        
