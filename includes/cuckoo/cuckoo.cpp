@@ -50,7 +50,7 @@ int hashfunc_absl(int i, int key, int length_of_table){
 int hash_this(int (*func)(int,int,int) , int key, int i, int length_of_table) 
 { 
 
-	int res=func(i, key, length_of_table);
+	int res=func( key,i, length_of_table);
 	return res;    
 
 } 

@@ -48,8 +48,8 @@ vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)(
 	vector<vector<int>> all_buckets(b);
 
 	for (int i = 0; i < size; ++i){
-		for (int j = 0; j < w; ++j){
-			int bucket_number=func(j,i,b);
+		for (int key = 0; key < w; ++key){
+			int bucket_number=func(key,i, b);
 			all_buckets.at(bucket_number).push_back(i);
 		}
 	}
