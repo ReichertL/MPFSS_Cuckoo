@@ -1,8 +1,6 @@
 //ensures header file is only included once
 #pragma once
 
-double lap;
-int cp;
 
 
 typedef struct {
@@ -14,5 +12,20 @@ typedef struct {
 
 } mpfss_cuckoo;
 
-mpfss_cuckoo * new_mpfss_cuckoo( int t, size_t size, int w, int b, int max_loop);
+typedef struct  {
+
+	int val;
+	int batch;
+	int index_in_batch;
+} match;
+
+
+typedef struct  {
+
+	mpfss_cuckoo *m;
+	int *bucket_lenghts;
+	match **matches;
+	int ** all_buckets_array;
+} yao_arguments;
+
 void mpfss_batch_cuckoo(void* args);

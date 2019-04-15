@@ -1,5 +1,26 @@
 load("@com_github_schoppmp_rules_oblivc//oblivc:oblivc.bzl", "oblivc_library")
 
+cc_binary(
+    name = "mpfss_cuckoo",
+    srcs = [
+        "mpfss_cuckoo.cpp",
+        "mpfss_cuckoo.h"
+    
+    ],
+
+    visibility = ["//visibility:public"],
+
+    deps = [
+        "//includes:util",
+        "//includes:dbg",
+        "//includes:cuckoo",
+        ":buckets",
+        ":mpfss_cuckoo_obliv",
+
+    ],
+
+    copts = ["-DDEBUG"], 
+)
 
 oblivc_library(
     name = "mpfss_cuckoo_obliv",
@@ -16,58 +37,13 @@ oblivc_library(
     deps = [
         "//includes:util",
         "//includes:dbg",
-        ":buckets",
-        "@ack//:oram_fssl",
+        #"@ack//:oram_fssl",
         "//semesterprojekt/code_projekt/mpfss_naive:mpfss_naive_obliv",
 
         
     ],
     copts = ["-DDEBUG"], 
 )
-
-
-cc_binary(
-    name = "mpfss_cuckoo",
-    srcs = [
-        "mpfss_cuckoo.c",
-    ],
-
-    visibility = ["//visibility:public"],
-
-    deps = [
-        "//includes:util",
-        "//includes:dbg",
-        ":mpfss_cuckoo_obliv",
-    ],
-
-    copts = ["-DDEBUG"], 
-)
-
-cc_library(
-    name = "cuckoo",
-    srcs = ["cuckoo.cpp"],
-    hdrs = ["cuckoo.h" ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//includes:dbg",
-        "//includes:list_utils",
-    ],
-    copts = ["-DDEBUG"], 
-    )
-
-cc_test(
-    name = "cuckoo_test",
-    srcs = [    "cuckoo.cpp"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//includes:dbg",
-        #"//includes:absl-hash",
-        #"//includes/absl/hash",
-        "//includes:cryptopp-master",
-        ":cuckoo"
-    ],
-    copts = ["-DDEBUG"], 
-    )
 
 cc_library(
     name = "buckets",
@@ -77,12 +53,14 @@ cc_library(
              ],
     deps = [
         "//includes:dbg",
-        "//includes:list_utils",
-        ":mpfss_naive_wrapper_obliv",
-        ":cuckoo",
+        "//includes:cuckoo",
     ],
     copts = ["-DDEBUG"], 
     )
+
+
+
+
 
 cc_test(
     name = "bucket_test",
@@ -93,9 +71,7 @@ cc_test(
     visibility = ["//visibility:public"],
     deps = [
         "//includes:dbg",
-        "//includes:list_utils",
-        ":cuckoo",
-        ":mpfss_naive_wrapper_obliv"
+        "//includes:cuckoo",
     ],
     copts = ["-DDEBUG"], 
     )

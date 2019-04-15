@@ -4,23 +4,26 @@
 #include <iostream>
 
 #include "includes/dbg.h"
-#include "includes/list_utils.h"
 
-extern "C" {
-#include "mpfss_naive_wrapper.h"
-}
-
-#include "cuckoo.h"
+//for match struct
 #include "mpfss_cuckoo.h"
+#include "includes/cuckoo/cuckoo.h"
 #include "buckets.h"
 
 using namespace std;
 
 void print_vector(std::vector<int> v){
 
-		for (std::vector<int>::const_iterator it = v.begin(); it != v.end(); ++it)
-    	std::cout << *it << ' ';
-		printf("\n");
+	for (std::vector<int>::const_iterator it = v.begin(); it != v.end(); ++it)
+    std::cout << *it << ' ';
+	printf("\n");
+}
+
+void print_vector_utf8(std::vector<uint8_t> v){
+
+	for (std::vector<uint8_t>::const_iterator it = v.begin(); it != v.end(); ++it)
+    std::cout << *it << ' ';
+	printf("\n");
 }
 
 void debug_print_buckets(vector<vector<int> > all_buckets , int b ){
@@ -40,16 +43,16 @@ void debug_print_buckets(vector<vector<int> > all_buckets , int b ){
 	}
 }
 
-vector<vector<int>> generate_batches_cuckoo(int size, int w, int b){
+vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)( int, int, int)){
 
-	vector<vector<int>> all_buckets(b); 
+	vector<vector<int>> all_buckets(b);
 
 	for (int i = 0; i < size; ++i)
 	{
 		for (int j = 0; j < w; ++j)
 		{
 			//not hashing j but j+1, useful later
-			int bucket_number=hashfuc_simple(j+1,i,b);
+			int bucket_number=func(j+1,i,b);
 			all_buckets.at(bucket_number).push_back(i);
 		}
 	
@@ -57,7 +60,8 @@ vector<vector<int>> generate_batches_cuckoo(int size, int w, int b){
 	return all_buckets;
 }
 
-void mpfss_cuckoo_in_cpp(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurrentParty){
+
+std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurrentParty, match **matches, int *bucket_lenghts, int (*func)( int, int, int)){
 
 
 	int size=mpfss->size;
@@ -66,22 +70,22 @@ void mpfss_cuckoo_in_cpp(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurre
 	int max_loop=mpfss->max_loop;
 	int t=mpfss->t;
 
-	pointinfo_t **matches = (pointinfo_t **) calloc(b, sizeof(pointinfo_t*));
 
-	vector<vector<int>> all_buckets=generate_batches_cuckoo( size,  w,  b);
-	int *bucket_lenghts=(int *) calloc(b, sizeof(int));
-	for (int i = 0; i < b; ++i)
-	{
+	//--------------------Create Buckets----------------------------------------------------------------------
+	vector<vector<int>> all_buckets=generate_buckets_cuckoo( size,  w,  b, func);
+
+	for (int i = 0; i < b; ++i){
 		vector<int> v=all_buckets.at(i);
 		bucket_lenghts[i]= static_cast<int>(v.size());
 	}
 	
 	debug_print_buckets(all_buckets,b);
 	
+	//--------------------Create Assignment----------------------------------------------------------------------
 	if(ocCurrentParty==1){   
 		//array of len 1 holding value b
 		int siz_of_hashtable[1]={b};
-		cuckoo_hashing *c=initialize( w, 1, siz_of_hashtable, NULL, max_loop);
+		cuckoo_hashing *c=initialize( w, 1, siz_of_hashtable, NULL, max_loop, func);
 	
 		int *indices_notobliv_plus_1=(int *)calloc(t, sizeof(int));
 		for (int i = 0; i < t; ++i){
@@ -94,7 +98,7 @@ void mpfss_cuckoo_in_cpp(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurre
 		for (int i = 0; i < b; ++i){
 
 			int val=table.at(i)-1; //unassigned slots will have value of -1
-			pointinfo_t *p=(pointinfo_t *) calloc(1, sizeof(pointinfo_t)); 
+			match *p=(match *) calloc(1, sizeof(match)); 
 			p->val=val;
 			p->batch=i;
 			if(val==-1){
@@ -111,6 +115,6 @@ void mpfss_cuckoo_in_cpp(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurre
 			matches[i]=p;
 		}
 	}
-	call_dpf_from_matches(matches,  b, bucket_lenghts);
+	return all_buckets;
 }
 

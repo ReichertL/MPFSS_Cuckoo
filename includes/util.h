@@ -5,8 +5,7 @@
 #define UTIL_H
 #endif
 
-int create_indices(BCipherRandomGen *random_gen, int *indices_notobliv, int t , int size);
-
+int create_indices(int *indices_notobliv, int t , int size);
 void ocTestUtilTcpOrDie(struct ProtocolDesc* pd,const char* remote_host,
                         const char* port);
 double wallClock();

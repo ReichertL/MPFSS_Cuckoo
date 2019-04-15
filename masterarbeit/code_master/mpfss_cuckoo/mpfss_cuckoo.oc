@@ -1,64 +1,164 @@
 #include <obliv.oh>
-#include <bcrandom.h>
 #include <stdlib.h>
-#include <fss_cprg.oh>
 
 #include "dbg.h"
-#include "util.h"
 
 #include "mpfss_naive.h"
 #include "mpfss_naive.oh"
 #include "mpfss_cuckoo.h"
-#include "buckets.h"
 #include "mpfss_cuckoo.oh"
 
 
 
-/*  Creates management structure for MPFSS_cuckoo. Tested.
-	Input 
-	t: Number of points in mpfss
-	size: Size of the field the points can be taken from 
+void call_dpf_from_matches(match **matches,bool **vectors, int b, int *bucket_lenghts){
 
-*/
-mpfss_cuckoo * new_mpfss_cuckoo( int t, size_t size, int w, int b, int max_loop){
-  mpfss_cuckoo * mpfss = malloc(sizeof(mpfss_cuckoo));
-  mpfss->t = t;
-  mpfss->size = size;
-  mpfss->w=w;
-  mpfss->b=b;
-  mpfss->max_loop=max_loop;
-
-  return mpfss;
-
-}
-
-
-
-/*  Example for creating a MPFSS Schema. No unit test for this function. 
-	Callable from execYaoProtocol().
-	Input:
-	  void* args -> mpfss *mpfss
-
-	Output
-	  No return type.
-*/
-void mpfss_batch_cuckoo(void* args){
-	mpfss_cuckoo *mpfss = (mpfss_cuckoo*) args;
-	int t=mpfss->t;
-	int size=mpfss->size;
-
-	int *indices_notobliv = calloc(t, sizeof(int ));
-	BCipherRandomGen *random_gen= newBCipherRandomGen();	
+	//synchronize	
 	if(ocCurrentParty()==1){
-		bool created=false;
-		int count=0;
-		while(!created && count<t*size*100000){	
-			created=create_indices(random_gen, indices_notobliv, t , size);
-			count++;
+
+		ocBroadcastInt(1, 1);
+	}else{
+		int ok=3;
+		while(!( ok==1)){
+			ok= ocBroadcastInt(1, 1);
 		}
 	}
 
-	//generate_batches_cuckoo(mpfss);
-	mpfss_cuckoo_in_cpp(mpfss, indices_notobliv, ocCurrentParty());
+	obliv uint8_t *values=calloc(b, sizeof(obliv uint8_t));
+	for (int i = 0; i < b; ++i)
+	{
+		int index_non_obliv;  		
+		if(ocCurrentParty()==1){
+  			index_non_obliv=(size_t)matches[i]->index_in_batch;
+  			debug("index_non_obliv %d\n", index_non_obliv);
+  			if(index_non_obliv==-1){
+  				debug("empty batch!\n");
+  			}
+  		}
 
+  		obliv int index_in_batch_obliv=feedOblivInt(index_non_obliv,1);
+
+		#ifdef DEBUG
+			int in;
+			revealOblivInt(&in, index_in_batch_obliv, 0);
+			debug("Index from obliv: %d\n",in );
+		#endif
+
+		bool *batch_vector;
+  		dpf(bucket_lenghts[i],(obliv size_t) index_in_batch_obliv, values, i,&batch_vector);
+	  	vectors[i]=batch_vector;
+
+	}
+
+
+
+	#ifdef DEBUG
+		debug("------------- RESUTLS -------------\n");
+	  	for(int i=0; i<b; i++){
+	  		
+			int batchsize=bucket_lenghts[i];
+
+			obliv bool *v1= calloc(batchsize, sizeof(obliv bool));
+			obliv bool *v2= calloc(batchsize, sizeof(obliv bool));
+			feedOblivBoolArray(v1, vectors[i], batchsize, 1);
+			feedOblivBoolArray(v2, vectors[i], batchsize, 2);;
+
+			obliv bool *dpf_obliv= calloc(batchsize, sizeof(obliv bool));
+			for(int i = 0; i <batchsize ; i++) {
+				dpf_obliv[i]=v1[i]^v2[i]; 
+			}
+			free(v1);
+			free(v2);
+
+			bool *vdpf2= calloc(batchsize, sizeof(bool));
+			revealOblivBoolArray(vdpf2, dpf_obliv, batchsize, 0);
+			free(dpf_obliv);
+
+			char *buff=calloc(batchsize*2+100, sizeof(int));
+			sprintf(buff, "dpf #%d:               ", i);  
+			for(int j = 0; j <batchsize; j++) {
+				char r[1+ sizeof(int)];
+				sprintf(r, " %d", vdpf2[j]);		
+			  	strcat(buff, r );  
+			}
+			debug("%s\n",buff);
+			free(buff);
+			free(vdpf2);
+	  	}
+  	#endif 
+
+	free(values);
+}
+
+bool *reveal_vector(bool *vector, int vector_size, int print){
+
+	obliv bool *v1= calloc(vector_size, sizeof(obliv bool));
+	obliv bool *v2= calloc(vector_size, sizeof(obliv bool));
+	feedOblivBoolArray(v1, vector, vector_size, 1);
+	feedOblivBoolArray(v2, vector, vector_size, 2);
+
+	obliv bool *dpf_obliv= calloc(vector_size, sizeof(obliv bool));
+	for(int i = 0; i <vector_size ; i++) {
+			dpf_obliv[i]=v1[i]^v2[i]; 
+	}    
+	free(v1);
+	free(v2);
+	
+	bool *reveald_vector= calloc(vector_size, sizeof(bool));
+	revealOblivBoolArray(reveald_vector, dpf_obliv, vector_size, 0);
+	free(dpf_obliv);
+
+	if(print==1){
+
+		char *buff=calloc(vector_size*2+100, sizeof(int));
+		sprintf(buff, "Revealed Vector: ");  
+		for(int j = 0; j <vector_size; j++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", reveald_vector[j]);		
+		  	strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+
+	}
+	return reveald_vector;
+}
+
+void create_mpfss_vector_cuckoo(bool **dpf_vectors, int ** all_buckets_array, int *bucket_lenghts,  int size, int b){
+    
+    bool *mpfss_vector=calloc(size, sizeof(bool));
+
+    for(int i=0;i<b; i++){
+
+    	int *bucket=all_buckets_array[i];
+        int len=bucket_lenghts[i];
+
+        for (int j=0; j<len;j++){
+
+            bool value=dpf_vectors[i][j];
+            int position=bucket[j];
+            /*if(value ==1){
+            	printf("i %d, j %d, position %d, value %d \n",i, j, position, value);
+        	}*/
+            mpfss_vector[position]=mpfss_vector[position]^value;
+        }
+    }
+
+    #ifdef DEBUG
+        reveal_vector(mpfss_vector, size, 1);     
+    #endif
+}
+
+
+void mpfss_batch_cuckoo(void* args){
+	yao_arguments *y_args= (yao_arguments *) args;
+	mpfss_cuckoo *m=(mpfss_cuckoo *) y_args->m;
+	int b=m->b;
+	int size=m->size;
+	int *bucket_lenghts=(int *) y_args->bucket_lenghts;
+    match **matches =(match **) y_args->matches;
+	int ** all_buckets_array= (int ** )y_args->all_buckets_array;
+
+	bool **dpf_vectors= (bool **)calloc(b, sizeof( bool *));
+	call_dpf_from_matches(matches,dpf_vectors, b, bucket_lenghts);
+	create_mpfss_vector_cuckoo(dpf_vectors, all_buckets_array, bucket_lenghts, size, b);
 }

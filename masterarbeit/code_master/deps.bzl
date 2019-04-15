@@ -21,9 +21,20 @@ def code_master_deps():
             build_file = clean_dep("//third_party:ack.BUILD"),
         )
 
-    # if "absl" not in native.existing_rules(): 
+    if "com_google_absl" not in native.existing_rules(): 
+        # abseil-cpp
+        http_archive(
+          name = "com_google_absl",
+          urls = ["https://github.com/abseil/abseil-cpp/archive/7c7754fb3ed9ffb57d35fe8658f3ba4d73a31e72.zip"],  # 2019-03-14
+          strip_prefix = "abseil-cpp-7c7754fb3ed9ffb57d35fe8658f3ba4d73a31e72",
+          sha256 = "71d00d15fe6370220b6685552fb66e5814f4dd2e130f3836fc084c894943753f",
+        )
+
+
+    # if "cryptopp" not in native.existing_rules(): 
     #     http_archive(
-    #         name = "absl",
-    #         strip_prefix = "abseil-cpp-master",
-    #         urls = ["https://github.com/abseil/abseil-cpp/archive/master.zip"],
+    #         name = "cryptopp",
+    #         url = "https://github.com/weidai11/cryptopp/archive/master.zip",
+    #         strip_prefix= "cryptopp-master",
+    #         build_file = clean_dep("//third_party:cryptopp.BUILD"),
     #     )
