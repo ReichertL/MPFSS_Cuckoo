@@ -47,19 +47,14 @@ vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)(
 
 	vector<vector<int>> all_buckets(b);
 
-	for (int i = 0; i < size; ++i)
-	{
-		for (int j = 0; j < w; ++j)
-		{
-			//not hashing j but j+1, useful later
-			int bucket_number=func(j+1,i,b);
+	for (int i = 0; i < size; ++i){
+		for (int j = 0; j < w; ++j){
+			int bucket_number=func(j,i,b);
 			all_buckets.at(bucket_number).push_back(i);
 		}
-	
 	}
 	return all_buckets;
 }
-
 
 std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurrentParty, match **matches, int *bucket_lenghts, int (*func)( int, int, int)){
 
@@ -86,25 +81,23 @@ std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_not
 		//array of len 1 holding value b
 		int siz_of_hashtable[1]={b};
 		cuckoo_hashing *c=initialize( w, 1, siz_of_hashtable, NULL, max_loop, func);
-	
-		int *indices_notobliv_plus_1=(int *)calloc(t, sizeof(int));
-		for (int i = 0; i < t; ++i){
-			indices_notobliv_plus_1[i]=indices_notobliv[i]+1;
-		}
 		
-		cuckoo(indices_notobliv_plus_1, t, c);
+		cuckoo(indices_notobliv, t, c);
 		print_tables(c);
 		std::vector<int> table=c->tables.at(0);
+		std::vector<bool> this_usage=c->table_usage.at(0);
 		for (int i = 0; i < b; ++i){
 
-			int val=table.at(i)-1; //unassigned slots will have value of -1
+			int val=table.at(i);
+			bool bucket_used=this_usage.at(i); //Allows checking if bucket was used
 			match *p=(match *) calloc(1, sizeof(match)); 
-			p->val=val;
 			p->batch=i;
-			if(val==-1){
+			if(!bucket_used){
+				p->val=-1;
 				p->index_in_batch=-1;
 				debug("unused batch: index = %d \n", p->index_in_batch );
 			}else{
+				p->val=val;
 				//Search takes O(log(n))
 				std::vector<int> v =all_buckets.at(i);
  	    		std::vector<int>::iterator upper1, upper2; 

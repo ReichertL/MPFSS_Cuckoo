@@ -4,6 +4,7 @@
 #include <vector> 
 #include <stdio.h>
 #include <cstdlib>
+#include <cmath>
 #include "absl/hash/hash.h"
 
 #include "includes/dbg.h"
@@ -38,7 +39,7 @@ int hashfunc_simple(int i, int key, int length_of_table){
 int hashfunc_absl(int i, int key, int length_of_table){
 	auto hash_pair = std::make_pair(i, key);
 	int val=absl::Hash<pair<int, int>>{}(hash_pair);
-	return val % length_of_table; // TODO: Das ist nicht gut/langsam!
+	return abs(val) % length_of_table; // TODO: Das ist nicht gut/langsam!
 }
 
   
@@ -73,12 +74,13 @@ void place(int key, int tableID, int cnt, cuckoo_hashing *c)
 	
 	debug("key %d hashed to %d in Table %d\n", key, pos, tableID);
 	
+
 	std::vector<int> t=c->tables.at(tableID);
 
-	//Difficult to find out if the slot is free or a 0 is placed in there:
-	//Hack: All values need to be shifted +1 on placing
-	if (!c->tables.at(tableID).at(pos)){
+	//Use separate vector here to see if position is used. Otherwise there would be problems with zero value and unused space.
+	if (!c->table_usage.at(tableID).at(pos)){
 		c->tables.at(tableID).at(pos)=key;
+		c->table_usage.at(tableID).at(pos)=true;
 
 	}else{
 
@@ -119,26 +121,27 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 
 	//initialize hash tables 
 	vector<vector<int>> tables;
+	std::vector<std::vector<bool>> table_usage; 
 	for (int i = 0; i < no_hash_tables; ++i)
 	{
 		std::vector<int> t(size_hash_tables[i]);
 		tables.push_back(t);
+
+		std::vector<bool> t_bool(size_hash_tables[i]);
+		table_usage.push_back(t_bool);
 	}
 	c->tables=tables;
+	c->table_usage=table_usage;
 
 	c->hash_function= func;
-
 	//initialize i values: Either number of function in function family or constant value used by the function
 	if(i_array){
 		std::vector<int> i(i_array, i_array + sizeof i_array / sizeof i_array[0]);
 		c->i=i;
 	}else{
 		vector<int> i;
-		for (int j = 0; j < w ; ++j)
-		{
-			//int r=rand();
+		for (int j = 0; j < w ; ++j){
 			i.push_back(j);
-
 		}
 		c->i=i;
 	}
