@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
             //TODO: find good value for max_loop
             int max_loop=size;
             mpfss_cuckoo *m=new_mpfss_cuckoo(t, size, w, b, max_loop);
-            int (*func)( int, int, int)=hashfunc_absl;
+            int (*func)( int, int)=hashfunc_absl;
         
         //Preparations: Creating Indices, Buckets and finding assignment------------
             lap = wallClock();        

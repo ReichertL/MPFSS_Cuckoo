@@ -8,5 +8,5 @@ std::vector<std::vector<int>> preparations(	mpfss_cuckoo *mpfss,
 											int ocCurrentParty, 
 											match **matches, 
 											int *bucket_lenghts,
-											int (*func)( int, int, int));
+											int (*func)( int, int));
 

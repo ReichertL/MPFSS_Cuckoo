@@ -20,8 +20,17 @@ using namespace std;
 using namespace std::placeholders;
 using std::vector;
 
-
-
+/* 	
+	Apparently faster than %
+	Cite:  Chandler Carruth's benchmarks at CppCon 2015, and 
+	https://stackoverflow.com/questions/33333363/built-in-mod-vs-custom-mod-function-improve-the-performance-of-modulus-op
+*/
+int fast_mod(const int input, const int ceil) {
+    // apply the modulo operator only when needed
+    // (i.e. when the input is greater than the ceiling)
+    return input >= ceil ? input % ceil : input;
+    // NB: the assumption here is that the numbers are positive
+}
 
 
 /*
@@ -30,16 +39,17 @@ using std::vector;
 	a=10; b=i; p=296741 
 	Warning: p>=m, so only use for tables smaller than 296741 (or change prime number). 
 */
-int hashfunc_simple(int i, int key, int length_of_table){
+int hashfunc_simple(int rand, int key){
 
-	return ((i+10*key)% 296741)%length_of_table;
+	return ((rand+10*key)% 296741);
 
 }
 
-int hashfunc_absl(int i, int key, int length_of_table){
-	auto hash_pair = std::make_pair(i, key);
+
+int hashfunc_absl(int rand, int key){
+	auto hash_pair = std::make_pair(rand, key);
 	int val=absl::Hash<pair<int, int>>{}(hash_pair);
-	return abs(val) % length_of_table; // TODO: Das ist nicht gut/langsam!
+	return  val;
 }
 
   
@@ -47,11 +57,11 @@ int hashfunc_absl(int i, int key, int length_of_table){
  * function: ID of hash function according to which 
     key has to hashed 
  * key: item to be hashed */
-int hash_this(int (*func)(int,int,int) , int key, int i, int length_of_table) 
+int hash_this(int (*func)(int,int) , int key, int rand, int length_of_table) 
 { 
 
-	int res=func( key,i, length_of_table);
-	return res;    
+	int res=abs(func( rand, key));
+	return fast_mod(res, length_of_table);    
 
 } 
 
@@ -67,10 +77,10 @@ void place(int key, int tableID, int cnt, cuckoo_hashing *c)
 { 		
 
 
-	int (*func)( int, int, int)=c->hash_function;;
+	int (*func)( int, int)=c->hash_function;;
 	int length_of_table=c->size_hash_tables[tableID];
-	int i=c->i.at(cnt % c->no_hash_functions);
-	int pos=hash_this(func, i, key, length_of_table);
+	int rand=c->rands.at(cnt % c->no_hash_functions);
+	int pos=hash_this(func, rand, key, length_of_table);
 	
 	debug("key %d hashed to %d in Table %d\n", key, pos, tableID);
 	
@@ -111,7 +121,7 @@ void print_tables(cuckoo_hashing *c){
 	}
 }
 
-cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, int *i_array, int max_loop, int (*func)( int, int, int) ){
+cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, int *rands_array, int max_loop, int (*func)( int, int) ){
 
 	cuckoo_hashing *c=(cuckoo_hashing *) calloc(1, sizeof(cuckoo_hashing));
 	c->no_hash_functions=w;
@@ -120,14 +130,15 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 	c->max_loop=max_loop;
 
 	//initialize hash tables 
-	vector<vector<int>> tables;
-	std::vector<std::vector<bool>> table_usage; 
+	vector<vector<int>> tables (no_hash_tables);
+	std::vector<std::vector<bool>> table_usage (no_hash_tables); 
 	for (int i = 0; i < no_hash_tables; ++i)
 	{
-		std::vector<int> t(size_hash_tables[i]);
+		int size=size_hash_tables[i];
+		std::vector<int> t(size);
 		tables.push_back(t);
 
-		std::vector<bool> t_bool(size_hash_tables[i]);
+		std::vector<bool> t_bool(size);
 		table_usage.push_back(t_bool);
 	}
 	c->tables=tables;
@@ -135,15 +146,15 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 
 	c->hash_function= func;
 	//initialize i values: Either number of function in function family or constant value used by the function
-	if(i_array){
-		std::vector<int> i(i_array, i_array + sizeof i_array / sizeof i_array[0]);
-		c->i=i;
+	if(rands_array){
+		std::vector<int> rands(rands_array, rands_array + sizeof rands_array / sizeof rands_array[0]);
+		c->rands=rands;
 	}else{
-		vector<int> i;
+		vector<int> rands (w);
 		for (int j = 0; j < w ; ++j){
-			i.push_back(j);
+			rands.push_back(j);
 		}
-		c->i=i;
+		c->rands=rands;
 	}
 
 	return c;

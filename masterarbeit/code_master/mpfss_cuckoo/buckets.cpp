@@ -43,20 +43,20 @@ void debug_print_buckets(vector<vector<int> > all_buckets , int b ){
 	}
 }
 
-vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)( int, int, int)){
+vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)( int, int)){
 
 	vector<vector<int>> all_buckets(b);
 
 	for (int i = 0; i < size; ++i){
 		for (int key = 0; key < w; ++key){
-			int bucket_number=func(key,i, b);
+			int bucket_number=hash_this(func,key,i, b);
 			all_buckets.at(bucket_number).push_back(i);
 		}
 	}
 	return all_buckets;
 }
 
-std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurrentParty, match **matches, int *bucket_lenghts, int (*func)( int, int, int)){
+std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurrentParty, match **matches, int *bucket_lenghts, int (*func)( int, int)){
 
 
 	int size=mpfss->size;

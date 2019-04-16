@@ -9,18 +9,18 @@ typedef struct
 	int max_loop;
 	std::vector<std::vector<int>> tables; 
 	std::vector<std::vector<bool>> table_usage; 
-	int (* hash_function)( int, int, int); 
-	std::vector<int> i; 
+	int (* hash_function)( int, int); 
+	std::vector<int> rands; 
 }cuckoo_hashing;
 
 
 
-
-int hashfunc_simple(int i, int key, int length_of_table);
-int hashfunc_absl(int i, int key, int length_of_table);
-
+int fast_mod(const int input, const int ceil);
+int hashfunc_simple(int rand, int key);
+int hashfunc_absl(int rand, int key);
+int hash_this(int (*func)(int,int) , int key, int rand, int length_of_table);
 void print_tables(cuckoo_hashing *c);
-cuckoo_hashing *initialize(int w, int no_hash_tables, int *size_hash_tables, int *i_array, int max_loop, int (*func)( int, int, int));
+cuckoo_hashing *initialize(int w, int no_hash_tables, int *size_hash_tables, int *rands_array, int max_loop, int (*func)( int, int));
 void cuckoo(int* keys, int no_keys,  cuckoo_hashing *c);
 
 //extern "C" void test223();

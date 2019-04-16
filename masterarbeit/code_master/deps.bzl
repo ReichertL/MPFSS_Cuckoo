@@ -31,10 +31,11 @@ def code_master_deps():
         )
 
 
-    # if "cryptopp" not in native.existing_rules(): 
-    #     http_archive(
-    #         name = "cryptopp",
-    #         url = "https://github.com/weidai11/cryptopp/archive/master.zip",
-    #         strip_prefix= "cryptopp-master",
-    #         build_file = clean_dep("//third_party:cryptopp.BUILD"),
-    #     )
+    if "com_google_googletest" not in native.existing_rules(): 
+        # Google Test
+        http_archive(
+          name = "com_google_googletest",
+          urls = ["https://github.com/google/googletest/archive/8b6d3f9c4a774bef3081195d422993323b6bb2e0.zip"],  # 2019-03-05
+          strip_prefix = "googletest-8b6d3f9c4a774bef3081195d422993323b6bb2e0",
+          sha256 = "d21ba93d7f193a9a0ab80b96e8890d520b25704a6fac976fe9da81fffb3392e3",
+		)

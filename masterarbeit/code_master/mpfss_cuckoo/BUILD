@@ -22,6 +22,7 @@ cc_binary(
     copts = ["-DDEBUG"], 
 )
 
+
 oblivc_library(
     name = "mpfss_cuckoo_obliv",
     srcs = [
@@ -37,7 +38,6 @@ oblivc_library(
     deps = [
         "//includes:util",
         "//includes:dbg",
-        #"@ack//:oram_fssl",
         "//semesterprojekt/code_projekt/mpfss_naive:mpfss_naive_obliv",
 
         
@@ -56,45 +56,42 @@ cc_library(
         "//includes:cuckoo",
     ],
     copts = ["-DDEBUG"], 
-    )
+)
 
 
-
-
-
-cc_test(
-    name = "bucket_test",
-    srcs = [    "buckets.cpp",
-                "mpfss_cuckoo.h",
-                "buckets.h"
+cc_library(
+    name = "mpfss_cuckoo_lib",
+    srcs = [
+        "mpfss_cuckoo.cpp",
     ],
+     
+    hdrs = [
+      "mpfss_cuckoo.h"
+    ],
+
     visibility = ["//visibility:public"],
+
     deps = [
+        "//includes:util",
         "//includes:dbg",
         "//includes:cuckoo",
-    ],
-    copts = ["-DDEBUG"], 
-    )
-
-
-
-oblivc_library(
-    name = "mpfss_naive_wrapper_obliv",
-    srcs = [
-        
-        "mpfss_naive_wrapper.oc",
+        ":buckets",
+        ":mpfss_cuckoo_obliv",
 
     ],
-    hdrs = [
-        "mpfss_naive_wrapper.h"
 
-    ],
-    deps = [
-        
-        "//includes:dbg",
-        "//includes:list_utils",
-        "//semesterprojekt/code_projekt/mpfss_naive:mpfss_naive_obliv",        
-    ],
     copts = ["-DDEBUG"], 
 )
 
+cc_test(
+    name="mpfss_cuckoo_test",
+    srcs = ["testing/mpfss_cuckoo_test.cpp"],
+    deps = [
+        "//includes:dbg",
+        "@com_google_googletest//:gtest_main",
+        ":mpfss_cuckoo_lib"
+    ],
+    copts = ["-DDEBUG"], 
+
+
+)
