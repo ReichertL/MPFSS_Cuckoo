@@ -187,4 +187,27 @@ TEST(cuckoo, Works){
 
 	cuckoo(keys, no_keys, c);
 
+	for (int i = 0; i < no_hash_tables; ++i)
+	{
+		for (int j = 0; j <size_hash_tables[i] ; ++j)
+		{
+			bool used =c->table_usage.at(i).at(j);
+			int set=c->tables.at(i).at(j);
+			if(set>0){
+				EXPECT_TRUE(used);
+			}
+			if(!used){
+				EXPECT_TRUE(set==0);
+			}else{
+				bool found=false;
+				for (int k = 0; k < no_keys; ++k)
+				{
+					if(keys[k]==set){
+						found=true;
+					}
+				}
+				EXPECT_TRUE(found);
+			}
+		}
+	}
 }
