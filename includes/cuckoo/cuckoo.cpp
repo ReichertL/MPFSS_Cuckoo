@@ -82,9 +82,7 @@ void place(int key, int tableID, int cnt, cuckoo_hashing *c)
 	int rand=c->rands.at(cnt % c->no_hash_functions);
 	int pos=hash_this(func, rand, key, length_of_table);
 	
-	debug("key %d hashed to %d in Table %d\n", key, pos, tableID);
-	
-
+	debug("key %d hashed to %d in Table %d with length %d\n", key, pos, tableID, length_of_table);
 	std::vector<int> t=c->tables.at(tableID);
 
 	//Use separate vector here to see if position is used. Otherwise there would be problems with zero value and unused space.
@@ -136,10 +134,10 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 	{
 		int size=size_hash_tables[i];
 		std::vector<int> t(size);
-		tables.push_back(t);
+		tables.at(i)=t;
 
-		std::vector<bool> t_bool(size);
-		table_usage.push_back(t_bool);
+		std::vector<bool> t_bool(size,false);
+		table_usage.at(i)=t_bool;
 	}
 	c->tables=tables;
 	c->table_usage=table_usage;
@@ -147,13 +145,12 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 	c->hash_function= func;
 	//initialize i values: Either number of function in function family or constant value used by the function
 	if(rands_array){
-		std::vector<int> rands(rands_array, rands_array + sizeof rands_array / sizeof rands_array[0]);
+
+		std::vector<int> rands(rands_array, rands_array+w );
 		c->rands=rands;
 	}else{
 		vector<int> rands (w);
-		for (int j = 0; j < w ; ++j){
-			rands.push_back(j);
-		}
+		std::iota (std::begin(rands), std::end(rands), 0);
 		c->rands=rands;
 	}
 

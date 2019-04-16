@@ -27,7 +27,7 @@ cc_library(
         ":dbg",
         "@com_google_absl//absl/hash"
     ],
-    copts = ["-DDEBUG"], 
+    #copts = ["-DDEBUG"], 
     )
 
 cc_test(
@@ -42,7 +42,7 @@ cc_test(
 
 
     ],
-    copts = ["-DDEBUG"], 
+   # copts = ["-DDEBUG"], 
     )
 
 

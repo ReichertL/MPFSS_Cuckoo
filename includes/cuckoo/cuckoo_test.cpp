@@ -33,9 +33,7 @@ TEST(fast_mod, Works){
 		target,
 		fast_mod(input,ceil)	
 	);
-
 }
-
 
 TEST(hashfunc_absl, Works){
 	for (int j = 0; j< 20; ++j){
@@ -56,7 +54,6 @@ TEST(hashfunc_absl, Works){
 
 	}
 }
-
 
 TEST(hash_this, Works){
 	for (int j = 0; j< 20; ++j){
@@ -88,7 +85,7 @@ TEST(hash_this, Works){
 	}
 }
 
-TEST(initialize, Works){
+/*TEST(initialize, rands_array_predefined){
 	
 		
 	srand (time(NULL));
@@ -113,6 +110,7 @@ TEST(initialize, Works){
 	EXPECT_EQ(max_loop,c->max_loop);
 
 	//casting does not work
+	
 	ASSERT_EQ(no_hash_tables*2,static_cast<int>(c->tables.size()));
 	for (int i = 0; i < no_hash_tables; ++i)
 	{
@@ -124,8 +122,69 @@ TEST(initialize, Works){
 
 	for (int i = 0; i < w; ++i)
 	{
-		EXPECT_EQ(i_array[i],c->i.at(i));
+		EXPECT_EQ(i_array[i],c->rands.at(i));
+	}
+}
+
+TEST(initialize, no_rands_array){
+	
+		
+	srand (time(NULL));
+	int w = rand()%100000;
+	int no_hash_tables=rand()%1000;
+	int *size_hash_tables=(int *)calloc(no_hash_tables,sizeof(int));
+	for (int i = 0; i < no_hash_tables; ++i)
+	{
+		size_hash_tables[i]=rand()%100000;
+	}
+
+	int max_loop=rand();
+	cuckoo_hashing *c=initialize(w, no_hash_tables, size_hash_tables, NULL, max_loop, hashfunc_absl );
+
+	EXPECT_EQ(w,c->no_hash_functions);
+	EXPECT_EQ(no_hash_tables,c->no_hash_tables);
+	EXPECT_EQ(size_hash_tables,c->size_hash_tables);
+	EXPECT_EQ(max_loop,c->max_loop);
+
+	//casting does not work
+	ASSERT_EQ(no_hash_tables*2,static_cast<int>(c->tables.size()));
+	for (int i = 0; i < no_hash_tables; ++i)
+	{
+		EXPECT_EQ(0,c->tables.at(i).size());
+		EXPECT_EQ(0,c->table_usage.at(i).size());
 
 	}
+	EXPECT_EQ(hashfunc_absl,c->hash_function);
+
+	for (int i = 0; i < w; ++i)
+	{
+		EXPECT_EQ(i,c->rands.at(i));
+	}
+}*/
+
+TEST(cuckoo, Works){
+
+	srand (time(NULL));
+	int w = rand()%100000;
+	int no_hash_tables=3;//rand()%1000;
+	int *size_hash_tables=(int *)calloc(no_hash_tables,sizeof(int));
+	int ceil=0;
+	for (int i = 0; i < no_hash_tables; ++i)
+	{
+		size_hash_tables[i]=rand()%100000;
+		ceil=ceil+size_hash_tables[i];
+	}
+	int max_loop=rand();
+	cuckoo_hashing *c=initialize(w, no_hash_tables, size_hash_tables, NULL, max_loop, hashfunc_absl );
+
+	ceil=0.01*ceil;
+	int no_keys=rand()%ceil;
+	int *keys= (int *) calloc(no_keys, sizeof(int));
+	for (int i = 0; i < no_keys; ++i)
+	{
+		keys[i]=rand();		
+	}
+
+	cuckoo(keys, no_keys, c);
 
 }
