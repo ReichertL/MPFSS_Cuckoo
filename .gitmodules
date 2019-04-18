@@ -1,3 +1,4 @@
 [submodule "semesterprojekt"] 
-  path = semesterprojekt 
-  url = ../../SP_Leonie_Reichert/mpfss.git
+ 	path = semesterprojekt 
+ 	#url = ../../SP_Leonie_Reichert/mpfss.git
+	url=git@gitlab.informatik.hu-berlin.de:ti/theses/student-content/SP_Leonie_Reichert/mpfss.git
