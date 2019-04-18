@@ -21,3 +21,8 @@
 *.zip
 *.png
 
+!benchmark/*.py
+#semesterprojekt/
+benchmark/
+bazel*
+
