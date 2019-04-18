@@ -4,7 +4,6 @@ cc_binary(
     name = "mpfss_cuckoo",
     srcs = [
         "mpfss_cuckoo.cpp",
-        "mpfss_cuckoo.h"
     
     ],
 
@@ -16,6 +15,7 @@ cc_binary(
         "//includes:cuckoo",
         ":buckets",
         ":mpfss_cuckoo_obliv",
+        ":create_structs",
 
     ],
 
@@ -32,14 +32,12 @@ oblivc_library(
     ],
     hdrs = [
         "mpfss_cuckoo.oh",
-        "mpfss_cuckoo.h"
-
     ],
     deps = [
         "//includes:util",
         "//includes:dbg",
         "//semesterprojekt/code_projekt/mpfss_naive:mpfss_naive_obliv",
-
+        ":create_structs"
         
     ],
     copts = ["-DDEBUG"], 
@@ -49,14 +47,26 @@ cc_library(
     name = "buckets",
     srcs = ["buckets.cpp"],
     hdrs = ["buckets.h",
-            "mpfss_cuckoo.h"
              ],
     deps = [
         "//includes:dbg",
         "//includes:cuckoo",
+        ":create_structs",
     ],
     copts = ["-DDEBUG"], 
 )
+
+oblivc_library(
+    name = "create_structs",
+    srcs = ["create_structs.c"],
+    hdrs = ["create_structs.h",
+           ],
+    deps = [
+
+    ],
+    copts = ["-DDEBUG"], 
+)
+
 
 
 cc_library(
@@ -64,9 +74,8 @@ cc_library(
     srcs = [
         "mpfss_cuckoo.cpp",
     ],
-     
-    hdrs = [
-      "mpfss_cuckoo.h"
+    hdrs =[
+        "mpfss_cuckoo.h"
     ],
 
     visibility = ["//visibility:public"],
@@ -77,6 +86,7 @@ cc_library(
         "//includes:cuckoo",
         ":buckets",
         ":mpfss_cuckoo_obliv",
+        ":create_structs",
 
     ],
 
@@ -94,4 +104,19 @@ cc_test(
     copts = ["-DDEBUG"], 
 
 
+)
+
+cc_test(
+    name = "buckets_test",
+    srcs = ["testing/buckets_test.cpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//includes:dbg",
+        "//includes:util",
+        "//includes:cuckoo",
+        ":buckets",
+        ":create_structs",
+        "@com_google_googletest//:gtest_main",
+    ],
+   copts = ["-DDEBUG"], 
 )

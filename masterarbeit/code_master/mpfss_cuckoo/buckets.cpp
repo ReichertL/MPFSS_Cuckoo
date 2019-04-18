@@ -6,7 +6,9 @@
 #include "includes/dbg.h"
 
 //for match struct
-#include "mpfss_cuckoo.h"
+extern "C"{
+	#include "create_structs.h"
+}
 #include "includes/cuckoo/cuckoo.h"
 #include "buckets.h"
 
@@ -19,12 +21,6 @@ void print_vector(std::vector<int> v){
 	printf("\n");
 }
 
-void print_vector_utf8(std::vector<uint8_t> v){
-
-	for (std::vector<uint8_t>::const_iterator it = v.begin(); it != v.end(); ++it)
-    std::cout << *it << ' ';
-	printf("\n");
-}
 
 void debug_print_buckets(vector<vector<int> > all_buckets , int b ){
 	int count=0;
@@ -47,40 +43,28 @@ vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)(
 
 	vector<vector<int>> all_buckets(b);
 
-	for (int i = 0; i < size; ++i){
-		for (int key = 0; key < w; ++key){
-			int bucket_number=hash_this(func,key,i, b);
-			all_buckets.at(bucket_number).push_back(i);
+	for (int key = 0; key < size; ++key){
+
+		for (int rand = 0; rand < w; ++rand){
+			int bucket_number=hash_this(func,key,rand, b);
+			all_buckets.at(bucket_number).push_back(key);
 		}
 	}
 	return all_buckets;
 }
 
-std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, int ocCurrentParty, match **matches, int *bucket_lenghts, int (*func)( int, int)){
-
-
-	int size=mpfss->size;
+void create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets){
+	
 	int w=mpfss->w;
 	int b=mpfss->b;
 	int max_loop=mpfss->max_loop;
 	int t=mpfss->t;
 
-
-	//--------------------Create Buckets----------------------------------------------------------------------
-	vector<vector<int>> all_buckets=generate_buckets_cuckoo( size,  w,  b, func);
-
-	for (int i = 0; i < b; ++i){
-		vector<int> v=all_buckets.at(i);
-		bucket_lenghts[i]= static_cast<int>(v.size());
-	}
-	
-	debug_print_buckets(all_buckets,b);
-	
-	//--------------------Create Assignment----------------------------------------------------------------------
-	if(ocCurrentParty==1){   
+	if(mpfss->cp==1){   
 		//array of len 1 holding value b
-		int siz_of_hashtable[1]={b};
-		cuckoo_hashing *c=initialize( w, 1, siz_of_hashtable, NULL, max_loop, func);
+		int size_of_hashtable[1]={b};
+		int no_hash_tables=1;
+		cuckoo_hashing *c=initialize( w, no_hash_tables, size_of_hashtable, NULL, max_loop, func);
 		
 		cuckoo(indices_notobliv, t, c);
 		print_tables(c);
@@ -108,6 +92,30 @@ std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_not
 			matches[i]=p;
 		}
 	}
+
+}
+
+
+std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int *bucket_lenghts, int (*func)( int, int)){
+
+
+	int size=mpfss->size;
+	int w=mpfss->w;
+	int b=mpfss->b;
+
+
+	//--------------------Create Buckets----------------------------------------------------------------------
+	vector<vector<int>> all_buckets=generate_buckets_cuckoo( size,  w,  b, func);
+
+	for (int i = 0; i < b; ++i){
+		vector<int> v=all_buckets.at(i);
+		bucket_lenghts[i]= static_cast<int>(v.size());
+	}
+	
+	debug_print_buckets(all_buckets,b);
+	
+	//--------------------Create Assignment----------------------------------------------------------------------
+	create_assignement(mpfss, indices_notobliv, matches, func, all_buckets);
 	return all_buckets;
 }
 

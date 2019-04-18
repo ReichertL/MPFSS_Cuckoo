@@ -5,8 +5,8 @@
 
 #include "mpfss_naive.h"
 #include "mpfss_naive.oh"
-#include "mpfss_cuckoo.h"
 #include "mpfss_cuckoo.oh"
+#include "create_structs.h"
 
 
 
@@ -123,10 +123,8 @@ bool *reveal_vector(bool *vector, int vector_size, int print){
 	return reveald_vector;
 }
 
-void create_mpfss_vector_cuckoo(bool **dpf_vectors, int ** all_buckets_array, int *bucket_lenghts,  int size, int b){
+void create_mpfss_vector_cuckoo(bool *mpfss_vector, bool **dpf_vectors, int ** all_buckets_array, int *bucket_lenghts,  int size, int b){
     
-    bool *mpfss_vector=calloc(size, sizeof(bool));
-
     for(int i=0;i<b; i++){
 
     	int *bucket=all_buckets_array[i];
@@ -144,7 +142,31 @@ void create_mpfss_vector_cuckoo(bool **dpf_vectors, int ** all_buckets_array, in
     }
 
     #ifdef DEBUG
-        reveal_vector(mpfss_vector, size, 1);     
+        bool * v=reveal_vector(mpfss_vector, size, 1);   
+
+        if(ocCurrentParty()==1){
+	        char filename[80];
+	        sprintf(filename, "results_debug_mpfss_cuckoo_result.txt");
+
+	        FILE *fptr;
+	        fptr = fopen(filename,"w");
+
+	        if(fptr == NULL){
+	              printf("Error while opening results_debug_mpfss_cuckoo!");               
+	        }else{
+
+	        	fseek (fptr, 0, SEEK_END);
+	        	int len = ftell(fptr);
+	       	 	if (0 == len) {
+	       	 		for (int i = 0; i < size; ++i)
+	       	 		{
+	            		fprintf(fptr,"%d\n",v[i] );
+	       	 		}
+	        	}
+	    	}
+	    	fclose(fptr);
+    	}
+        free(v);
     #endif
 }
 
@@ -160,5 +182,13 @@ void mpfss_batch_cuckoo(void* args){
 
 	bool **dpf_vectors= (bool **)calloc(b, sizeof( bool *));
 	call_dpf_from_matches(matches,dpf_vectors, b, bucket_lenghts);
-	create_mpfss_vector_cuckoo(dpf_vectors, all_buckets_array, bucket_lenghts, size, b);
+	bool *mpfss_vector=calloc(size, sizeof(bool));
+	create_mpfss_vector_cuckoo(mpfss_vector, dpf_vectors, all_buckets_array, bucket_lenghts, size, b);
+
+	for (int i = 0; i < b; ++i)
+	{
+		free(dpf_vectors[i]);
+	}
+	free(dpf_vectors);
+	free(mpfss_vector);
 }

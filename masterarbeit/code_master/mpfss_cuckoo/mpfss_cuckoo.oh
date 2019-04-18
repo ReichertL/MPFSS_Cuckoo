@@ -10,3 +10,4 @@
 
 
 
+void mpfss_batch_cuckoo(void* args);
