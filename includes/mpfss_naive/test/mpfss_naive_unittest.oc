@@ -1,0 +1,304 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#include <obliv.h>
+#include <obliv.oh>
+#include <fss_cprg.oh>
+#include "bcrandom.h"
+
+
+#include "dbg.h"
+#include "util.h"
+
+#include "mpfss_naive_unittest.h"
+#include "mpfss_naive.h"
+#include "mpfss_naive.oh"
+
+bool TEST_get_mpfss_vector(int t, size_t size){
+	mpfss *m=new_mpfss_naive(t, size);
+	int *indices_notobliv = calloc(t, sizeof(int));
+	for(int i=0; i<t; i++){
+		indices_notobliv[i]=i;
+	}
+		//feed indices one by one because target type is not int but size_t
+	obliv size_t *indices = calloc(t, BLOCKSIZE*sizeof(obliv size_t)*block_no);
+	for(int i=0; i<t; i++){
+		obliv size_t k_obliv= feedOblivInt(indices_notobliv[i], 1);
+		indices[i]=k_obliv;
+	}
+
+	bool *vector=calloc(size, sizeof(bool));
+	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t));
+	get_mpfss_vector(m, indices, vector, values);
+
+	bool succ=true;
+	bool print=false;
+	
+	//Testing the vector
+	obliv bool *v1= calloc(size, sizeof(obliv bool));
+	obliv bool *v2= calloc(size, sizeof(obliv bool));
+	feedOblivBoolArray(v1, vector, size, 1);
+	feedOblivBoolArray(v2, vector, size, 2);
+
+	obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+	for(int i = 0; i <size ; i++) {
+		dpf_obliv[i]=v1[i]^v2[i]; 
+	}    
+	free(v1);
+	free(v2);
+	bool *vdpf= calloc(size, sizeof(bool));
+	revealOblivBoolArray(vdpf, dpf_obliv, size, 0);
+	free(dpf_obliv);
+
+	for(int i=0; i<size; i++){
+		if(vdpf[i]==1){
+			bool found=false;
+			for(int j=0; j<t;j++){
+				if(indices_notobliv[j]==i){
+					found=true;
+				}
+			}
+			if(found==false){
+				succ=false;
+				print=true;
+				test_fail("TEST_get_mpfss_vector: Resulting MPF is not 1 at index %d, but should be.\n", i);
+			}
+		}else{
+			bool found=false;
+			for(int j=0; j<t;j++){
+				if(indices_notobliv[j]==i){
+					found=true;
+				}
+			}
+			if(found==true){
+				succ=false;
+				print=true;
+				test_fail("TEST_get_mpfss_vector: Resulting MPF is 1 at index %d, but should not be.\n", i);
+			}
+		}
+		
+	}
+	free(vdpf);
+
+	// Testing the values
+	for(int i=0; i<t; i++){
+		int v_value;
+		int *v_value_ptr=&v_value;
+		revealOblivInt(v_value_ptr, values[i], 0);
+		if(v_value==0){
+			print=true;
+			test_fail("TEST_get_mpfss_vector: Warning! Value at one point of MPF was zero, but should be != zero.\n");
+		}
+	}
+
+	//Print all values and vector if there has been an error
+	if(print){
+
+		//Printing expected indices
+		char *buff=calloc(t+100, sizeof(int));
+		sprintf(buff, "indices (expected)	: ");  
+		for(int i = 0; i <t ; i++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", indices_notobliv[i]);		
+		  strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+
+		//Printing actual indices after revelation
+		//Do not use revealOblivIntArray() when obliv type is size_t
+		int *indices_revealed = calloc(t, sizeof(int));
+		char *buff=calloc(t+100, sizeof(int));
+		sprintf(buff, "indices (revealed)	: ");  
+		for(int i = 0; i <t ; i++) {
+			char r[1+ sizeof(int)];
+			int k;
+			revealOblivInt(&k, indices[i],0);
+			sprintf(r, " %d", k);		
+		  strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+		free(indices_revealed);
+
+		//Printing the x values of the multi point function
+		bool *vdpf2= calloc(size, sizeof(bool));
+		revealOblivBoolArray(vdpf2, vector, size, 0);
+		char *buff=calloc((int)size+100, sizeof(int));
+		sprintf(buff, "MPF: ");  
+		for(int i = 0; i <size ; i++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", vdpf2[i]);		
+		  	strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+		free(vdpf2); 
+
+
+		//Printing y values of multi point function (only where x!=0)
+		char *buff=calloc(t+100, sizeof(int));
+		sprintf(buff, "Values: ");  
+		for(int i=0; i< t; i++){     
+
+			int v_value;
+			int *v_value_ptr=&v_value;
+			revealOblivInt(v_value_ptr, values[i], 0);
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", v_value);		
+		  	strcat(buff, r );
+		}
+		debug("%s\n",buff);
+		free(buff);
+		
+	}
+
+	free(m);
+	free(indices_notobliv);
+	free(indices);
+	free(vector);
+	free(values);
+
+	return succ;
+}
+
+bool TEST_new_mpfss_naive( int t, size_t size){
+	mpfss *m=new_mpfss_naive(t, size);
+	bool succ=true;
+
+	if(m->t !=t){
+		test_fail("TEST_new_mpfss_naive: t value was %d, but %d expected.\n", m->t, t );
+		succ=false;
+	}
+
+	if(m->size !=size){
+		test_fail("TEST_new_mpfss_naive: size value was %d, but %d expected.\n", m->size, size );
+		succ=false;
+	}
+
+	free(m);
+	return succ;
+}
+
+bool TEST_dpf(size_t size, int index){
+	bool *vector;
+	obliv uint8_t *values = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t));
+	obliv size_t index_obliv=feedOblivInt(index, 1);
+	dpf(size,index_obliv, values, 0,&vector);
+	
+	int activ_value;
+	int *activ_value_ptr=&activ_value;
+	revealOblivInt(activ_value_ptr, values[0], 0);
+	
+	obliv bool *v1= calloc(size, sizeof(obliv bool));
+	obliv bool *v2= calloc(size, sizeof(obliv bool));
+	feedOblivBoolArray(v1, vector, size, 1);
+	feedOblivBoolArray(v2, vector, size, 2);
+	obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+	for(int i = 0; i <size ; i++) {
+		dpf_obliv[i]=v1[i]^v2[i]; 
+	}
+	free(v1);
+	free(v2);
+	bool *dpf= calloc(size, sizeof(bool ));
+	revealOblivBoolArray(dpf, dpf_obliv, size, 0);
+	free(dpf_obliv);
+
+	bool succ=true;
+	bool print=false;
+
+	if(activ_value==0 && index<size){
+		test_fail("TEST_dpf:  activ_value has wrong value after reveal. Was 0, but should be greater than 0. \n");
+		succ=false;
+	}
+	if(activ_value!=0 && index>size){
+		test_fail("TEST_dpf: WARNING activ_value has wrong value after reveal. Was %d, but should be 0. \n", activ_value);
+		//succ=false;
+	}
+
+
+
+	for(int i=0; i<size; i++){
+		if(i==index && dpf[i]!=1 ){
+			test_fail("TEST_dpf: Resulting Dpf is not 1 at index %d.\n", index);
+				print=true;
+				succ=false;
+
+		}else if(dpf[i]!=0 && i!=index){
+			test_fail("TEST_dpf: Resulting Dpf is not 0 at %d.\n", i);
+			print=true;
+			succ=false;
+			break;
+		}
+	}
+
+	if(print){
+
+		char *buff=calloc(size+100, sizeof(int));
+		sprintf(buff, "TEST_dpf: dpf   		 	 ");  
+
+		for(int j = 0; j <size ; j++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", dpf[j]);		
+		  	strcat(buff, r );  
+		}
+		test_fail("%s\n",buff);
+		free(buff);
+	}
+
+	free(vector);
+	free(values);
+	free(dpf);
+	return succ;
+
+}
+
+
+void TEST_ALL_mpfss_naive(bool *err){
+
+	printf("\n\nTesting MPFSS Naive-----------------------------------------------.----\n");
+
+
+	printf("TEST_dpf---------------------------------------------------------\n" );
+	if(!TEST_dpf(10, 3 )){
+		printf("%s\n", "TEST_dpf(10,3) failed" );
+		*err=1;
+	}
+	if(!TEST_dpf(10, 11 )){
+		printf("%s\n", "TEST_dpf(10,11) failed" );
+		*err=1;
+	}
+
+	if(!TEST_dpf(100, 101 )){
+		printf("%s\n", "TEST_dpf(10,11) failed" );
+		*err=1;
+	}
+
+	if(!TEST_dpf(10, -1 )){
+		printf("%s\n", "TEST_dpf(10,11) failed" );
+		*err=1;
+	}
+
+
+
+	printf("TEST_new_mpfss_naive---------------------------------------------------------\n" );
+	if(!TEST_new_mpfss_naive( 6, (size_t) 10)){
+		printf("%s\n", "TEST_new_mpfss_naive( 6, (size_t) 10 ) failed" );
+		*err=1;
+	}
+
+	printf("TEST_get_mpfss_vector---------------------------------------------------------\n" );
+	if(!TEST_get_mpfss_vector( 4, (size_t) 10)){
+		printf("%s\n", "TEST_get_mpfss_vector( 4, (size_t) 10) failed" );
+		*err=1;
+	} 
+
+	if(!TEST_get_mpfss_vector( 5, (size_t) 100)){
+		printf("%s\n", "TEST_get_mpfss_vector( 4, (size_t) 10) failed" );
+		*err=1;
+	}
+}
+
+

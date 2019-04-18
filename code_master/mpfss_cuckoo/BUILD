@@ -36,7 +36,8 @@ oblivc_library(
     deps = [
         "//includes:util",
         "//includes:dbg",
-        "@semesterprojekt//code_projekt/mpfss_naive:mpfss_naive_obliv",
+        #"@semesterprojekt//code_projekt/mpfss_naive:mpfss_naive_obliv",
+        "//includes/mpfss_naive:mpfss_naive_obliv",
         ":create_structs"
         
     ],

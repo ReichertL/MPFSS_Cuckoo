@@ -12,9 +12,9 @@ load("//code_master:deps.bzl", "code_master_deps")
 
 code_master_deps()
 
-local_repository(
-    name = "semesterprojekt",
-    path = "../semesterprojekt",
-)
 
 
+#local_repository(
+#    name = "semesterprojekt",
+#    path = "../semesterprojekt",
+#    )
