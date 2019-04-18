@@ -19,7 +19,7 @@ cc_binary(
 
     ],
 
-    copts = ["-DDEBUG"], 
+    #copts = ["-DDEBUG"], 
 )
 
 
@@ -41,7 +41,7 @@ oblivc_library(
         ":create_structs"
         
     ],
-    copts = ["-DDEBUG"], 
+    #copts = ["-DDEBUG"], 
 )
 
 cc_library(
@@ -54,7 +54,7 @@ cc_library(
         "//includes:cuckoo",
         ":create_structs",
     ],
-    copts = ["-DDEBUG"], 
+    #copts = ["-DDEBUG"], 
 )
 
 oblivc_library(
@@ -65,10 +65,8 @@ oblivc_library(
     deps = [
 
     ],
-    copts = ["-DDEBUG"], 
+    #copts = ["-DDEBUG"], 
 )
-
-
 
 cc_library(
     name = "mpfss_cuckoo_lib",
@@ -91,7 +89,7 @@ cc_library(
 
     ],
 
-    copts = ["-DDEBUG"], 
+    #copts = ["-DDEBUG"], 
 )
 
 cc_test(
@@ -102,9 +100,7 @@ cc_test(
         "@com_google_googletest//:gtest_main",
         ":mpfss_cuckoo_lib"
     ],
-    copts = ["-DDEBUG"], 
-
-
+    #copts = ["-DDEBUG"], 
 )
 
 cc_test(
@@ -119,5 +115,5 @@ cc_test(
         ":create_structs",
         "@com_google_googletest//:gtest_main",
     ],
-   copts = ["-DDEBUG"], 
+   #copts = ["-DDEBUG"], 
 )

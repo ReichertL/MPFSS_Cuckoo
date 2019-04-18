@@ -33,9 +33,9 @@ TEST(generate_buckets_cuckoo, Works){
 		EXPECT_TRUE(contained)<<"Test value "<<test_val<<" was not contained in  bucket "<<bucket_number<<" (w="<<i<<").";
 
 	}
-	if(::testing::Test::HasFatalFailure() and b<=10 and size<=100){
+	/*if(::testing::Test::HasFatalFailure() and b<=10 and size<=100){
 		debug_print_buckets(result,b);
-	}
+	}*/
 }
 
 TEST(preparations, cp1){
