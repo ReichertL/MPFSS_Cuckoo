@@ -15,7 +15,7 @@ oblivc_library(
     deps = [
         ":dbg",
     ],
-    copts = ["-DDEBUG"], 
+    copts = ["-DDEBUG -g"], 
 )
 
 cc_library(
@@ -27,7 +27,7 @@ cc_library(
         ":dbg",
         "@com_google_absl//absl/hash"
     ],
-    #copts = ["-DDEBUG"], 
+    copts = ["-DDEBUG"], 
     )
 
 cc_test(

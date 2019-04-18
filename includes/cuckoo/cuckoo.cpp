@@ -79,8 +79,9 @@ void place(int key, int tableID, int cnt, cuckoo_hashing *c)
 
 	int (*func)( int, int)=c->hash_function;;
 	int length_of_table=c->size_hash_tables[tableID];
-	int rand=c->rands.at(cnt % c->no_hash_functions);
-	int pos=hash_this(func, rand, key, length_of_table);
+	int no_this_hashfunc=cnt % c->no_hash_functions;
+	int rand=c->rands.at(no_this_hashfunc);
+	int pos=hash_this(func, key, rand, length_of_table);
 	
 	debug("key %d hashed to %d in Table %d with length %d\n", key, pos, tableID, length_of_table);
 	std::vector<int> t=c->tables.at(tableID);

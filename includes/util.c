@@ -1,6 +1,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <obliv.h>
 #include <bcrandom.h>
@@ -39,9 +42,8 @@ void benchmark(double runtime, size_t size, int t, int cp, char type[]){
         char filename[80];
         sprintf(filename, "/home/turing/TI/benchmark/%s/resutls_t:%d_size:%d", type, t, (int) size);
 
-
-        FILE *fptr;
-        fptr = fopen(filename,"a+");
+        char path[80];
+        sprintf(path, "/home/turing/TI/benchmark/%s", type);
 
         time_t rawtime;
         struct tm * timeinfo;
@@ -49,6 +51,17 @@ void benchmark(double runtime, size_t size, int t, int cp, char type[]){
         time (&rawtime);
         timeinfo = localtime (&rawtime);
         strftime (current_time,80,"%d.%m.%Y-%H:%M",timeinfo);
+        
+        //create dir if not exist
+        struct stat st = {0};
+
+        if (stat(path, &st) == -1) {
+            mkdir(path, 0700);
+        }
+    
+        FILE *fptr;
+        fptr = fopen(filename,"a+");
+
 
         if(fptr == NULL){
               printf("Error while logging runtime result!");   
@@ -64,7 +77,6 @@ void benchmark(double runtime, size_t size, int t, int cp, char type[]){
         fprintf(fptr,"%s,",current_time);
         fprintf(fptr,"%d,",cp);
         fprintf(fptr,"%lf\n",runtime);
-       // fprintf(fptr,"%u/n", yaoGateCount());
         fclose(fptr);
 
 }
