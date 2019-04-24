@@ -82,11 +82,11 @@ bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matc
 			print_tables(c);
 		#endif
 
-		std::vector<int> table=c->tables.at(0);
+		std::vector<pair<int,int>> table=c->tables.at(0);
 		std::vector<bool> this_usage=c->table_usage.at(0);
 		for (int i = 0; i < b; ++i){
 
-			int val=table.at(i);
+			int val=table.at(i).first;
 			bool bucket_used=this_usage.at(i); //Allows checking if bucket was used
 			match *p=(match *) calloc(1, sizeof(match)); 
 			p->batch=i;

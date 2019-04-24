@@ -7,8 +7,9 @@ typedef struct
 	int no_hash_tables;
 	int *size_hash_tables;
 	int max_loop;
-	std::vector<std::vector<int>> tables; 
+	std::vector<std::vector<std::pair<int,int>>> tables; 
 	std::vector<std::vector<bool>> table_usage; 
+
 	int (* hash_function)( int, int); 
 	std::vector<int> rands; 
 }cuckoo_hashing;

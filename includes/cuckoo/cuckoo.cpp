@@ -86,21 +86,21 @@ int hash_this(int (*func)(int,int) , int key, int rand, int length_of_table)
 		true - 		Key placed successfully
 		false - 	Max Loop was reached
 */
-int place(int key, int tableID, int cnt, cuckoo_hashing *c) { 		
+int place(int key, int rand_no, int tableID, int cnt, cuckoo_hashing *c) { 		
 
 	int (*func)( int, int)=c->hash_function;;
 	int length_of_table=c->size_hash_tables[tableID];
-	int no_this_hashfunc=cnt % c->no_hash_functions;
-	int rand=c->rands.at(no_this_hashfunc);
+	int rand=c->rands.at(rand_no);
 	int pos=hash_this(func, key, rand, length_of_table);
 	
-	debug("key %d hashed to %d in Table %d with length %d\n", key, pos, tableID, length_of_table);
-	std::vector<int> t=c->tables.at(tableID);
+	log_err("key %d hashed to %d in Table %d (length %d) using rand_no %d \n", key, pos, tableID, length_of_table, rand_no);
 
 	//Use separate vector here to see if position is used. Otherwise there would be problems with zero value and unused space.
 	if (!c->table_usage.at(tableID).at(pos)){
-		c->tables.at(tableID).at(pos)=key;
+		c->tables.at(tableID).at(pos).first=key;
+		c->tables.at(tableID).at(pos).second=rand_no;
 		c->table_usage.at(tableID).at(pos)=true;
+		printf("%d %d\n",c->tables.at(tableID).at(pos).first, c->tables.at(tableID).at(pos).second );
 		return cnt;
 	}else{
 
@@ -114,12 +114,13 @@ int place(int key, int tableID, int cnt, cuckoo_hashing *c) {
 			printf("\n");
 			return -1;
 		}else{
-			int new_key=c->tables.at(tableID).at(pos);
+			int new_key=c->tables.at(tableID).at(pos).first;
+			int new_rand_no=(c->tables.at(tableID).at(pos).second +1 )% c->no_hash_functions;
 			log_err("Key %d was evicted from %d in Table %d\n", new_key, pos, tableID);
-			c->tables.at(tableID).at(pos)=key;
+			c->tables.at(tableID).at(pos).first=key;
+			c->tables.at(tableID).at(pos).second=rand_no;
 			int new_tableID=(tableID+1)%c->no_hash_tables;
-			return place(new_key, new_tableID, new_cnt, c);
-
+			return place(new_key, new_rand_no,new_tableID, new_cnt, c);
 		}
 	}
 }
@@ -146,9 +147,10 @@ void print_tables(cuckoo_hashing *c){
 	for (int i = 0; i < c->no_hash_tables; ++i)
 	{
 		std::cout << "Table " << i<< ": ";
-		std::vector<int> table= c->tables.at(i);
-		for (std::vector<int>::const_iterator it = table.begin(); it != table.end(); ++it)
-    	std::cout << *it << ' ';
+		std::vector<pair<int,int>> table= c->tables.at(i);
+		for(auto &x:table){
+  			cout<<x.first<<":"<<x.second<<", ";
+		}
 		printf("\n");
 	}
 }
@@ -164,12 +166,12 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 	c->max_loop=max_loop;
 
 	//initialize hash tables 
-	vector<vector<int>> tables (no_hash_tables);
+	vector<vector<pair<int,int>>> tables (no_hash_tables);
 	std::vector<std::vector<bool>> table_usage (no_hash_tables); 
 	for (int i = 0; i < no_hash_tables; ++i)
 	{
 		int size=size_hash_tables[i];
-		std::vector<int> t(size);
+		std::vector<pair<int,int>> t(size);
 		tables.at(i)=t;
 
 		std::vector<bool> t_bool(size,false);
@@ -232,7 +234,7 @@ int cuckoo(int* keys, int no_keys, cuckoo_hashing *c){
 	int evictions=0;
 	for (int i = 0; i < no_keys ; ++i)
 	{
-		int ev=place(keys[i], 0, 0, c);
+		int ev=place(keys[i], 0,0, 0, c);
 		if(ev==-1){
 			return -1;
 		}
