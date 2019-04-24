@@ -19,7 +19,7 @@ oblivc_library(
         "@ack//:oram_fssl",
     ],
     visibility = ["//visibility:public"],
-    copts = ["-DDEBUG -g3"], 
+   # copts = ["-DDEBUG -g3"], 
 )
 
 

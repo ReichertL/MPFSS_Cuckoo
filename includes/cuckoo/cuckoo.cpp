@@ -3,8 +3,11 @@
 #include <bits/stdc++.h> 
 #include <vector> 
 #include <stdio.h>
-#include <cstdlib>
+//#include <cstdlib>
 #include <cmath>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+
 #include "absl/hash/hash.h"
 
 #include "includes/dbg.h"
@@ -19,6 +22,11 @@
 using namespace std;
 using namespace std::placeholders;
 using std::vector;
+
+/* Cuckoo Algorithm : Code partially taken from https://www.geeksforgeeks.org/cuckoo-hashing/ and then rewritten.
+*/
+
+
 
 /* 	
 	Apparently faster than %
@@ -72,10 +80,13 @@ int hash_this(int (*func)(int,int) , int key, int rand, int length_of_table)
  * cnt: number of times function has already been called 
    in order to place the first input key 
  * (max_loop: maximum number of times function can be recursively 
-   called before stopping and declaring presence of cycle) */
-void place(int key, int tableID, int cnt, cuckoo_hashing *c) 
-{ 		
+   called before stopping and declaring presence of cycle)
 
+	Function returns:
+		true - 		Key placed successfully
+		false - 	Max Loop was reached
+*/
+int place(int key, int tableID, int cnt, cuckoo_hashing *c) { 		
 
 	int (*func)( int, int)=c->hash_function;;
 	int length_of_table=c->size_hash_tables[tableID];
@@ -90,23 +101,45 @@ void place(int key, int tableID, int cnt, cuckoo_hashing *c)
 	if (!c->table_usage.at(tableID).at(pos)){
 		c->tables.at(tableID).at(pos)=key;
 		c->table_usage.at(tableID).at(pos)=true;
-
+		return cnt;
 	}else{
 
 		int new_cnt=cnt+1;
 		if(new_cnt==c->max_loop){
-			printf("MAX_ITER reached, stopping. max_loop: %d\n", c->max_loop);
+			log_err("MAX_ITER reached, stopping. max_loop: %d\n", c->max_loop);
+			print_tables(c);
+			vector<double> u= calculate_table_utilizastion(c);
+			for (std::vector<double>::const_iterator it = u.begin(); it != u.end(); ++it)
+	    		std::cout << *it << ' ';
+			printf("\n");
+			return -1;
 		}else{
 			int new_key=c->tables.at(tableID).at(pos);
-			debug("Key %d was evicted from %d in Table %d\n", new_key, pos, tableID);
+			log_err("Key %d was evicted from %d in Table %d\n", new_key, pos, tableID);
 			c->tables.at(tableID).at(pos)=key;
 			int new_tableID=(tableID+1)%c->no_hash_tables;
-			place(new_key, new_tableID, new_cnt, c);
+			return place(new_key, new_tableID, new_cnt, c);
 
 		}
 	}
 }
 
+
+std::vector<double> calculate_table_utilizastion(cuckoo_hashing *c){
+	std::vector<double> utilization;
+	for (int i = 0; i < c->no_hash_tables; ++i){
+		int this_len=c->size_hash_tables[i];
+		std::vector<bool> v=c->table_usage.at(i);
+		int count;
+		for (int j = 0; j < this_len; ++j){
+			if(v.at(j)==true){
+				count++;
+			}
+		}
+		utilization.push_back((double)count/(double)this_len);
+	}
+	return utilization;
+}
 
 void print_tables(cuckoo_hashing *c){
 
@@ -122,6 +155,8 @@ void print_tables(cuckoo_hashing *c){
 
 cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, int *rands_array, int max_loop, int (*func)( int, int) ){
 
+	log_info("Initializing Cuckoo Hashing\n");
+	
 	cuckoo_hashing *c=(cuckoo_hashing *) calloc(1, sizeof(cuckoo_hashing));
 	c->no_hash_functions=w;
 	c->no_hash_tables=no_hash_tables;
@@ -150,20 +185,60 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 		std::vector<int> rands(rands_array, rands_array+w );
 		c->rands=rands;
 	}else{
-		vector<int> rands (w);
-		std::iota (std::begin(rands), std::end(rands), 0);
-		c->rands=rands;
+		c->rands=create_rand_vector(w);
+		for (std::vector<int>::const_iterator it = c->rands.begin(); it != c->rands.end(); ++it)
+	    	std::cout << *it << ' ';
+		printf("\n");
 	}
 
 	return c;
 }
 
-void cuckoo(int* keys, int no_keys, cuckoo_hashing *c){
+std::vector<int> create_rand_vector( int no){
+  
+  srand (time(NULL));
+  std::vector<int> res;
+  int i=0;
+  int sanity=0;
+  int limit=100000;
+  bool already_exists=false;
+  while(i<no && sanity<limit){	
+  	int r=rand();
+    sanity++;
+    for (int j = 0; j < i; ++j){
+      if(res.at(j)==r){
+        already_exists=true;
+      }
+    }
+    if(!already_exists){
+      res.push_back(r);
+      i++;
+      already_exists=false;
+    }
+  }
+  if(sanity>=limit){
+    debug("creation of %d distinct random numbers failed. creating vector with f(x)=x;",no );
+    vector<int> linear (no);
+	std::iota (std::begin(linear), std::end(linear), 0);
+    return linear;
+  }
+  return res;
+}
 
+int cuckoo(int* keys, int no_keys, cuckoo_hashing *c){
+
+	log_info("Running cuckoo with %d keys.\n",no_keys);
+
+	int evictions=0;
 	for (int i = 0; i < no_keys ; ++i)
 	{
-		place(keys[i], 0, 0, c);
+		int ev=place(keys[i], 0, 0, c);
+		if(ev==-1){
+			return -1;
+		}
+		evictions=evictions+ev;
 	}
+	return evictions;
 
 }
 

@@ -62,15 +62,18 @@ TEST(run_mpfss_cuckoo, small){
     EXPECT_TRUE(infile2.good())<<"File with result mpfss does not exist.";
     EXPECT_TRUE(infile2.is_open());
     
+    int count=0;
     std::vector<int> mpfss;
     if (infile2.is_open()) {
         while(infile2>>index){
             mpfss.push_back(index);
+            count++;
         }
     }
     infile2.close();
 
-    EXPECT_EQ(size,mpfss.size());
+    EXPECT_EQ(size,count);
+   
     std::vector<char> expected(size,0);
     for (int i = 0; i < t; ++i){
         expected.at(indices.at(i))=1;
@@ -133,15 +136,18 @@ TEST(run_mpfss_cuckoo, middle){
     EXPECT_TRUE(infile2.good())<<"File with result mpfss does not exist.";
     EXPECT_TRUE(infile2.is_open());
     
+    int count=0;
     std::vector<int> mpfss;
     if (infile2.is_open()) {
         while(infile2>>index){
             mpfss.push_back(index);
+            count++;
         }
     }
     infile2.close();
 
-    EXPECT_EQ(size,mpfss.size());
+    EXPECT_EQ(size,count);
+
     std::vector<char> expected(size,0);
     for (int i = 0; i < t; ++i){
         expected.at(indices.at(i))=1;

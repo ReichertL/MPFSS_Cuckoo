@@ -1,6 +1,7 @@
 #include <vector> 
-#include <cstring>
+#include <string>
 #include <fstream>
+#include<iostream>
 
 extern "C" {
     #include "obliv.h"
@@ -9,6 +10,7 @@ extern "C" {
     #include "mpfss_cuckoo.oh"
     #include "create_structs.h"
 }
+#include "includes/benchmark.h"
 #include "buckets.h"
 #include "includes/cuckoo/cuckoo.h"
 using namespace std;
@@ -60,38 +62,46 @@ void run_mpfss_cuckoo(int t, int size, int cp,const char *remote_host, const cha
             
             //Making max_loop dependent on the size of the input field
             //TODO: find good value for max_loop
-            int max_loop=size;
-            mpfss_cuckoo *m=new_mpfss_cuckoo(t, size, w, b, max_loop,cp);
+            int max_loop=0.5*size;
+            mpfss_cuckoo *m=new_mpfss_cuckoo(t, size, w, b, max_loop,cp, (int)do_benchmark);
             int (*func)( int, int)=hashfunc_absl;
         
         //Preparations: Creating Indices, Buckets and finding assignment------------
             lap = wallClock();        
 
+            log_info("Creating Indices\n");
             int *indices_notobliv = (int *)calloc(t, sizeof(int ));
             if(cp==1){
                 bool created=false;
                 int count=0;
-                while(!created && count<t*size*100000){ 
+                while(!created && count<100000){ 
                     created=create_indices(indices_notobliv, t , size);
                     count++;
                 }
                 if(created==false){
-                    printf("Error: Could not create Indices.\n" );
+                    log_err("Error: Could not create Indices.\n" );
                     exit(1);
                 }
 
+                log_info("Write Indices to file\n");
                 string filename="results_debug_mpfss_cuckoo_indices.txt";
                 ofstream file;
-                file.open (filename);
-                for (int i = 0; i < t; ++i){
-                    file << indices_notobliv[i]<<"\n";
+                try{
+                    file.open (filename);
+                    for (int i = 0; i < t; ++i){
+                        file << indices_notobliv[i]<<"\n";
+                    }
+
+                    file.close();
+                }catch(ios_base::failure& e){
+                    log_err("%s",e.what());
                 }
-                file.close();
             }
 
             int *bucket_lenghts=(int *) calloc(b, sizeof(int));
             match **matches = (match **) calloc(b, sizeof(match*));
-            vector<vector<int>> all_buckets = preparations(m,indices_notobliv, matches, bucket_lenghts,func);
+            int evictions_logging=0;
+            vector<vector<int>> all_buckets = preparations(m,indices_notobliv, matches, bucket_lenghts,func, &evictions_logging);
 
 
             int ** all_buckets_array=(int **) calloc(b, sizeof(int *));
@@ -106,6 +116,9 @@ void run_mpfss_cuckoo(int t, int size, int cp,const char *remote_host, const cha
             y_args->all_buckets_array=all_buckets_array;
 
         // Execute Yao's protocol and cleanup
+            if(cp==1){ 
+                log_info("Executing Yao Protocol\n");
+            }
             execYaoProtocol(&pd, mpfss_batch_cuckoo, y_args);
             cleanupProtocol(&pd);
             
@@ -114,11 +127,10 @@ void run_mpfss_cuckoo(int t, int size, int cp,const char *remote_host, const cha
         // Print results and gate count
             double runtime = wallClock() - lap; // stop clock here 
             log_info("Total time: %lf seconds\n", runtime);
-            if (do_benchmark){
-                const char* s_name = "cuckoo";
-                char* name = new char[15];
-                std::strncpy(name, s_name, 15);
-                benchmark(runtime, size, t, cp, name);
+            if (do_benchmark && cp==1){
+                std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions"};
+                std::vector<string> list_of_values={to_string(runtime),to_string(t),to_string(size),to_string(b),to_string(w),to_string(max_loop), "no", to_string(evictions_logging) };
+                benchmark_list("cuckoo", 8, list_of_names, list_of_values);
             }
 
     free(m);

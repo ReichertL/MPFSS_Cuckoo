@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "includes/dbg.h"
+#include "includes/benchmark.h"
 
 //for match struct
 extern "C"{
@@ -53,7 +54,7 @@ vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)(
 	return all_buckets;
 }
 
-void create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets){
+bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets , int *evictions_logging){
 	
 	int w=mpfss->w;
 	int b=mpfss->b;
@@ -66,8 +67,21 @@ void create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matc
 		int no_hash_tables=1;
 		cuckoo_hashing *c=initialize( w, no_hash_tables, size_of_hashtable, NULL, max_loop, func);
 		
-		cuckoo(indices_notobliv, t, c);
-		print_tables(c);
+		int evictions=cuckoo(indices_notobliv, t, c);
+		*evictions_logging=evictions;
+		if(evictions==-1){
+			if(mpfss->do_benchmark==1){
+				std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions"};
+				std::vector<string> list_of_values={"-1",to_string(t),to_string(mpfss->size),to_string(b),to_string(w),to_string(max_loop), "yes", "-1" };
+                benchmark_list("cuckoo", 8, list_of_names, list_of_values);
+			}
+			return false;
+		}
+		
+		#ifdef DEBUG
+			print_tables(c);
+		#endif
+
 		std::vector<int> table=c->tables.at(0);
 		std::vector<bool> this_usage=c->table_usage.at(0);
 		for (int i = 0; i < b; ++i){
@@ -92,11 +106,12 @@ void create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matc
 			matches[i]=p;
 		}
 	}
+	return true;
 
 }
 
 
-std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int *bucket_lenghts, int (*func)( int, int)){
+std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int *bucket_lenghts, int (*func)( int, int), int *evictions_logging){
 
 
 	int size=mpfss->size;
@@ -105,6 +120,7 @@ std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_not
 
 
 	//--------------------Create Buckets----------------------------------------------------------------------
+	log_info("Creating Buckets with size %d ,b %d and w %d\n", size,b, w);
 	vector<vector<int>> all_buckets=generate_buckets_cuckoo( size,  w,  b, func);
 
 	for (int i = 0; i < b; ++i){
@@ -112,10 +128,18 @@ std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_not
 		bucket_lenghts[i]= static_cast<int>(v.size());
 	}
 	
-	debug_print_buckets(all_buckets,b);
-	
+	#ifdef DEBUG
+		debug_print_buckets(all_buckets,b);
+	#endif
+
 	//--------------------Create Assignment----------------------------------------------------------------------
-	create_assignement(mpfss, indices_notobliv, matches, func, all_buckets);
+	if(mpfss->cp==1){
+		log_info("Creating Assignment\n");
+	}
+	bool succ=create_assignement(mpfss, indices_notobliv, matches, func, all_buckets, evictions_logging);
+	if(!succ){
+		exit(1);
+	}
 	return all_buckets;
 }
 

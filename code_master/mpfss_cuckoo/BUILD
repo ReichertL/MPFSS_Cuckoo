@@ -13,6 +13,7 @@ cc_binary(
         "//includes:util",
         "//includes:dbg",
         "//includes:cuckoo",
+        "//includes:benchmark-cpp",
         ":buckets",
         ":mpfss_cuckoo_obliv",
         ":create_structs",
@@ -51,6 +52,7 @@ cc_library(
              ],
     deps = [
         "//includes:dbg",
+        "//includes:benchmark-cpp",
         "//includes:cuckoo",
         ":create_structs",
     ],

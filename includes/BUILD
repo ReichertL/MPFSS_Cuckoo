@@ -15,8 +15,19 @@ oblivc_library(
     deps = [
         ":dbg",
     ],
-    copts = ["-DDEBUG -g"], 
+   # copts = ["-DDEBUG -g"], 
 )
+cc_library(
+    name = "benchmark-cpp",
+    srcs = ["benchmark.cpp"],
+    hdrs = ["benchmark.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":dbg",
+    ],
+   # copts = ["-DDEBUG -g"], 
+)
+
 
 cc_library(
     name = "cuckoo",
@@ -27,7 +38,7 @@ cc_library(
         ":dbg",
         "@com_google_absl//absl/hash"
     ],
-    copts = ["-DDEBUG"], 
+   # copts = ["-DDEBUG"], 
     )
 
 cc_test(
@@ -67,5 +78,5 @@ cc_library(
     deps = [
         ":dbg",
     ],
-    copts = ["-DDEBUG "], 
+    #copts = ["-DDEBUG "], 
 )

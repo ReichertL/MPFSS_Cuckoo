@@ -52,7 +52,7 @@ TEST(preparations, cp1){
 
 	int count=0;
 	bool created=false;
-    while(!created and count<t*size*100000){ 
+    while(!created and count<100000){ 
         created=create_indices(indices_notobliv, t , size);
         count++;
     }

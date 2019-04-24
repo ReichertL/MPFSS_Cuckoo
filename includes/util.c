@@ -40,10 +40,10 @@ void ocTestUtilTcpOrDie(ProtocolDesc* pd,const char* remote_host,
 void benchmark(double runtime, size_t size, int t, int cp, char type[]){
 
         char filename[80];
-        sprintf(filename, "/home/turing/TI/benchmark/%s/resutls_t:%d_size:%d", type, t, (int) size);
+        sprintf(filename, "benchmark/%s/resutls_t:%d_size:%d", type, t, (int) size);
 
         char path[80];
-        sprintf(path, "/home/turing/TI/benchmark/%s", type);
+        sprintf(path, "benchmark/%s", type);
 
         time_t rawtime;
         struct tm * timeinfo;
@@ -80,6 +80,9 @@ void benchmark(double runtime, size_t size, int t, int cp, char type[]){
         fclose(fptr);
 
 }
+
+
+
 
 
 /*  Uses the obliv-c random number generator to fill the array indices_notobliv
