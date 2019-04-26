@@ -12,6 +12,7 @@
 
 void call_dpf_from_matches(match **matches,bool **vectors, int b, int *bucket_lenghts){
 
+	bool set_beta=true;
 	//synchronize	
 	if(ocCurrentParty()==1){
 
@@ -23,9 +24,7 @@ void call_dpf_from_matches(match **matches,bool **vectors, int b, int *bucket_le
 		}
 	}
 
-	obliv uint8_t *values=calloc(b, sizeof(obliv uint8_t));
-	for (int i = 0; i < b; ++i)
-	{
+	for (int i = 0; i < b; ++i){
 		int index_non_obliv;  		
 		if(ocCurrentParty()==1){
   			index_non_obliv=(size_t)matches[i]->index_in_batch;
@@ -43,10 +42,39 @@ void call_dpf_from_matches(match **matches,bool **vectors, int b, int *bucket_le
 			debug("Index from obliv: %d\n",in );
 		#endif
 
-		bool *batch_vector;
-  		dpf(bucket_lenghts[i],(obliv size_t) index_in_batch_obliv, values, i,&batch_vector);
-	  	vectors[i]=batch_vector;
+	  	bool *local_bit_output;
+	  	uint8_t *local_output;
 
+	  	if(set_beta){
+		  	uint8_t *beta_share;
+		  	uint8_t *beta;
+		  	if(ocCurrentParty()==1){
+				uint8_t this_beta[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50};
+				beta= this_beta; 	
+			}else{
+				uint8_t this_beta[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+				beta= this_beta;
+			}
+
+			dpf_with_beta_obliv( 	bucket_lenghts[i],
+									(obliv size_t) index_in_batch_obliv, 
+									beta,
+									&beta_share, 
+									i, 
+									&local_bit_output,
+									&local_output);
+	  	}else{
+
+		  	uint8_t *active_block_delta_share;
+		  	dpf_proper( bucket_lenghts[i],
+						(obliv size_t) index_in_batch_obliv,
+						&active_block_delta_share,
+						i,  
+						&local_bit_output,
+						&local_output);
+		}				
+	  	
+		vectors[i]=local_bit_output;
 	}
 
 
@@ -86,7 +114,6 @@ void call_dpf_from_matches(match **matches,bool **vectors, int b, int *bucket_le
 	  	}
   	#endif 
 
-	free(values);
 }
 
 bool *reveal_vector(bool *vector, int vector_size, int print){

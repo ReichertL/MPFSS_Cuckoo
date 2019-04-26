@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
 
         // Final initializations before entering protocol
         cp = (argv[2][0]=='1'? 1 : 2);
+
+
         log_info("-----Party %d-------\n", cp);
         setCurrentParty(&pd, cp); // only checks for a '1'        
         int t = atoi(argv[3]);
@@ -58,9 +60,8 @@ int main(int argc, char *argv[]) {
 
         // Print results and gate count
         log_info("Total time: %lf seconds\n", runtime);
-       
         benchmark(runtime, size, t, cp, "Naive");
-        
+    
    } else {
         log_info("Usage: %s <hostname:port> <1|2> <t> <size> \n" 
                  "\tHostname usage:\n" 

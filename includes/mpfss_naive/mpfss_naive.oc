@@ -2,6 +2,9 @@
 #include <bcrandom.h>
 #include <stdlib.h>
 #include <fss.oh>
+#include <fss_cprg.oh>
+#include <floram_util.h>
+#include <inttypes.h>
 
 #include "dbg.h"
 #include "util.h"
@@ -24,27 +27,245 @@ mpfss * new_mpfss_naive( int t, size_t size){
 
 }
 
-/*  Creates a Distributed Point Function using the fss.oh. Tested.
-	Input
-	  size_t size: Size of the input field
-	  obliv size_t index: Used as x value for the point function
-	  obliv uint8_t *values: Pointer to array of obliv integers
-	  int j : current run in loop (see loop in get_mpfss_vector) 
-	  obliv bool **vector: pointer to a pointer 
-
-	Output
-	  Writes obliv y value in values[j] 
-	  Returns the x value in form of an array of obliv bools. When the function 
-	  ended, vector will point to this specific array.   
-	  Return type: Void
+/*	Input:
+	Similar to dpf but takes a value for beta: f(index)=beta (0 everywhere else).
+	Beta ist an array of  uint8_t values (length: memblocksize)
+		e.g.:  uint8_t this_beta[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50};
+		Neither local_bit_output nor local_output need to be initialized beforehand.
+	Output:
+	This function will write a bit representation of the dpf into local_bit_output.
+	The dpf with values (each element has length of memblocksize) is stored in local_output.
+	
 */
-void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool **vector){
-	log_info("-----------DPF Run: %d -----------\n",j );
 
+void dpf_with_beta_obliv( size_t size, obliv size_t index, uint8_t *beta_non_obliv,uint8_t **beta_share_ret, int j,  bool **local_bit_output_ret, uint8_t **local_output_ret){
+	log_info("-----------DPF Run: %d -----------\n",j );
+	int memblocksize=BLOCKSIZE*block_no;
+	OcCopy memblockcpy=ocCopyCharN(memblocksize);
+	bool cpgr_set=false;
+	//Works for blockmultiple==1
+	
+	obliv uint8_t *beta=calloc(1, memblocksize * sizeof(obliv uint8_t));
+	feedOblivLLongArray((obliv uint64_t *)beta, (uint64_t *) beta_non_obliv,  memblocksize/sizeof(uint64_t), 1);
+	#ifdef DEBUG
+		int index_non_obliv;
+		revealOblivInt(&index_non_obliv, (obliv int) index, 0);
+		log_info(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
+	#endif 
+
+
+
+		
+	void *my_fss;
+	if(cpgr_set){
+		my_fss= (fss_cprg *)fss_cprg_new(size, block_no);
+	}else{
+		my_fss= (fss *)fss_new(size, block_no,1);
+	}
+
+	uint8_t *local_output;
+	bool *local_bit_output;
+	floram_pma(&local_output, 16, size* memblocksize);
+	floram_pma(&local_bit_output, 16, size * sizeof(bool));
+
+
+	obliv uint8_t *active_block_delta = calloc(1, memblocksize * sizeof(obliv uint8_t));
+
+  	if(cpgr_set){
+		fss_cprg_getblockvector( 	active_block_delta, 
+									local_output, 
+									local_bit_output, 
+									my_fss, 
+									index);
+	}else{
+		fss_getblockvector( 		active_block_delta, 
+									local_output, 
+									local_bit_output, 
+									my_fss, 
+									index);
+	}
+
+	//----Correction-----------------------
+
+	/*	printf("local_output                 ");
+		for(int i = 0; i <size ; i++) {
+			if(i==index_non_obliv){
+			for (size_t jj = 0; jj < memblocksize/sizeof(uint8_t); jj++) {
+				printf(" %llu", local_output[i * memblocksize/sizeof(uint8_t) + jj]);		
+			}
+			printf("\n");
+			}
+		}
+		obliv uint8_t this_beta[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50};
+	    for (int i = 0; i < memblocksize; ++i){
+	    	int test;
+	    	revealOblivInt(&test, (obliv int) (this_beta[i]),0);
+	    	printf(" %d",test);
+	    }
+	    printf("\n");
+	 */
+
+	obliv uint8_t *temp=calloc(1, memblockcpy.eltsize);
+	uint8_t *temp_local=malloc(memblocksize );
+	
+	for (int i = 0; i < memblocksize; ++i){
+		temp[i]= active_block_delta[i] ^ beta[i];
+	}
+
+	for (size_t ii = 0; ii < memblocksize/sizeof(uint64_t); ii++){
+		revealOblivLLong(&((uint64_t *)temp_local)[ii], ((obliv uint64_t *)temp)[ii], 2);
+		revealOblivLLong(&((uint64_t *)temp_local)[ii], ((obliv uint64_t *)temp)[ii], 1);
+	}
+
+	for (size_t ii = 0; ii< size; ii++) {
+		for (size_t jj = 0; jj < memblocksize; jj++) {
+			local_output[ii * memblocksize + jj]^=(local_bit_output[ii] * temp_local[jj]);
+		}
+	}
+
+	free(temp);
+	free(temp_local);
+
+	/*	printf("local_output                 ");
+		for(int i = 0; i <size ; i++) {
+			if(i==index_non_obliv){
+			for (size_t jj = 0; jj < memblocksize/sizeof(uint8_t); jj++) {
+				printf(" %llu", local_output[i * memblocksize/sizeof(uint8_t) + jj]);		
+			}
+			printf("\n");
+			}
+		}*/
+
+		/*printf("temp_local                   " );
+		for (int i = 0; i < memblocksize; ++i){
+			uint8_t activ_value=0;
+			revealOblivLLong(&activ_value, temp[i], 0);
+			printf("%d ",activ_value );
+		}
+		printf("\n");
+
+		printf("local_bit_output                    ", j);  
+		for(int i = 0; i <size ; i++) {
+			printf(" %d", local_bit_output[i]);		
+		}
+		printf("\n");*/
+
+	//----Return Values-------------------
+	
+	uint8_t *beta_share = calloc(1, memblocksize * sizeof(obliv uint8_t));
+
+	for (size_t ii = 0; ii < memblocksize/sizeof(uint64_t); ii++){
+		revealOblivLLong(&((uint64_t *)beta_share)[ii], ((obliv uint64_t *)beta)[ii], 2);
+		revealOblivLLong(&((uint64_t *)beta_share)[ii], ((obliv uint64_t *)beta)[ii], 1);
+	}
+	*local_output_ret=local_output;
+	*local_bit_output_ret=local_bit_output;
+	*beta_share_ret=beta_share;
+
+	//-----Debug--------------------------
+	#ifdef DEBUG
+
+		obliv bool *v1= calloc(size, sizeof(obliv bool));
+		obliv bool *v2= calloc(size, sizeof(obliv bool));
+
+		feedOblivBoolArray(v1, local_bit_output, size, 1);
+		feedOblivBoolArray(v2, local_bit_output, size, 2);
+
+		obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+		/*	Xor both local output vectors to generate an obliv vector*/
+		for(int i = 0; i <size ; i++) {
+			dpf_obliv[i]=v1[i]^v2[i]; 
+		}
+		free(v1);
+		free(v2);	  
+		bool *dpf= calloc(size, sizeof(bool));
+
+		revealOblivBoolArray(dpf, dpf_obliv, size, 0);
+		char buff [(int)size * sizeof(int) + 100];
+		sprintf(buff, "dpf                    ", j);  
+		for(int i = 0; i <size ; i++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", dpf[i]);		
+		  strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(dpf_obliv);
+		free(dpf);
+		//------------------------------------------------------------
+
+		uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)local_output, size*memblocksize/sizeof(uint64_t), 1);
+		ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)local_output,size*memblocksize/sizeof(uint64_t),  2);
+		uint8_t *dpf_with_beta;
+		floram_pma(&dpf_with_beta, 16, size* memblocksize);
+		for (size_t ii = 0; ii< size; ii++) {
+			for (size_t jj = 0; jj < memblocksize; jj++) {
+				uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];
+				dpf_with_beta[ii * memblocksize + jj]=xor;
+			}
+		}
+		free(local_output_1);
+		free(local_output_2);
+
+		char *buff = (char *) calloc((int)size *memblocksize+100, sizeof(int));
+		sprintf(buff, "dpf_with_values %d\n", j);  
+		for(int i = 0; i <size ; i++) {
+			for (int j=0;j<memblocksize; ++j){
+				char r[1+ sizeof(int)];
+				sprintf(r, " %d", dpf_with_beta[i * memblocksize + j]);		
+			  	strcat(buff, r );  
+			}	
+			char *eof="\n";	
+			strcat(buff, eof );
+		}
+		debug("%s\n",buff);
+		free(buff);
+		free(dpf_with_beta);
+
+		//--------------------------------------------------------------
+		char *buff = (char *) calloc(memblocksize+100, sizeof(int));
+		sprintf(buff, "active_block_delta       ");  
+		for (int i = 0; i < memblocksize; ++i){
+			uint8_t activ_value=0;
+			revealOblivInt(&activ_value, active_block_delta[i], 0);
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", activ_value);		
+			strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+	#endif
+
+	free(active_block_delta);
+	if(cpgr_set){
+		fss_cprg_free(my_fss);
+	}else{
+	 	fss_free(my_fss);
+	}	
+} 
+
+/*	Input:
+	Same as dpf but called with different parameter.
+	Beta is random.
+	Neither local_bit_output, active_block_delta nor local_output need to be initialized beforehand.
+
+	Output:
+	This function will write a bit representation of the dpf into local_bit_output.
+	The dpf with values (each element has length of memblocksize) is stored in local_output.
+	The magnitude (beta) is written active_block_delta.
+	
+*/
+void dpf_proper( size_t size, obliv size_t index, uint8_t **beta_share_ret, int j,  bool **local_bit_output_ret, uint8_t **local_output_ret){
+	log_info("-----------DPF Run: %d -----------\n",j );
+	//Works for blockmultiple==1
 	int index_non_obliv;
 	revealOblivInt(&index_non_obliv, (obliv int) index, 0);
 	log_info(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
 
+	int memblocksize=BLOCKSIZE*block_no;
+	OcCopy memblockcpy=ocCopyCharN(memblocksize);
+	bool cpgr_set=false;
 
 	/*  fss * fss(size_t size, size_t block_no) {
 		Creates new FSS instance
@@ -53,13 +274,24 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool *
 			uint32_t truncated_levels:  The same as start level -> 0 should be a good value
 			(only needed for fss_new , not for fss_new)
 	*/
-	fss *my_fss;
-	my_fss= fss_new(size, block_no,1 );
 
+	void *my_fss;
+	if(cpgr_set){
+		my_fss= (fss_cprg *)fss_cprg_new(size, block_no);
+	}else{
+		//was in the original code like that, not sure if i should use it 
+		/*int lev;
+		if(log2(size)<5){
+			lev=log2(size);
+		}else{
+			lev=5;
+		}*/
+		my_fss= (fss *)fss_new(size, block_no,1);
+	}
 	
-	/*	The 'fss_getblockvector' function takes the
-			value a as "index", and writes y^1 and y^2 as output into the location
-			specified by the "local_output". Party 1 gets y^1 and party 2 gets y^2.
+	/*	The 'fss_getblockvector' function takes the value a as "index", 
+		and writes y^1 and y^2 as output into the location
+		specified by the "local_output". Party 1 gets y^1 and party 2 gets y^2.
 		void *calloc(size_t nitems, size_t size)
 		calloc allocats memory and sets everything to zero.
 		Returns: Pointer to memory, NULL if request fails
@@ -68,13 +300,14 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool *
 		Blocksize and block_no inidicates the size of our output field:
 		Blocksize*block_no = 2 ==> only 4 different y values possible. ???
 	*/
-
-	uint8_t *local_output = calloc(size,BLOCKSIZE*sizeof(uint8_t));
-	bool *local_bit_output = calloc(size,  sizeof(bool)); 
+	uint8_t *local_output;
+	bool *local_bit_output;
+	floram_pma(&local_output, 16, size* memblocksize);
+	floram_pma(&local_bit_output, 16, size * sizeof(bool));
 
 
 	/* "Finally, you'll have noticed that there's no input for beta. That's because
-		  the final, correction stage of the FSS has not been performed, which means
+		the final, correction stage of the FSS has not been performed, which means
 		in effect that the DPF magnitude is random. This random magnitude is
 		returned as a vector of obliv bytes, to the location specified by
 		'active_block_delta' "
@@ -84,10 +317,7 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool *
 		active_block_delta will later on hold be the b value. This value is not preset in this 
 		case as it will be set by the protocol at random.
 	   */
-  obliv uint8_t *active_block_delta = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t));
-
-
-	
+  	obliv uint8_t *active_block_delta = calloc(1, memblocksize * sizeof(obliv uint8_t));
 
 	/*  fss_getblockvector 
 		Calls fss gen and eval.
@@ -100,13 +330,34 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool *
 			fss * fss: instance of fss
 			obliv size_t index: In DPF f(a)=b everywhere else the Function is 0. Index is equal to a.
 	*/
-	fss_getblockvector( 	active_block_delta, 
-							local_output, 
-							local_bit_output, 
-							my_fss, 
-							index);
+  	if(cpgr_set){
+		fss_cprg_getblockvector( 	active_block_delta, 
+									local_output, 
+									local_bit_output, 
+									my_fss, 
+									index);
+	}else{
+		fss_getblockvector( 		active_block_delta, 
+									local_output, 
+									local_bit_output, 
+									my_fss, 
+									index);
+	}
+
+	//----Return Values-------------------
 	
-		//Debug
+	uint8_t *beta_share = calloc(1, memblocksize * sizeof(obliv uint8_t));
+
+	for (size_t ii = 0; ii < memblocksize/sizeof(uint64_t); ii++){
+		revealOblivLLong(&((uint64_t *)beta_share)[ii], ((obliv uint64_t *)active_block_delta)[ii], 2);
+		revealOblivLLong(&((uint64_t *)beta_share)[ii], ((obliv uint64_t *)active_block_delta)[ii], 1);
+	}
+	*local_output_ret=local_output;
+	*local_bit_output_ret=local_bit_output;
+	*beta_share_ret=beta_share;
+
+
+	//-----Debug--------------------------
 	  #ifdef DEBUG
 
 		obliv bool *v1= calloc(size, sizeof(obliv bool));
@@ -125,7 +376,8 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool *
 		for(int i = 0; i <size ; i++) {
 			dpf_obliv[i]=v1[i]^v2[i]; 
 		}
-	  
+		free(v1);
+		free(v2);	  
 		bool *dpf= calloc(size, sizeof(bool));
 		
 		/*  bool revealObliv<Tname>(tname* dest, obliv tname src, int party)
@@ -143,34 +395,278 @@ void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool *
 		  strcat(buff, r );  
 		}
 		debug("%s\n",buff);
-
-
-		int activ_value=0;
-		int *activ_value_ptr=&activ_value;
-		revealOblivInt(activ_value_ptr, *active_block_delta, 0);
-		debug("activ_value %d\n", activ_value );
-		
-
-		free(v1);
-		free(v2);
-		free(dpf);
 		free(dpf_obliv);
+		free(dpf);
+		//------------------------------------------------------------
+
+		uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)local_output, size*memblocksize/sizeof(uint64_t), 1);
+		ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)local_output,size*memblocksize/sizeof(uint64_t),  2);
+		uint8_t *dpf_with_beta;
+		floram_pma(&dpf_with_beta, 16, size* memblocksize);
+		for (size_t ii = 0; ii< size; ii++) {
+			for (size_t jj = 0; jj < memblocksize; jj++) {
+				uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];
+				dpf_with_beta[ii * memblocksize + jj]=xor;
+			}
+		}
+		free(local_output_1);
+		free(local_output_2);
+
+		char *buff = (char *) calloc((int)size *memblocksize+100, sizeof(int));
+		sprintf(buff, "dpf with values \n", j);  
+		for(int i = 0; i <size ; i++) {
+			for (int j=0;j<memblocksize; ++j){
+				char r[1+ sizeof(int)];
+				sprintf(r, " %d", dpf_with_beta[i * memblocksize + j]);		
+			  	strcat(buff, r );  
+			}	
+			char *eof="\n";	
+			strcat(buff, eof );
+		}
+		debug("%s\n",buff);
+		free(buff);
+		free(dpf_with_beta);
+
+
+
+		//--------------------------------------------------------------
+		char *buff = (char *) calloc(memblocksize+100, sizeof(int));
+		sprintf(buff, "active_block_delta       ");  
+		for (int i = 0; i < memblocksize; ++i){
+			uint8_t activ_value=0;
+			revealOblivInt(&activ_value, active_block_delta[i], 0);
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", activ_value);		
+			strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+
+		
+	#endif
+
+	if(cpgr_set){
+		fss_cprg_free(my_fss);
+	}else{
+	 	fss_free(my_fss);
+	}	
+}
+
+/*  Creates a Distributed Point Function using the fss.oh. Tested.
+	Input
+	  size_t size: Size of the input field
+	  obliv size_t index: Used as x value for the point function
+	  obliv uint8_t *values: Pointer to array of obliv integers
+	  int j : current run in loop (see loop in get_mpfss_vector) 
+	  obliv bool **vector: pointer to a pointer 
+
+	Output
+	  Writes obliv y value in values[j] 
+	  Returns the x value in form of an array of obliv bools. When the function 
+	  ended, vector will point to this specific array.   
+	  Return type: Void
+*/
+void dpf( size_t size, obliv size_t index, obliv uint8_t *values, int j,  bool **vector){
+	log_info("-----------DPF Run: %d -----------\n",j );
+	//Works for blockmultiple==1
+	int index_non_obliv;
+	revealOblivInt(&index_non_obliv, (obliv int) index, 0);
+	log_info(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
+
+	int memblocksize=BLOCKSIZE*block_no;
+	OcCopy memblockcpy=ocCopyCharN(memblocksize);
+	bool cpgr_set=false;
+
+	/*  fss * fss(size_t size, size_t block_no) {
+		Creates new FSS instance
+		size_t size: size of input field
+		size_t block_no: How many Blocks are there in one entry -> 1 should be sufficient
+			uint32_t truncated_levels:  The same as start level -> 0 should be a good value
+			(only needed for fss_new , not for fss_new)
+	*/
+
+	void *my_fss;
+	if(cpgr_set){
+		my_fss= (fss_cprg *)fss_cprg_new(size, block_no);
+	}else{
+		//was in the original code like that, not sure if i should use it 
+		/*int lev;
+		if(log2(size)<5){
+			lev=log2(size);
+		}else{
+			lev=5;
+		}*/
+		my_fss= (fss *)fss_new(size, block_no,1);
+	}
+	
+	/*	The 'fss_getblockvector' function takes the value a as "index", 
+		and writes y^1 and y^2 as output into the location
+		specified by the "local_output". Party 1 gets y^1 and party 2 gets y^2.
+		void *calloc(size_t nitems, size_t size)
+		calloc allocats memory and sets everything to zero.
+		Returns: Pointer to memory, NULL if request fails
+		nitems: no. of elements to be allocated
+		size: size of elements
+		Blocksize and block_no inidicates the size of our output field:
+		Blocksize*block_no = 2 ==> only 4 different y values possible. ???
+	*/
+	uint8_t *local_output;
+	bool *local_bit_output;
+
+	floram_pma(&local_output, 16, size* memblocksize);
+	floram_pma(&local_bit_output, 16, size * sizeof(bool));
+
+
+	/* "Finally, you'll have noticed that there's no input for beta. That's because
+		the final, correction stage of the FSS has not been performed, which means
+		in effect that the DPF magnitude is random. This random magnitude is
+		returned as a vector of obliv bytes, to the location specified by
+		'active_block_delta' "
+
+		active_block_delta is a single Element of size: Blocksize*block_no. But since these will be
+		obliv bits a larger amount of bits need to be allocated. 
+		active_block_delta will later on hold be the b value. This value is not preset in this 
+		case as it will be set by the protocol at random.
+	   */
+  	obliv uint8_t *active_block_delta = calloc(1, memblocksize * sizeof(obliv uint8_t));
+
+	/*  fss_getblockvector 
+		Calls fss gen and eval.
+		Generates a pair of keys and then evaluates the keys to produce
+		  two vectors y^1 and y^2 such that y^1_x xor y^2_x == b if x == a and
+			y^1_x xor y^2_x == 0 otherwise.
+			obliv uint8_t * active_block_delta: value of point function at point i
+			uint8_t * local_output: 
+			bool * local_bit_output: Will be 1 at corresponding index
+			fss * fss: instance of fss
+			obliv size_t index: In DPF f(a)=b everywhere else the Function is 0. Index is equal to a.
+	*/
+  	if(cpgr_set){
+		fss_cprg_getblockvector( 	active_block_delta, 
+									local_output, 
+									local_bit_output, 
+									my_fss, 
+									index);
+	}else{
+		fss_getblockvector( 		active_block_delta, 
+									local_output, 
+									local_bit_output, 
+									my_fss, 
+									index);
+	}
+
+
+
+	//-----Debug--------------------------
+	  #ifdef DEBUG
+
+		obliv bool *v1= calloc(size, sizeof(obliv bool));
+		obliv bool *v2= calloc(size, sizeof(obliv bool));
+
+		/* 	feedObliv<Typename>(typename v, int party)
+			Send obliv values to all parties.
+			tname can be: bool, char, int, short, long, long long, or float
+			==> void  feedOblivBoolArray(obliv bool  dest[],const bool  src[],size_t n, int party);;
+		*/
+		feedOblivBoolArray(v1, local_bit_output, size, 1);
+		feedOblivBoolArray(v2, local_bit_output, size, 2);
+
+		obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+		/*	Xor both local output vectors to generate an obliv vector*/
+		for(int i = 0; i <size ; i++) {
+			dpf_obliv[i]=v1[i]^v2[i]; 
+		}
+		free(v1);
+		free(v2);	  
+		bool *dpf= calloc(size, sizeof(bool));
+		
+		/*  bool revealObliv<Tname>(tname* dest, obliv tname src, int party)
+			  Revealing obliv values to specified parties.
+			  Returns true if successful.
+			  When party=0: All parties will receive this value.
+			  ==>bool  revealOblivBoolArray(bool dest[],  obliv bool src[],  size_t n, int party);
+		*/
+		revealOblivBoolArray(dpf, dpf_obliv, size, 0);
+		char buff [(int)size * sizeof(int) + 100];
+		sprintf(buff, "dpf                    ", j);  
+		for(int i = 0; i <size ; i++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", dpf[i]);		
+		  strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(dpf_obliv);
+		free(dpf);
+		//------------------------------------------------------------
+
+		uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)local_output, size*memblocksize/sizeof(uint64_t), 1);
+		ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)local_output,size*memblocksize/sizeof(uint64_t),  2);
+		uint8_t *dpf_with_beta;
+		floram_pma(&dpf_with_beta, 16, size* memblocksize);
+		for (size_t ii = 0; ii< size; ii++) {
+			for (size_t jj = 0; jj < memblocksize; jj++) {
+				uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];
+				dpf_with_beta[ii * memblocksize + jj]=xor;
+			}
+		}
+		free(local_output_1);
+		free(local_output_2);
+
+		char *buff = (char *) calloc((int)size *memblocksize+100, sizeof(int));
+		sprintf(buff, "dpf with values \n", j);  
+		for(int i = 0; i <size ; i++) {
+			for (int j=0;j<memblocksize; ++j){
+				char r[1+ sizeof(int)];
+				sprintf(r, " %d", dpf_with_beta[i * memblocksize + j]);		
+			  	strcat(buff, r );  
+			}	
+			char *eof="\n";	
+			strcat(buff, eof );
+		}
+		debug("%s\n",buff);
+		free(buff);
+		free(dpf_with_beta);
+
+
+
+		//--------------------------------------------------------------
+		char *buff = (char *) calloc(memblocksize+100, sizeof(int));
+		sprintf(buff, "active_block_delta       ");  
+		for (int i = 0; i < memblocksize; ++i){
+			uint8_t activ_value=0;
+			revealOblivInt(&activ_value, active_block_delta[i], 0);
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", activ_value);		
+			strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+
+		
 	#endif
 
 	/*  
 		Writing the return values to correct location
 		==>void * memcpy ( void * destination, const void * source, size_t num );
 	*/
-  values[j]=*active_block_delta;
-  *vector=local_bit_output;
+	values[j]=*active_block_delta;
+	*vector=local_bit_output;
 
 	/* Freeing the allocated space.*/
-  free(active_block_delta);
+	free(active_block_delta);
 
-  free(local_output);
-  fss_free(my_fss);
-	
+	free(local_output);
+	if(cpgr_set){
+		fss_cprg_free(my_fss);
+	}else{
+	 	fss_free(my_fss);
+	}	
 } 
+
 
 
 /*  Interface for calling MPFSS. Tested. 
@@ -194,11 +690,10 @@ void get_mpfss_vector(mpfss *mpfss, obliv size_t *indices, bool *vector, obliv u
   debug("t %d\n", t );
   obliv size_t index;
   
-  
-
   for (int j=0; j<t;j++){
 	  bool *this_vector;
 	  index=indices[j];
+	
 	  dpf(size,index, values, j,&this_vector);
 
 	  for (int i = 0; i < size; i++){
@@ -227,7 +722,7 @@ void get_mpfss_vector(mpfss *mpfss, obliv size_t *indices, bool *vector, obliv u
 		bool *vdpf2= calloc(size, sizeof(bool ));
 		revealOblivBoolArray(vdpf2, dpf_obliv, size, 0);
 
-		char buff [(int)size * sizeof(int) + 100];
+		char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
 		sprintf(buff, "vector round #%d:               ", j);  
 		for(int i = 0; i <size ; i++) {
 			char r[1+ sizeof(int)];
@@ -235,7 +730,7 @@ void get_mpfss_vector(mpfss *mpfss, obliv size_t *indices, bool *vector, obliv u
 		  strcat(buff, r );  
 		}
 		debug("%s\n",buff);
-
+		free(buff);
 
 		feedOblivBoolArray(v1, vector, size, 1);
 		feedOblivBoolArray(v2, vector, size, 2);
@@ -243,7 +738,7 @@ void get_mpfss_vector(mpfss *mpfss, obliv size_t *indices, bool *vector, obliv u
 			dpf_obliv[i]=v1[i]^v2[i]; 
 		}
 
-		char buff [(int)size * sizeof(int) + 100];
+		char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
 		sprintf(buff, "Zwischenergebnis:   		 	 ");  
 
 		bool *vdpf3= calloc(size, sizeof(bool));
@@ -255,6 +750,7 @@ void get_mpfss_vector(mpfss *mpfss, obliv size_t *indices, bool *vector, obliv u
 		  strcat(buff, r );  
 		}
 		debug("%s\n",buff);
+		free(buff);
 
 		free(vdpf3);      
 		free(vdpf2);
@@ -320,13 +816,15 @@ void mpfss_naive(void* args){
 
 		bool *vdpf2= calloc(size, sizeof(bool ));
 		revealOblivBoolArray(vdpf2, dpf_obliv, size, 0);
-		char buff [(int)size * sizeof(int) + 100];
+		char *buff= calloc(size, sizeof(int)*sizeof(char)+10);
 		for(int j = 0; j <size ; j++) {
 			char r[1+ sizeof(int)];
 			sprintf(r, " %d", vdpf2[j]);		
-		  strcat(buff, r );  
+		  	strcat(buff, r );
+
 		}
 		debug("%s\n",buff);
+		free(buff);
 
 		free(vdpf2);
 		free(v1);
