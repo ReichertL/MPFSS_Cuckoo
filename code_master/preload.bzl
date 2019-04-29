@@ -39,3 +39,21 @@ def code_master_preload():
             strip_prefix = "mpc-utils-2cf3ca2e900b55b9066c09070faa5aeb4550ea9c",
         )
 
+    # Transitive dependency of io_bazel_rules_docker
+    if "bazel_skylib" not in native.existing_rules():
+        http_archive(
+            name = "bazel_skylib",
+            sha256 = "c33a54ef16961e48df7d306a67ccb92c0c4627d0549df519e07533a6f3d270aa",
+            strip_prefix = "bazel-skylib-9b85311ab47548ec051171213a1b3b4b3b3c9dc8",
+            url = "https://github.com/bazelbuild/bazel-skylib/archive/9b85311ab47548ec051171213a1b3b4b3b3c9dc8.zip",
+        )
+
+
+
+    if "io_bazel_rules_docker" not in native.existing_rules(): 
+        http_archive(
+        name = "io_bazel_rules_docker",
+        sha256 = "aed1c249d4ec8f703edddf35cbe9dfaca0b5f5ea6e4cd9e83e99f3b0d1136c3d",
+        strip_prefix = "rules_docker-0.7.0",
+        urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.7.0.tar.gz"],
+        )

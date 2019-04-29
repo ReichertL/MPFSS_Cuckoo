@@ -1,0 +1,1178 @@
+
+Executed 0 out of 1 test: [0m[31m[1m1 fails to build[0m.
+==================== Test output for //includes/mpfss_naive:mpfss_naive_unittest:
+
+
+Testing MPFSS Naive-----------------------------------------------.----
+TEST_dpf---------------------------------------------------------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 10, index 3
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 0 0 1 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+
+
+ 214 155 224 41 112 47 228 55 103 64 160 72 13 221 26 133
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        214 155 224 41 112 47 228 55 103 64 160 72 13 221 26 133
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 10, index 11
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        186 74 196 104 212 88 246 79 75 218 215 196 96 4 208 144
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 100, index 101
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        3 99 157 110 31 192 254 191 37 51 226 124 5 232 182 216
+
+TEST_dpf_proper---------------------------------------------------------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L255) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L259)  call to dpf with size 10, index 3
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L347: dpf                     0 0 0 1 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L378: dpf with values 
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 157 97 189 70 29 149 134 72 86 117 111 139 235 179 189 133
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L394: active_block_delta        157 97 189 70 29 149 134 72 86 117 111 139 235 179 189 133
+
+Size: 10 Index: 3
+TEST_dpf_proper: dpf   		 	  0 0 0 1 0 0 0 0 0 0
+dpf_with_values
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 157 97 189 70 29 149 134 72 86 117 111 139 235 179 189 133
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+active value
+ 157 97 189 70 29 149 134 72 86 117 111 139 235 179 189 133
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L255) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L259)  call to dpf with size 10, index 11
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L347: dpf                     0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L378: dpf with values 
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L394: active_block_delta        52 169 242 179 99 75 108 59 212 37 225 247 189 255 202 57
+
+TEST_dpf_proper: WARNING activ_value has wrong value after reveal. Should be 0, but was not. 
+Size: 10 Index: 11
+TEST_dpf_proper: dpf   		 	  0 0 0 0 0 0 0 0 0 0
+dpf_with_values
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+active value
+ 52 169 242 179 99 75 108 59 212 37 225 247 189 255 202 57
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L255) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L259)  call to dpf with size 100, index 101
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L347: dpf                     0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L378: dpf with values 
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_proper:L394: active_block_delta        115 87 147 194 54 74 120 169 136 245 32 31 208 212 70 101
+
+TEST_dpf_proper: WARNING activ_value has wrong value after reveal. Should be 0, but was not. 
+Size: 100 Index: 101
+TEST_dpf_proper: dpf   		 	  0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+dpf_with_values
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+active value
+ 115 87 147 194 54 74 120 169 136 245 32 31 208 212 70 101
+TEST_TEST_with_beta_obliv---------------------------------------------------------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_obliv:L42) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_obliv:L53)  call to dpf with size 10, index 3
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_obliv:L186: dpf                     0 0 0 1 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_obliv:L217: dpf_with_values 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 50
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_obliv:L231: active_block_delta        23 211 202 119 114 123 148 245 71 134 130 132 235 36 225 152
+
+Size: 10 Index: 3
+TEST_dpf_proper: dpf   		 	  0 0 0 1 0 0 0 0 0 0
+dpf_with_values
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 50
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+beta_revealed
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 50
+TEST_new_mpfss_naive---------------------------------------------------------
+TEST_get_mpfss_vector---------------------------------------------------------
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L642: t 4
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 10, index 0
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     1 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+ 28 19 159 97 136 233 197 208 153 33 111 104 164 243 164 91
+
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        28 19 159 97 136 233 197 208 153 33 111 104 164 243 164 91
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 28
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #0:                1 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 0 0 0 0 0 0 0 0 0
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 1 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 10, index 1
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 1 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+ 42 52 130 57 67 116 156 189 177 60 14 27 106 242 129 76
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        42 52 130 57 67 116 156 189 177 60 14 27 106 242 129 76
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 42
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #1:                0 1 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 1 0 0 0 0 0 0 0 0
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 2 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 10, index 2
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 0 1 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+
+ 97 26 107 250 216 131 193 211 131 4 99 143 206 111 73 255
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        97 26 107 250 216 131 193 211 131 4 99 143 206 111 73 255
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 97
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #2:                0 0 1 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 1 1 0 0 0 0 0 0 0
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 3 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 10, index 3
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 0 0 1 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+
+
+ 138 54 170 117 74 58 223 208 91 170 166 185 179 200 224 63
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        138 54 170 117 74 58 223 208 91 170 166 185 179 200 224 63
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 138
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #3:                0 0 0 1 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 1 1 1 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L642: t 5
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 0 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 100, index 0
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+ 178 244 194 16 103 74 24 203 160 253 196 31 41 50 136 69
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        178 244 194 16 103 74 24 203 160 253 196 31 41 50 136 69
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 178
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #0:                1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 1 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 100, index 1
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+ 176 231 221 241 35 213 248 51 89 86 41 16 218 222 230 122
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        176 231 221 241 35 213 248 51 89 86 41 16 218 222 230 122
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 176
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #1:                0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 2 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 100, index 2
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+
+ 44 233 158 233 19 242 80 211 2 179 214 170 24 43 202 19
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        44 233 158 233 19 242 80 211 2 179 214 170 24 43 202 19
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 44
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #2:                0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 3 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 100, index 3
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+
+
+ 135 169 140 74 179 150 186 11 201 134 173 198 141 181 81 254
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        135 169 140 74 179 150 186 11 201 134 173 198 141 181 81 254
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 135
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #3:                0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L422) -----------DPF Run: 4 -----------
+[INFO] (includes/mpfss_naive/mpfss_naive.oc:dpf:L426)  call to dpf with size 100, index 4
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L549: dpf                     0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L582: dpf with values 
+
+
+
+
+ 34 102 102 236 85 0 53 146 184 121 32 237 174 226 2 150
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf:L598: active_block_delta        34 102 102 236 85 0 53 146 184 121 32 237 174 226 2 150
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L657: Debug get_mpfss_vector()
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L663: activ_value in get_mpfss_vector: 34
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L684: vector round #4:                0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:get_mpfss_vector:L704: Zwischenergebnis:   		 	  1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+================================================================================
+//includes/mpfss_naive:mpfss_naive_unittest                              [0m[32mPASSED[0m in 7.4s
+
+Executed 1 out of 1 test: 1 test passes.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

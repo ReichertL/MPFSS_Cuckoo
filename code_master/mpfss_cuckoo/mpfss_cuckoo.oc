@@ -65,10 +65,10 @@ void call_dpf_from_matches(match **matches,bool **vectors, int b, int *bucket_le
 									&local_output);
 	  	}else{
 
-		  	uint8_t *active_block_delta_share;
+		  	obliv uint8_t *active_block_delta;
 		  	dpf_proper( bucket_lenghts[i],
 						(obliv size_t) index_in_batch_obliv,
-						&active_block_delta_share,
+						&active_block_delta,
 						i,  
 						&local_bit_output,
 						&local_output);

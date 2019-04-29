@@ -35,7 +35,7 @@ cc_binary(
         ":mpfss_naive_obliv",
     ],
 
-    copts = ["-DDEBUG -g3"], 
+    #copts = ["-DDEBUG -g3"], 
 )
 
 
@@ -56,8 +56,10 @@ oblivc_library(
         "//includes:dbg",
         "@ack//:oram_fssl",
         ":mpfss_naive_obliv",
+        "@com_google_googletest//:gtest_main",
+
     ],
-    copts = ["-DDEBUG -g3"], 
+    #copts = ["-DDEBUG -g3"], 
 )
 
 cc_test(
@@ -72,7 +74,7 @@ cc_test(
         "//includes:dbg",
     ],
     visibility = ["//visibility:public"],
-    copts = ["-DDEBUG -g3"], 
+    #copts = ["-DDEBUG -g3"], 
 
 
 )

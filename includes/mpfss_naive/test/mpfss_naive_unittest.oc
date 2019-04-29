@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+//#include <gtest/gtest.h>
 
 #include <obliv.h>
 #include <obliv.oh>
@@ -15,6 +16,8 @@
 #include "mpfss_naive_unittest.h"
 #include "mpfss_naive.h"
 #include "mpfss_naive.oh"
+
+
 
 bool TEST_get_mpfss_vector(int t, size_t size){
 	mpfss *m=new_mpfss_naive(t, size);
@@ -30,7 +33,7 @@ bool TEST_get_mpfss_vector(int t, size_t size){
 	}
 
 	bool *vector=calloc(size, sizeof(bool));
-	obliv uint8_t *values = calloc(t, BLOCKSIZE*sizeof(obliv uint8_t));
+	obliv uint8_t **values  = calloc(1, memblocksize * sizeof(obliv uint8_t*));
 	get_mpfss_vector(m, indices, vector, values);
 
 	bool succ=true;
@@ -63,7 +66,7 @@ bool TEST_get_mpfss_vector(int t, size_t size){
 			if(found==false){
 				succ=false;
 				print=true;
-				test_fail("TEST_get_mpfss_vector: Resulting MPF is not 1 at index %d, but should be.\n", i);
+				printf("TEST_get_mpfss_vector: Resulting MPF is not 1 at index %d, but should be.\n", i);
 			}
 		}else{
 			bool found=false;
@@ -75,7 +78,7 @@ bool TEST_get_mpfss_vector(int t, size_t size){
 			if(found==true){
 				succ=false;
 				print=true;
-				test_fail("TEST_get_mpfss_vector: Resulting MPF is 1 at index %d, but should not be.\n", i);
+				printf("TEST_get_mpfss_vector: Resulting MPF is 1 at index %d, but should not be.\n", i);
 			}
 		}
 		
@@ -84,12 +87,18 @@ bool TEST_get_mpfss_vector(int t, size_t size){
 
 	// Testing the values
 	for(int i=0; i<t; i++){
-		int v_value;
-		int *v_value_ptr=&v_value;
-		revealOblivInt(v_value_ptr, values[i], 0);
-		if(v_value==0){
+
+		uint8_t *activ_value = calloc(1, memblocksize * sizeof(uint8_t));
+		revealOblivLLongArray((uint64_t *)activ_value, (uint64_t *)values[i],memblocksize/sizeof(uint64_t),  0);
+		bool was_zero=true;
+		for (int i = 0; i < memblocksize; ++i){
+			if(activ_value[i]!=0){
+				was_zero=false;
+			}
+		}
+		if(was_zero){
 			print=true;
-			test_fail("TEST_get_mpfss_vector: Warning! Value at one point of MPF was zero, but should be != zero.\n");
+			printf("TEST_get_mpfss_vector: Warning! Value at one point of MPF was zero, but should be != zero.\n");
 		}
 	}
 
@@ -138,21 +147,16 @@ bool TEST_get_mpfss_vector(int t, size_t size){
 		free(vdpf2); 
 
 
-		//Printing y values of multi point function (only where x!=0)
-		char *buff=calloc(t+100, sizeof(int));
-		sprintf(buff, "Values: ");  
-		for(int i=0; i< t; i++){     
+		/*//Printing y values of multi point function (only where x!=0)
+		for(int i=0; i<t; i++){
 
-			int v_value;
-			int *v_value_ptr=&v_value;
-			revealOblivInt(v_value_ptr, values[i], 0);
-			char r[1+ sizeof(int)];
-			sprintf(r, " %d", v_value);		
-		  	strcat(buff, r );
-		}
-		debug("%s\n",buff);
-		free(buff);
-		
+			uint8_t *activ_value = calloc(1, memblocksize * sizeof(uint8_t));
+			revealOblivLLongArray((uint64_t *)activ_value, (uint64_t *)values[i],memblocksize/sizeof(uint64_t),  0);
+			for (int j = 0; j < memblocksize; ++j){
+				printf("%d \n", activ_value[j] );
+			}	
+			printf("\n");
+		}*/
 	}
 
 	free(m);
@@ -169,12 +173,12 @@ bool TEST_new_mpfss_naive( int t, size_t size){
 	bool succ=true;
 
 	if(m->t !=t){
-		test_fail("TEST_new_mpfss_naive: t value was %d, but %d expected.\n", m->t, t );
+		printf("TEST_new_mpfss_naive: t value was %d, but %d expected.\n", m->t, t );
 		succ=false;
 	}
 
 	if(m->size !=size){
-		test_fail("TEST_new_mpfss_naive: size value was %d, but %d expected.\n", m->size, size );
+		printf("TEST_new_mpfss_naive: size value was %d, but %d expected.\n", m->size, size );
 		succ=false;
 	}
 
@@ -182,16 +186,297 @@ bool TEST_new_mpfss_naive( int t, size_t size){
 	return succ;
 }
 
+bool TEST_with_beta_obliv(size_t size, int index){
+	bool *local_bit_output;
+	uint8_t *local_output;
+	obliv size_t index_obliv=feedOblivInt(index, 1);
+	obliv uint8_t *beta_obliv;
+
+	uint8_t *this_beta=calloc(memblocksize, sizeof(uint8_t));
+	this_beta[0]=50;
+	dpf_with_beta_obliv( 		size,
+								index_obliv,
+								this_beta,
+								&beta_obliv,
+								0,  
+								&local_bit_output,
+								&local_output);
+
+	//revealing beta from obliv value
+	uint8_t *beta_revealed = calloc(1, memblocksize * sizeof(uint8_t));
+	revealOblivLLongArray((uint64_t *)beta_revealed, (uint64_t *)beta_obliv,memblocksize/sizeof(uint64_t),  0);
+
+	//revealing dpf
+	obliv bool *v1= calloc(size, sizeof(obliv bool));
+	obliv bool *v2= calloc(size, sizeof(obliv bool));
+	feedOblivBoolArray(v1, local_bit_output, size, 1);
+	feedOblivBoolArray(v2, local_bit_output, size, 2);
+	obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+	for(int i = 0; i <size ; i++) {
+		dpf_obliv[i]=v1[i]^v2[i]; 
+	}
+	free(v1);
+	free(v2);
+	bool *dpf= calloc(size, sizeof(bool ));
+	revealOblivBoolArray(dpf, dpf_obliv, size, 0);
+	free(dpf_obliv);
+
+	//revealing dpf_with_values
+	uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+	uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+	ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)local_output, size*memblocksize/sizeof(uint64_t), 1);
+	ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)local_output,size*memblocksize/sizeof(uint64_t),  2);
+	uint8_t *dpf_with_values=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+	for (size_t ii = 0; ii< size; ii++) {
+		for (size_t jj = 0; jj < memblocksize; jj++) {
+			uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];
+			dpf_with_values[ii * memblocksize + jj]=xor;
+		}
+	}
+	free(local_output_1);
+	free(local_output_2);
+
+	bool succ=true;
+	bool print=true;
+
+
+	
+	for(int i=0; i<size; i++){
+		if(i==index && dpf[i]!=1 ){
+			printf("TEST_with_beta_obliv: Resulting Dpf is not 1 at index %d.\n", index);
+				print=true;
+				succ=false;
+
+		}else if(dpf[i]!=0 && i!=index){
+			printf("TEST_with_beta_obliv: Resulting Dpf is not 0 at %d.\n", i);
+			print=true;
+			succ=false;
+			break;
+		}
+	}
+
+	if(index<size && index>=0){
+		for (int i = 0; i <memblocksize ; ++i){
+			uint8_t d=dpf_with_values[index * memblocksize + i];
+			uint8_t b=this_beta[i];
+			uint8_t b_r=beta_revealed[i];
+			if(b!=d){
+				printf("TEST_with_beta_obliv: the actual difference in block was not the same as beta%d.\n", i);
+				print=true;
+				succ=false;
+			}
+			if(b_r!=b){
+				printf("TEST_with_beta_obliv: Beta revealed was not the same as beta in block %d.\n", i);
+				print=true;
+				succ=false;
+			}
+		}
+	}	
+
+	for (int i = 0; i < size; ++i){
+		for (int j = 0; j <memblocksize ; ++j){
+			uint8_t a=dpf_with_values[i * memblocksize + j];
+			if(i!=index && a!=0){
+				printf("TEST_dpf_proper: block %d in position %d (not the index) was not zero.\n", j, i);
+				print=true;
+				succ=false;
+			}
+		}
+	}
+
+	if(print){
+
+		printf("Size: %d Index: %d\n",size, index );
+		char *buff=calloc(size+100, sizeof(int));
+		sprintf(buff, "TEST_dpf_proper: dpf   		 	 ");  
+
+		for(int j = 0; j <size ; j++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", dpf[j]);		
+		  	strcat(buff, r );  
+		}
+		printf("%s\n",buff);
+		free(buff);
+
+
+		printf("dpf_with_values\n");
+		for(int i = 0; i <size ; i++) {
+			for (size_t jj = 0; jj < memblocksize/sizeof(uint8_t); jj++) {
+				printf(" %d", dpf_with_values[i * memblocksize/sizeof(uint8_t) + jj]);		
+			}
+			printf("\n");
+		}
+			
+		printf("beta_revealed\n");
+		for (size_t jj = 0; jj < memblocksize; jj++) {
+			printf(" %d", beta_revealed[jj]);		
+		}
+		printf("\n");
+
+	}
+
+	free(dpf);
+	free(beta_revealed);
+	free(dpf_with_values);
+	return succ;
+
+}
+
+
+bool TEST_dpf_proper(size_t size, int index){
+	bool *local_bit_output;
+	uint8_t *local_output;
+	obliv size_t index_obliv=feedOblivInt(index, 1);
+	obliv uint8_t *active_block_delta;
+	
+	dpf_proper( 		size,
+						index_obliv,
+						&active_block_delta,
+						0,  
+						&local_bit_output,
+						&local_output);
+
+	//creating active value
+	uint8_t *activ_value = calloc(1, memblocksize * sizeof(uint8_t));
+	revealOblivLLongArray((uint64_t *)activ_value, (uint64_t *)active_block_delta,memblocksize/sizeof(uint64_t),  0);
+
+
+	//creating dpf
+	obliv bool *v1= calloc(size, sizeof(obliv bool));
+	obliv bool *v2= calloc(size, sizeof(obliv bool));
+	feedOblivBoolArray(v1, local_bit_output, size, 1);
+	feedOblivBoolArray(v2, local_bit_output, size, 2);
+	obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+	for(int i = 0; i <size ; i++) {
+		dpf_obliv[i]=v1[i]^v2[i]; 
+	}
+	free(v1);
+	free(v2);
+	bool *dpf= calloc(size, sizeof(bool ));
+	revealOblivBoolArray(dpf, dpf_obliv, size, 0);
+	free(dpf_obliv);
+
+	//creating dpf_with_values
+	uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+	uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+	ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)local_output, size*memblocksize/sizeof(uint64_t), 1);
+	ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)local_output,size*memblocksize/sizeof(uint64_t),  2);
+	uint8_t *dpf_with_values=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+	for (size_t ii = 0; ii< size; ii++) {
+		for (size_t jj = 0; jj < memblocksize; jj++) {
+			uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];
+			dpf_with_values[ii * memblocksize + jj]=xor;
+		}
+	}
+	free(local_output_1);
+	free(local_output_2);
+
+	bool succ=true;
+	bool print=true;
+
+	bool was_zero=true;
+	for (int i = 0; i < memblocksize; ++i){
+		if(activ_value[i]!=0){
+			was_zero=false;
+		}
+	}
+	if(was_zero && index<size){
+		printf("TEST_dpf_proper:  activ_value has wrong value after reveal. Was 0, but should be greater than 0. \n");
+		succ=false;
+		print=true;
+	}
+	if(!was_zero && index>size){
+		printf("TEST_dpf_proper: WARNING activ_value has wrong value after reveal. Should be 0, but was not. \n");
+	}
+
+	
+	for(int i=0; i<size; i++){
+		if(i==index && dpf[i]!=1 ){
+			printf("TEST_dpf_proper: Resulting Dpf is not 1 at index %d.\n", index);
+				print=true;
+				succ=false;
+
+		}else if(dpf[i]!=0 && i!=index){
+			printf("TEST_dpf_proper: Resulting Dpf is not 0 at %d.\n", i);
+			print=true;
+			succ=false;
+			break;
+		}
+	}
+
+	if(index<size && index>=0){
+		for (int i = 0; i <memblocksize ; ++i){
+			uint8_t a=dpf_with_values[index * memblocksize + i];
+			uint8_t b=activ_value[i];
+			if(a!=b){
+				printf("TEST_dpf_proper: active_block_delta was not the same as the actual difference in block %d.\n", i);
+				print=true;
+				succ=false;
+			}
+		}
+	}	
+
+	for (int i = 0; i < size; ++i){
+		for (int j = 0; j <memblocksize ; ++j){
+			uint8_t a=dpf_with_values[i * memblocksize + j];
+			if(i!=index && a!=0){
+				printf("TEST_dpf_proper: block %d in position %d (not the index) was not zero.\n", j, i);
+				print=true;
+				succ=false;
+			}
+		}
+	}
+
+	if(print){
+
+		printf("Size: %d Index: %d\n",size, index );
+		char *buff=calloc(size+100, sizeof(int));
+		sprintf(buff, "TEST_dpf_proper: dpf   		 	 ");  
+
+		for(int j = 0; j <size ; j++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", dpf[j]);		
+		  	strcat(buff, r );  
+		}
+		printf("%s\n",buff);
+		free(buff);
+
+
+		printf("dpf_with_values\n");
+		for(int i = 0; i <size ; i++) {
+			for (size_t jj = 0; jj < memblocksize/sizeof(uint8_t); jj++) {
+				printf(" %d", dpf_with_values[i * memblocksize/sizeof(uint8_t) + jj]);		
+			}
+			printf("\n");
+		}
+			
+		printf("active value\n");
+		for (size_t jj = 0; jj < memblocksize; jj++) {
+			printf(" %d", activ_value[jj]);		
+		}
+		printf("\n");
+
+	}
+
+	free(dpf);
+	free(dpf_with_values);
+	free(activ_value);
+	return succ;
+
+}
+
+
+
 bool TEST_dpf(size_t size, int index){
 	bool *vector;
-	obliv uint8_t *values = calloc(1, BLOCKSIZE*sizeof(obliv uint8_t));
+	obliv uint8_t *value = calloc(1, memblocksize * sizeof(obliv uint8_t));
 	obliv size_t index_obliv=feedOblivInt(index, 1);
-	dpf(size,index_obliv, values, 0,&vector);
+	dpf(size,index_obliv, value, 0,&vector);
 	
-	int activ_value;
-	int *activ_value_ptr=&activ_value;
-	revealOblivInt(activ_value_ptr, values[0], 0);
-	
+	uint8_t *activ_value = calloc(1, memblocksize * sizeof(uint8_t));
+	revealOblivLLongArray((uint64_t *)activ_value, (uint64_t *)value,memblocksize/sizeof(uint64_t),  0);
+
+
 	obliv bool *v1= calloc(size, sizeof(obliv bool));
 	obliv bool *v2= calloc(size, sizeof(obliv bool));
 	feedOblivBoolArray(v1, vector, size, 1);
@@ -209,25 +494,28 @@ bool TEST_dpf(size_t size, int index){
 	bool succ=true;
 	bool print=false;
 
-	if(activ_value==0 && index<size){
-		test_fail("TEST_dpf:  activ_value has wrong value after reveal. Was 0, but should be greater than 0. \n");
-		succ=false;
+	bool was_zero=true;
+	for (int i = 0; i < memblocksize; ++i){
+		if(activ_value[i]!=0){
+			was_zero=false;
+		}
 	}
-	if(activ_value!=0 && index>size){
-		test_fail("TEST_dpf: WARNING activ_value has wrong value after reveal. Was %d, but should be 0. \n", activ_value);
-		//succ=false;
+
+	if(was_zero && index<size){
+		printf("TEST_dpf:  activ_value has wrong value after reveal. Was 0, but should be greater than 0. \n");
+		succ=false;
 	}
 
 
 
 	for(int i=0; i<size; i++){
 		if(i==index && dpf[i]!=1 ){
-			test_fail("TEST_dpf: Resulting Dpf is not 1 at index %d.\n", index);
+			printf("TEST_dpf: Resulting Dpf is not 1 at index %d.\n", index);
 				print=true;
 				succ=false;
 
 		}else if(dpf[i]!=0 && i!=index){
-			test_fail("TEST_dpf: Resulting Dpf is not 0 at %d.\n", i);
+			printf("TEST_dpf: Resulting Dpf is not 0 at %d.\n", i);
 			print=true;
 			succ=false;
 			break;
@@ -244,12 +532,20 @@ bool TEST_dpf(size_t size, int index){
 			sprintf(r, " %d", dpf[j]);		
 		  	strcat(buff, r );  
 		}
-		test_fail("%s\n",buff);
+		printf("%s\n",buff);
 		free(buff);
+
+
+		printf("active value\n");
+		for (size_t jj = 0; jj < memblocksize; jj++) {
+			printf(" %d", activ_value[jj]);		
+		}
+		printf("\n");
 	}
 
+	free(activ_value);
 	free(vector);
-	free(values);
+	free(value);
 	free(dpf);
 	return succ;
 
@@ -272,16 +568,30 @@ void TEST_ALL_mpfss_naive(bool *err){
 	}
 
 	if(!TEST_dpf(100, 101 )){
-		printf("%s\n", "TEST_dpf(10,11) failed" );
+		printf("%s\n", "TEST_dpf(100, 101 ) failed" );
+		*err=1;
+	}
+	printf("TEST_dpf_proper---------------------------------------------------------\n" );
+
+	if(!TEST_dpf_proper(10, 3 )){
+		printf("%s\n", "TEST_dpf_proper(10,3) failed" );
+		*err=1;
+	}
+	if(!TEST_dpf_proper(10, 11 )){
+		printf("%s\n", "TEST_dpf_proper(10,11) failed" );
 		*err=1;
 	}
 
-	if(!TEST_dpf(10, -1 )){
-		printf("%s\n", "TEST_dpf(10,11) failed" );
+	if(!TEST_dpf_proper(100, 101 )){
+		printf("%s\n", "TEST_dpf_proper(100, 101 ) failed" );
 		*err=1;
 	}
+	printf("TEST_with_beta_obliv---------------------------------------------------------\n" );
 
-
+	if(!TEST_with_beta_obliv(10, 3 )){
+		printf("%s\n", "TEST_with_beta_obliv(10,3) failed" );
+		*err=1;
+	}
 
 	printf("TEST_new_mpfss_naive---------------------------------------------------------\n" );
 	if(!TEST_new_mpfss_naive( 6, (size_t) 10)){

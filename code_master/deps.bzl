@@ -1,8 +1,12 @@
 load(
-    "@bazel_tools//tools/build_defs/repo:http.bzl",
-    "http_archive",
+    "@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive",
 )
 load("@mpc_utils//mpc_utils:deps.bzl", "mpc_utils_deps")
+load(
+    "@io_bazel_rules_docker//cc:image.bzl", _cc_image_repos = "repositories",
+)
+
+
 
 # Sanitize a dependency so that it works correctly from code that includes
 # this workspace as a git submodule.
@@ -11,6 +15,7 @@ def clean_dep(dep):
 
 def code_master_deps():
     mpc_utils_deps()
+    _cc_image_repos()
 
     if "ack" not in native.existing_rules():
         http_archive(
@@ -38,4 +43,5 @@ def code_master_deps():
           urls = ["https://github.com/google/googletest/archive/8b6d3f9c4a774bef3081195d422993323b6bb2e0.zip"],  # 2019-03-05
           strip_prefix = "googletest-8b6d3f9c4a774bef3081195d422993323b6bb2e0",
           sha256 = "d21ba93d7f193a9a0ab80b96e8890d520b25704a6fac976fe9da81fffb3392e3",
-		)
+		    )
+
