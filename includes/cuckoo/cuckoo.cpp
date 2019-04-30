@@ -93,14 +93,13 @@ int place(int key, int rand_no, int tableID, int cnt, cuckoo_hashing *c) {
 	int rand=c->rands.at(rand_no);
 	int pos=hash_this(func, key, rand, length_of_table);
 	
-	log_err("key %d hashed to %d in Table %d (length %d) using rand_no %d \n", key, pos, tableID, length_of_table, rand_no);
+	debug("key %d hashed to %d in Table %d (length %d) using rand_no %d \n", key, pos, tableID, length_of_table, rand_no);
 
 	//Use separate vector here to see if position is used. Otherwise there would be problems with zero value and unused space.
 	if (!c->table_usage.at(tableID).at(pos)){
 		c->tables.at(tableID).at(pos).first=key;
 		c->tables.at(tableID).at(pos).second=rand_no;
 		c->table_usage.at(tableID).at(pos)=true;
-		printf("%d %d\n",c->tables.at(tableID).at(pos).first, c->tables.at(tableID).at(pos).second );
 		return cnt;
 	}else{
 
@@ -116,7 +115,7 @@ int place(int key, int rand_no, int tableID, int cnt, cuckoo_hashing *c) {
 		}else{
 			int new_key=c->tables.at(tableID).at(pos).first;
 			int new_rand_no=(c->tables.at(tableID).at(pos).second +1 )% c->no_hash_functions;
-			log_err("Key %d was evicted from %d in Table %d\n", new_key, pos, tableID);
+			debug("Key %d was evicted from %d in Table %d\n", new_key, pos, tableID);
 			c->tables.at(tableID).at(pos).first=key;
 			c->tables.at(tableID).at(pos).second=rand_no;
 			int new_tableID=(tableID+1)%c->no_hash_tables;
@@ -188,9 +187,12 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 		c->rands=rands;
 	}else{
 		c->rands=create_rand_vector(w);
-		for (std::vector<int>::const_iterator it = c->rands.begin(); it != c->rands.end(); ++it)
+		#ifdef DEBUG
+			printf("Rand values for hash functions\n");
+			for (std::vector<int>::const_iterator it = c->rands.begin(); it != c->rands.end(); ++it)
 	    	std::cout << *it << ' ';
-		printf("\n");
+			printf("\n");
+		#endif
 	}
 
 	return c;

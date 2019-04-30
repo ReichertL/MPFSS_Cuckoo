@@ -6,8 +6,9 @@
 // doubled when needed in load_data()
 
 /*one block: 16 byte -> Blockmultiple allow longer */
-#define block_no 2
-#define memblocksize BLOCKSIZE*block_no
+#define block_no 1
+//Blocksize =16 (set by fss)
+#define memblocksize 16*block_no
 
 
 void dpf_with_beta_obliv( size_t size, obliv size_t index, uint8_t *beta_non_obliv,obliv uint8_t **beta_obliv, int j,  bool **local_bit_output, uint8_t **local_output);

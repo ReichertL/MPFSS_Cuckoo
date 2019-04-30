@@ -11,6 +11,7 @@ cc_binary(
     name = "mpfss_cuckoo",
     srcs = [
         "mpfss_cuckoo.cpp",
+        "mpfss_cuckoo.h"
     
     ],
 
@@ -29,6 +30,7 @@ cc_binary(
 
     #copts = ["-DDEBUG"], 
 )
+
 
 
 oblivc_library(

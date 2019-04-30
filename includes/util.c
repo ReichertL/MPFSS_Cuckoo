@@ -108,7 +108,7 @@ int create_indices(int *indices_notobliv, int t , int size){
   int limit=t*100000;
   bool already_exists=false;
   while(i<t && sanity<limit){
-    rand= bcRandomInt(random_gen, (unsigned long long) size);
+    rand= bcRandomInt(random_gen, (unsigned long long) size-1);
     sanity++;
     for (int j = 0; j < i; ++j)
     {

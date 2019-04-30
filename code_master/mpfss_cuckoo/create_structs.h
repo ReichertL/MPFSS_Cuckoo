@@ -24,6 +24,11 @@ typedef struct  {
 	int *bucket_lenghts;
 	match **matches;
 	int ** all_buckets_array;
+	uint8_t **mpfss_output;
+	bool * mpfss_bit_output;
+	uint8_t **beta_vector;
+	bool set_beta;
+	
 } yao_arguments;
 
 mpfss_cuckoo * new_mpfss_cuckoo( int t, size_t size, int w, int b, int max_loop,int cp, int do_benchmark );
