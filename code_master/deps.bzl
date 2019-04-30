@@ -1,7 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive",)
 load("@mpc_utils//mpc_utils:deps.bzl", "mpc_utils_deps")
 load( "@io_bazel_rules_docker//cc:image.bzl", _cc_image_repos = "repositories",)
-load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
 
 
 
@@ -43,4 +42,3 @@ def code_master_deps():
 		    )
 
 
-    boost_deps()
