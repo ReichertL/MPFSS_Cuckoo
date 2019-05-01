@@ -111,7 +111,7 @@ bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matc
 }
 
 
-std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int *bucket_lenghts, int (*func)( int, int), int *evictions_logging){
+std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss,  int *bucket_lenghts, int (*func)( int, int)){
 
 
 	int size=mpfss->size;
@@ -132,14 +132,6 @@ std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss, int *indices_not
 		debug_print_buckets(all_buckets,b);
 	#endif
 
-	//--------------------Create Assignment----------------------------------------------------------------------
-	if(mpfss->cp==1){
-		log_info("Creating Assignment\n");
-	}
-	bool succ=create_assignement(mpfss, indices_notobliv, matches, func, all_buckets, evictions_logging);
-	if(!succ){
-		exit(1);
-	}
 	return all_buckets;
 }
 

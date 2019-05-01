@@ -50,9 +50,12 @@ ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port
 
 
 
-template <typename T>
-void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<T> *mc_args){
+void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
 
+        if(!mc_args->connection_already_exists){
+            mc_args->pd=prepare_connection(mc_args->cp, mc_args->host, mc_args->port);
+
+        }
 
         //Setting Parameters ------------------------------------------------------
 
@@ -99,41 +102,62 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<T> *mc_args){
                 }
             }
 
-            int *bucket_lenghts=(int *) calloc(b, sizeof(int));
+
+            if(!mc_args->buckets_set){
+                if(mc_args->cp==1){
+                    log_info("Creating Buckets\n");
+                }
+
+                int *bucket_lenghts=(int *) calloc(b, sizeof(int));
+                vector<vector<int>> all_buckets = preparations(m,bucket_lenghts,func);
+                mc_args->all_buckets=all_buckets;
+                mc_args->bucket_lenghts=bucket_lenghts;
+
+                int ** all_buckets_array=(int **) calloc(b, sizeof(int *));
+                for (int i = 0; i < b; ++i){
+                    all_buckets_array[i]=mc_args->all_buckets.at(i).data();
+                }
+                mc_args->all_buckets_array=all_buckets_array;    
+            }
+
+
+            //--------------------Create Assignment----------------------------------------------------------------------
+            if(mc_args->cp==1){
+                log_info("Creating Assignment\n");
+            }
             match **matches = (match **) calloc(b, sizeof(match*));
             int evictions_logging=0;
-            vector<vector<int>> all_buckets = preparations(m,indices_notobliv, matches, bucket_lenghts,func, &evictions_logging);
-
-
-            int ** all_buckets_array=(int **) calloc(b, sizeof(int *));
-            for (int i = 0; i < b; ++i){
-                all_buckets_array[i]=all_buckets.at(i).data();
+            bool succ=create_assignement(m, indices_notobliv, matches, func, mc_args->all_buckets, &evictions_logging);
+            if(!succ){
+                exit(1);
             }
 
             yao_arguments *y_args= (yao_arguments *) calloc(1, sizeof(yao_arguments));
             y_args->m=m;
-            y_args->bucket_lenghts=bucket_lenghts;
+            y_args->bucket_lenghts=mc_args->bucket_lenghts;
             y_args->matches=matches;
-            y_args->all_buckets_array=all_buckets_array;
-            y_args->set_beta=mc_args->set_beta;
+            y_args->all_buckets_array=mc_args->all_buckets_array;
+            y_args->set_beta=abs(mc_args->set_beta);
 
             int lim=memblocksize;
-            if(sizeof(T)<(size_t)memblocksize){
-                lim=sizeof(T);
+            if(sizeof(int)<(size_t)memblocksize){
+                lim=sizeof(int);
             }
-            if(mc_args->beta_vector.empty()){
-                for (int i = 0; i < b; ++i){
-                    uint8_t *this_beta= (uint8_t *)calloc(16, sizeof(uint8_t));
-                    T beta_T=mc_args->beta_vector.at(i);
-                    for (int j = 0; j < lim; ++j){
-                        uint8_t x = ((uint8_t *)(&beta_T))[j];
-                        this_beta[j]=x;
-                    }              
-                }
-            }else{
+            if(mc_args->set_beta==1){
+                
+                    for (int i = 0; i < b; ++i){
+                        uint8_t *this_beta= (uint8_t *)calloc(16, sizeof(uint8_t));
+                        int beta_int=mc_args->beta_vector.at(i);
+                        for (int j = 0; j < lim; ++j){
+                            uint8_t x = ((uint8_t *)(&beta_int))[j];
+                            this_beta[j]=x;
+                        }              
+                    }
+            }else if(mc_args->set_beta==-1){
+                //all distances will be 50
                 y_args->beta_vector=NULL;
+                
             }
-
         // Execute Yao's protocol and cleanup
             if(mc_args->cp==1){ 
                 log_info("Executing Yao Protocol\n");
@@ -152,14 +176,14 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<T> *mc_args){
             }
 
         //prepare results for c++     
-            std::vector<T> v;
+            std::vector<int> v;
             std::vector<bool> v_bit;
             for (int i = 0; i < size; ++i){
 
                 uint8_t *this_value_vector=y_args->mpfss_output[i];
-                T value;
+                int value;
                 for (int i = 0; i < lim; ++i){
-                    value = ((T)value << 8*i) | this_value_vector[i];
+                    value = ((int)value << 8*i) | this_value_vector[i];
                 }
                 v.push_back(value);
                 v_bit.push_back(y_args->mpfss_bit_output[i]);
@@ -171,48 +195,21 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<T> *mc_args){
 
     free(m);
     free(indices_notobliv);
-    free(bucket_lenghts);
     for (int i = 0; i < b; ++i)
     {
         free(matches[i]);   
     }
     free(matches);
-    free(all_buckets_array);
     free(y_args);
+}
+
+void free_mc_args( mpfss_cuckoo_args<int> *mc_args){
+
+    free(mc_args->all_buckets_array);
+    free(mc_args->bucket_lenghts);
+    free(mc_args->mpfss_output_raw);
+    free(mc_args->mpfss_bit_output_raw);
+    free(mc_args);
 
 }
 
-int main(int argc, char *argv[]) {
-
-  // call a function in another file
-
-    printf("MPFSS CUCKOO\n");
-    printf("=================\n\n");
-    // Check args
-    if (argc != 5) {
-
-        log_info("Usage: %s <hostname:port> <1|2> <t> <size> \n" 
-                 "\tHostname usage:\n" 
-                 "\tlocal -> 'localhost' remote -> IP address or DNS name\n", argv[0]);
-        exit(1);
-    }
-
-    const char *remote_host = strtok(argv[1], ":");
-    const char *port = strtok(NULL, ":");
-    int cp = (argv[2][0]=='1'? 1 : 2);
-    int t = atoi(argv[3]);
-    int size = atoi(argv[4]);
-
-    // Initialize protocols and obtain connection information
-    mpfss_cuckoo_args<int> *mc_args=(mpfss_cuckoo_args<int> *)calloc(1, sizeof(mpfss_cuckoo_args<int>));
-    mc_args->cp=cp;
-    mc_args->do_benchmark=true;
-    mc_args->pd=prepare_connection(mc_args->cp, remote_host, port);
-
-    std::vector<int> v(1.5*t, 50);
-    mc_args->set_beta=true;
-    mc_args->beta_vector=v;
-    run_mpfss_cuckoo(t, size, mc_args);
-
-    exit(0);
- }

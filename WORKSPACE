@@ -12,7 +12,12 @@ load("//code_master:deps.bzl", "code_master_deps")
 
 code_master_deps()
 
+load(
+    "@io_bazel_rules_docker//python:image.bzl",
+    _py_image_repos = "repositories",
+)
 
+_py_image_repos()
 
 #local_repository(
 #    name = "semesterprojekt",
