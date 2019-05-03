@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     mc_args->port=port;
     mc_args->host=remote_host;
     mc_args->connection_already_exists=true;
-
+    mc_args->print_stdout=true;
     //std::vector<int> v(1.5*t, 50);
     std::vector<int> v;
     mc_args->set_beta=-1;

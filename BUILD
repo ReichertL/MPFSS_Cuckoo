@@ -1,9 +1,20 @@
 #load("@io_bazel_rules_docker//python:image.bzl", "py_image")
 load("@io_bazel_rules_docker//cc:image.bzl", "cc_image")
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_image",
+)
 
 cc_image(
-    name = "run_cuckoo_image",
+    name = "run_cuckoo_cc_image",
+   # base= ":base_with_volume",
     binary = ":run_cuckoo_cc",
+)
+
+container_image(
+    name = "base_with_volume",
+    volumes=["/mnt"],
+
 )
 
 #py_binary(

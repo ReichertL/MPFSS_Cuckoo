@@ -178,6 +178,7 @@ bool *reveal_vector(bool *vector, int vector_size, int print){
 		  	strcat(buff, r );  
 		}
 		debug("%s\n",buff);
+		log_info("%s\n",buff);
 		free(buff);
 
 	}
@@ -208,6 +209,11 @@ void create_mpfss_vector_cuckoo(bool *mpfss_bit_vector,uint8_t **mpfss_value_vec
         	}
         }
     }
+
+    /*#ifdef  INFO
+        bool * v1=reveal_vector(mpfss_bit_vector, size, 1);  
+        free(v1);
+    #endif*/
 
     #ifdef DEBUG
         bool * v=reveal_vector(mpfss_bit_vector, size, 1);  

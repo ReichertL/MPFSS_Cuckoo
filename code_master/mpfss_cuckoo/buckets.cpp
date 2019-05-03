@@ -40,21 +40,21 @@ void debug_print_buckets(vector<vector<int> > all_buckets , int b ){
 	}
 }
 
-vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)( int, int)){
+vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)( int, int), std::vector<int> rands){
 
 	vector<vector<int>> all_buckets(b);
 
 	for (int key = 0; key < size; ++key){
 
-		for (int rand = 0; rand < w; ++rand){
-			int bucket_number=hash_this(func,key,rand, b);
+		for (int j = 0; j < w; ++j){
+			int bucket_number=hash_this(func,key,rands.at(j), b);
 			all_buckets.at(bucket_number).push_back(key);
 		}
 	}
 	return all_buckets;
 }
 
-bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets , int *evictions_logging){
+bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets , int *evictions_logging, std::vector<int> rands){
 	
 	int w=mpfss->w;
 	int b=mpfss->b;
@@ -65,7 +65,7 @@ bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matc
 		//array of len 1 holding value b
 		int size_of_hashtable[1]={b};
 		int no_hash_tables=1;
-		cuckoo_hashing *c=initialize( w, no_hash_tables, size_of_hashtable, NULL, max_loop, func);
+		cuckoo_hashing *c=initialize( w, no_hash_tables, size_of_hashtable, rands.data(), max_loop, func);
 		
 		int evictions=cuckoo(indices_notobliv, t, c);
 		*evictions_logging=evictions;
@@ -111,7 +111,7 @@ bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matc
 }
 
 
-std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss,  int *bucket_lenghts, int (*func)( int, int)){
+std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss,  int *bucket_lenghts, int (*func)( int, int), std::vector<int> rands){
 
 
 	int size=mpfss->size;
@@ -121,7 +121,7 @@ std::vector<std::vector<int>> preparations(mpfss_cuckoo *mpfss,  int *bucket_len
 
 	//--------------------Create Buckets----------------------------------------------------------------------
 	log_info("Creating Buckets with size %d ,b %d and w %d\n", size,b, w);
-	vector<vector<int>> all_buckets=generate_buckets_cuckoo( size,  w,  b, func);
+	vector<vector<int>> all_buckets=generate_buckets_cuckoo( size,  w,  b, func, rands);
 
 	for (int i = 0; i < b; ++i){
 		vector<int> v=all_buckets.at(i);

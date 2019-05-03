@@ -36,6 +36,7 @@ cc_binary(
     ],
 
     #copts = ["-DDEBUG -g3"], 
+    copts = ["-DINFO"], 
 )
 
 

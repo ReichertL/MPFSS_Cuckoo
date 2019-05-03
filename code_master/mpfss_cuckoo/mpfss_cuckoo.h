@@ -9,16 +9,21 @@ template <typename T>
 struct  mpfss_cuckoo_args{
 	int cp; 			//needs to be set
 	bool do_benchmark; //needs to be set
+	bool print_stdout=true; 
 
 	ProtocolDesc pd; //set either pd or port and host
 	const char *host;
     const char *port;
     bool connection_already_exists; //need to be set
 
+    std::vector<int> indices;
+    int indices_set; // needed. 0: create random indices, 1:indices are set, -1: take indices from 0 to t
+
+	std::vector<int> rands;
 	int *bucket_lenghts;
 	bool buckets_set;
 	int ** all_buckets_array;
-	std::vector<std::vector<int>> all_buckets;
+	std::vector<std::vector<int>> all_buckets; //sollte das hier nicht auch T sein
 
 	std::vector<T> mpfss_output;
 	std::vector<bool> mpfss_bit_output;

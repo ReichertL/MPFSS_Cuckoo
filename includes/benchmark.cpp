@@ -4,6 +4,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 extern "C"{
     #include <sys/types.h>
@@ -42,10 +43,22 @@ void benchmark_list(string type, int len_of_lists, std::vector<string> list_of_n
         struct stat myStat;
         if (!((stat(path.c_str(), &myStat) == 0) && (((myStat.st_mode) & S_IFMT) == S_IFDIR))) {
 
-            const int dir_err = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-            if (-1 == dir_err){
-                printf("Error creating directory %s!\n", path.c_str());
-                exit(1);
+            //splits path
+            std::replace(path.begin(), path.end(), '/', ' '); 
+            vector<string> array;
+            stringstream ss(path);
+            string temp;
+            while (ss >> temp)
+                array.push_back(temp);
+            string part;
+            for (int i = 0; i < (int) array.size(); ++i){
+                part.append(array.at(i));
+                part.append("/");
+                const int dir_err = mkdir(part.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+                if (-1 == dir_err){
+                    printf("Error creating directory %s!\n", part.c_str());
+                    exit(1);
+                }
             }
         }
 

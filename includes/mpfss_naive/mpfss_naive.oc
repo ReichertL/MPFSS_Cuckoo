@@ -39,7 +39,7 @@ mpfss * new_mpfss_naive( int t, size_t size){
 */
 
 void dpf_with_beta_obliv( size_t size, obliv size_t index, uint8_t *beta_non_obliv,obliv uint8_t **beta_obliv, int j,  bool **local_bit_output_ret, uint8_t **local_output_ret){
-	log_info("-----------DPF Run: %d -----------\n",j );
+	debug("-----------DPF Run: %d -----------\n",j );
 	//int memblocksize=BLOCKSIZE*block_no;
 	OcCopy memblockcpy=ocCopyCharN(memblocksize);
 	bool cpgr_set=false;
@@ -50,7 +50,7 @@ void dpf_with_beta_obliv( size_t size, obliv size_t index, uint8_t *beta_non_obl
 	#ifdef DEBUG
 		int index_non_obliv;
 		revealOblivInt(&index_non_obliv, (obliv int) index, 0);
-		log_info(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
+		debug(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
 	#endif 
 
 
@@ -242,11 +242,13 @@ void dpf_with_beta_obliv( size_t size, obliv size_t index, uint8_t *beta_non_obl
 	
 */
 void dpf_proper( size_t size, obliv size_t index, obliv uint8_t **active_block_delta_ret, int j,  bool **local_bit_output_ret, uint8_t **local_output_ret){
-	log_info("-----------DPF Run: %d -----------\n",j );
+	debug("-----------DPF Run: %d -----------\n",j );
 	//Works for blockmultiple==1
-	int index_non_obliv;
-	revealOblivInt(&index_non_obliv, (obliv int) index, 0);
-	log_info(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
+	#ifdef DEBUG
+		int index_non_obliv;
+		revealOblivInt(&index_non_obliv, (obliv int) index, 0);
+		debug(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
+	#endif
 
 	//int memblocksize=BLOCKSIZE*block_no;
 	OcCopy memblockcpy=ocCopyCharN(memblocksize);
@@ -409,11 +411,13 @@ void dpf_proper( size_t size, obliv size_t index, obliv uint8_t **active_block_d
 	  Return type: Void
 */
 void dpf( size_t size, obliv size_t index, obliv uint8_t **this_value, int j,  bool **vector){
-	log_info("-----------DPF Run: %d -----------\n",j );
-	//Works for blockmultiple==1
-	int index_non_obliv;
-	revealOblivInt(&index_non_obliv, (obliv int) index, 0);
-	log_info(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
+	debug("-----------DPF Run: %d -----------\n",j );
+	#ifdef DEBUG
+		//Works for blockmultiple==1
+		int index_non_obliv;
+		revealOblivInt(&index_non_obliv, (obliv int) index, 0);
+		debug(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
+	#endif
 
 	//int memblocksize=BLOCKSIZE*block_no;
 	OcCopy memblockcpy=ocCopyCharN(memblocksize);

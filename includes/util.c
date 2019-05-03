@@ -9,7 +9,7 @@
 #include <bcrandom.h>
 #include"dbg.h"
 
-
+//Has significant overhead
 double wallClock()
 {
   struct timespec t;

@@ -2,6 +2,8 @@
 #include <string>
 #include <fstream>
 #include<iostream>
+#include <chrono>
+#include <ctime> 
 
 extern "C" {
     #include "obliv.h"
@@ -17,7 +19,6 @@ extern "C" {
 using namespace std;
 
 double lap;
-int cp;
 
 
 
@@ -41,7 +42,7 @@ ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port
         }
 
         // Final initializations before entering protocol
-        log_info("-----Party %d-------\n", cp);
+
         setCurrentParty(&pd, cp); // only checks for a '1'   
 
         return pd;
@@ -52,12 +53,12 @@ ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port
 
 void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
 
-        if(!mc_args->connection_already_exists){
-            mc_args->pd=prepare_connection(mc_args->cp, mc_args->host, mc_args->port);
+    if(mc_args->print_stdout)log_info("Party %d \n", mc_args->cp);
+    if(!mc_args->connection_already_exists){
+    	mc_args->pd=prepare_connection(mc_args->cp, mc_args->host, mc_args->port);
+	}
 
-        }
-
-        //Setting Parameters ------------------------------------------------------
+        //--------------------Setting Parameters ------------------------------------------------------
 
             //following Angle et al. : PIR..
             int w= 3;   //Number of hash functions
@@ -70,46 +71,82 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
             int (*func)( int, int)=hashfunc_absl;
             int memblocksize=16; //TODO
 
-        //Preparations: Creating Indices, Buckets and finding assignment------------
-            lap = wallClock();        
+            
+        //--------------------Create Indices----------------------------------------------------------------------
+            auto start_indices = std::chrono::system_clock::now();
+            int *indices_notobliv;
+     		if(mc_args->cp==1){
+	            if(mc_args->indices_set==1){
+		            	if(mc_args->print_stdout)log_info("Indices provided by caller\n");
+			       	    indices_notobliv = mc_args->indices.data();
+	        	}else if(mc_args->indices_set==-1){
+		       	    indices_notobliv = (int *)calloc(t, sizeof(int ));
+		       	    std::vector<int> indices_notobliv_vec;
+		       	    if(mc_args->cp==1){
+		       	    	if(mc_args->print_stdout)log_info("Creating Indices iteratively\n");
+		       	    	for (int i = 0; i < t; ++i){
+		       	    		indices_notobliv[i]=i;
+		       	    		indices_notobliv_vec.push_back(i);
+		       	    	}
+		       	    }
+		       	    mc_args->indices=indices_notobliv_vec;
 
-            log_info("Creating Indices\n");
-            int *indices_notobliv = (int *)calloc(t, sizeof(int ));
-            if(mc_args->cp==1){
-                bool created=false;
-                int count=0;
-                while(!created && count<100000){ 
-                    created=create_indices(indices_notobliv, t , size);
-                    count++;
-                }
-                if(created==false){
-                    log_err("Error: Could not create Indices.\n" );
-                    exit(1);
-                }
+	        	}else{
+		       	    indices_notobliv = (int *)calloc(t, sizeof(int ));
 
-                log_info("Write Indices to file\n");
-                string filename="results_debug_mpfss_cuckoo_indices.txt";
-                ofstream file;
-                try{
-                    file.open (filename);
-                    for (int i = 0; i < t; ++i){
-                        file << indices_notobliv[i]<<"\n";
-                    }
+		            if(mc_args->print_stdout)log_info("Creating Indices randomly\n");
+		            bool created=false;
+		            int count=0;
+		            while(!created && count<100000){ 
+		                created=create_indices(indices_notobliv, t , size);
+		                count++;
+		            }
+		            if(created==false){
+		                log_err("Error: Could not create Indices.\n" );
+		                exit(1);
+		            }	              
+		           std::vector<int> indices_notobliv_vec(indices_notobliv, indices_notobliv+t);
+		           // vector<int> indices_notobliv_vec(std::begin(*indices_notobliv), std::end(indices_notobliv));
+		           	mc_args->indices=indices_notobliv_vec;
+	
+	        	}
+	        	#ifdef TESTING
+			        if(mc_args->print_stdout)log_info("Write Indices to file\n");
+			        string filename="results_debug_mpfss_cuckoo_indices.txt";
+			        ofstream file;
+			        try{
+			            file.open (filename);
+			            for (int i = 0; i < t; ++i){
+			                file << indices_notobliv[i]<<"\n";
+			            }
 
-                    file.close();
-                }catch(ios_base::failure& e){
-                    log_err("%s",e.what());
-                }
-            }
+			        	file.close();
+			        }catch(ios_base::failure& e){
+			            if(mc_args->print_stdout)log_err("%s",e.what());
+			        }
+		        #endif
+	    	}else{
+	    		indices_notobliv= (int *)calloc(t, sizeof(int ));
+	    	}
 
+    		auto end_indices = std::chrono::system_clock::now();
+    		std::chrono::duration<double> runtime_indices = end_indices-start_indices;
+            if(mc_args->print_stdout)log_info("Time to create indices : %lf seconds\n", runtime_indices.count());
+
+        //--------------------Create Buckets----------------------------------------------------------------------
+            auto start_buckets = std::chrono::system_clock::now();
 
             if(!mc_args->buckets_set){
-                if(mc_args->cp==1){
-                    log_info("Creating Buckets\n");
-                }
-
+                if(mc_args->print_stdout) log_info("Creating Buckets\n");
+                
+                std::vector<int> rands=create_rand_vector(w);
+                #if defined(INFO) || defined(DEBUG)
+                    printf("rands Party %d :", mc_args->cp);
+              		print_vector(rands);
+ 				#endif
+                mc_args->rands=rands;
                 int *bucket_lenghts=(int *) calloc(b, sizeof(int));
-                vector<vector<int>> all_buckets = preparations(m,bucket_lenghts,func);
+                vector<vector<int>> all_buckets = preparations(m,bucket_lenghts,func, mc_args->rands);
                 mc_args->all_buckets=all_buckets;
                 mc_args->bucket_lenghts=bucket_lenghts;
 
@@ -118,19 +155,32 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
                     all_buckets_array[i]=mc_args->all_buckets.at(i).data();
                 }
                 mc_args->all_buckets_array=all_buckets_array;    
+            }else{
+            	if(mc_args->print_stdout) log_info("Buckets were provided by caller\n");
             }
+            
 
+    		auto end_buckets = std::chrono::system_clock::now();
+    		std::chrono::duration<double> runtime_buckets = end_buckets-start_buckets;
+            if(mc_args->print_stdout)log_info("Time to create Buckets : %lf seconds\n", runtime_buckets.count());
 
-            //--------------------Create Assignment----------------------------------------------------------------------
-            if(mc_args->cp==1){
-                log_info("Creating Assignment\n");
-            }
+        //--------------------Create Assignment----------------------------------------------------------------------
+            auto start_proto = std::chrono::system_clock::now();
+            if(mc_args->print_stdout) log_info("Creating Assignment\n");
+            
             match **matches = (match **) calloc(b, sizeof(match*));
             int evictions_logging=0;
-            bool succ=create_assignement(m, indices_notobliv, matches, func, mc_args->all_buckets, &evictions_logging);
+            bool succ=create_assignement(m, indices_notobliv, matches, func, mc_args->all_buckets, &evictions_logging, mc_args->rands );
             if(!succ){
                 exit(1);
             }
+
+			std::chrono::duration<double>  runtime_assignment;
+			#if defined(INFO) || defined(DEBUG)
+            	auto end_assi = std::chrono::system_clock::now();
+    			runtime_assignment = end_assi-start_proto;
+            	if(mc_args->print_stdout)log_info("Time to create Assignment : %lf seconds\n", runtime_assignment.count());
+            #endif
 
             yao_arguments *y_args= (yao_arguments *) calloc(1, sizeof(yao_arguments));
             y_args->m=m;
@@ -158,24 +208,27 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
                 y_args->beta_vector=NULL;
                 
             }
-        // Execute Yao's protocol and cleanup
-            if(mc_args->cp==1){ 
-                log_info("Executing Yao Protocol\n");
-            }
+
+        //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
+            
+            if(mc_args->print_stdout) log_info("Executing Yao Protocol\n");
+           
             execYaoProtocol(&mc_args->pd, mpfss_batch_cuckoo, y_args);
+            size_t bytesSent=tcp2PBytesSent(&mc_args->pd);
             cleanupProtocol(&mc_args->pd);
             
+        //--------------------Print results----------------------------------------------------------------------
+            auto end_proto = std::chrono::system_clock::now();
+    		std::chrono::duration<double> runtime = end_proto-start_proto;
+            if(mc_args->print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
 
-        // Print results
-            double runtime = wallClock() - lap; // stop clock here 
-            log_info("Total time: %lf seconds\n", runtime);
             if (mc_args->do_benchmark && mc_args->cp==1){
-                std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions"};
-                std::vector<string> list_of_values={to_string(runtime),to_string(t),to_string(size),to_string(b),to_string(w),to_string(max_loop), "no", to_string(evictions_logging) };
-                benchmark_list("cuckoo", 8, list_of_names, list_of_values);
+                std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions", "runtime_indices","runtime_buckets", "runtime_assignment", "bytesSent"};
+                std::vector<string> list_of_values={to_string(runtime.count()),to_string(t),to_string(size),to_string(b),to_string(w),to_string(max_loop), "no", to_string(evictions_logging),to_string(runtime_indices.count()),to_string(runtime_buckets.count()), to_string(runtime_assignment.count()), to_string(int(bytesSent)) };
+                benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
             }
 
-        //prepare results for c++     
+        //--------------------Prepare results for c++----------------------------------------------------------------------     
             std::vector<int> v;
             std::vector<bool> v_bit;
             for (int i = 0; i < size; ++i){
@@ -194,9 +247,11 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
             mc_args->mpfss_bit_output_raw=y_args->mpfss_bit_output;
 
     free(m);
-    free(indices_notobliv);
-    for (int i = 0; i < b; ++i)
-    {
+    if(!mc_args->indices_set){
+    	free(indices_notobliv);
+    }
+
+    for (int i = 0; i < b; ++i){
         free(matches[i]);   
     }
     free(matches);

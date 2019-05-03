@@ -200,7 +200,10 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 
 std::vector<int> create_rand_vector( int no){
   
-  srand (time(NULL));
+  //can potenially cause problems in assymetric communication scenarios
+  int now=time(NULL);
+  srand (now);
+  debug("seed %d\n",now);
   std::vector<int> res;
   int i=0;
   int sanity=0;
