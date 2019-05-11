@@ -1,0 +1,193 @@
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.344603
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.821488
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.621818
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.517988
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.927622
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.036932
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.305731
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.926743
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.318405
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.879777
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.778288
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.178514
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.189225
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.081717
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.279855
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.348487
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.865040
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.273510
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.387626
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.090018
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.515726
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.294937
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.605049
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.762237
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.198687
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.421555
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.606595
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:160.281355
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.698564
+splits---------------------t:74 size:2048----------------------------
+t:74
+size:2048
+runtime:159.966527
+splits---------------------t:192 size:16384----------------------------
+*** Error in `/app/code_projekt/mpfss_splits/mpfss_splits_repeat': malloc(): memory corruption: 0x0000000000f631c0 ***
+======= Backtrace: =========
+/lib/x86_64-linux-gnu/libc.so.6(+0x70bfb)[0x7ffa64215bfb]
+/lib/x86_64-linux-gnu/libc.so.6(+0x76fc6)[0x7ffa6421bfc6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x79089)[0x7ffa6421e089]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_calloc+0x27b)[0x7ffa64220b7b]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x40670f]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x406397]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x4036a8]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x4038c3]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x403a55]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x41abf3]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x40357e]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x403138]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf1)[0x7ffa641c52e1]
+/app/code_projekt/mpfss_splits/mpfss_splits_repeat[0x4031a9]
+======= Memory map: ========
+00400000-0052b000 r-xp 00000000 08:01 259505                             /app/code_projekt/mpfss_splits/mpfss_splits_repeat.runfiles/__main__/code_projekt/mpfss_splits/mpfss_splits_repeat
+0052c000-0052e000 r--p 0012b000 08:01 259505                             /app/code_projekt/mpfss_splits/mpfss_splits_repeat.runfiles/__main__/code_projekt/mpfss_splits/mpfss_splits_repeat
+0052e000-00533000 rw-p 0012d000 08:01 259505                             /app/code_projekt/mpfss_splits/mpfss_splits_repeat.runfiles/__main__/code_projekt/mpfss_splits/mpfss_splits_repeat
+00533000-00534000 rw-p 00000000 00:00 0 
+00f3c000-0137a000 rw-p 00000000 00:00 0                                  [heap]
+7ffa54000000-7ffa54021000 rw-p 00000000 00:00 0 
+7ffa54021000-7ffa58000000 ---p 00000000 00:00 0 
+7ffa58000000-7ffa58021000 rw-p 00000000 00:00 0 
+7ffa58021000-7ffa5c000000 ---p 00000000 00:00 0 
+7ffa5c000000-7ffa5c021000 rw-p 00000000 00:00 0 
+7ffa5c021000-7ffa60000000 ---p 00000000 00:00 0 
+7ffa62d88000-7ffa62d89000 ---p 00000000 00:00 0 
+7ffa62d89000-7ffa63589000 rw-p 00000000 00:00 0 
+7ffa63589000-7ffa6358a000 ---p 00000000 00:00 0 
+7ffa6358a000-7ffa63d8a000 rw-p 00000000 00:00 0 
+7ffa63d8a000-7ffa63da0000 r-xp 00000000 08:01 258656                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7ffa63da0000-7ffa63f9f000 ---p 00016000 08:01 258656                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7ffa63f9f000-7ffa63fa0000 r--p 00015000 08:01 258656                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7ffa63fa0000-7ffa63fa1000 rw-p 00016000 08:01 258656                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7ffa63fa1000-7ffa63fa4000 r-xp 00000000 08:01 256311                     /lib/x86_64-linux-gnu/libdl-2.24.so
+7ffa63fa4000-7ffa641a3000 ---p 00003000 08:01 256311                     /lib/x86_64-linux-gnu/libdl-2.24.so
+7ffa641a3000-7ffa641a4000 r--p 00002000 08:01 256311                     /lib/x86_64-linux-gnu/libdl-2.24.so
+7ffa641a4000-7ffa641a5000 rw-p 00003000 08:01 256311                     /lib/x86_64-linux-gnu/libdl-2.24.so
+7ffa641a5000-7ffa6433a000 r-xp 00000000 08:01 256308                     /lib/x86_64-linux-gnu/libc-2.24.so
+7ffa6433a000-7ffa6453a000 ---p 00195000 08:01 256308                     /lib/x86_64-linux-gnu/libc-2.24.so
+7ffa6453a000-7ffa6453e000 r--p 00195000 08:01 256308                     /lib/x86_64-linux-gnu/libc-2.24.so
+7ffa6453e000-7ffa64540000 rw-p 00199000 08:01 256308                     /lib/x86_64-linux-gnu/libc-2.24.so
+7ffa64540000-7ffa64544000 rw-p 00000000 00:00 0 
+7ffa64544000-7ffa64647000 r-xp 00000000 08:01 256312                     /lib/x86_64-linux-gnu/libm-2.24.so
+7ffa64647000-7ffa64846000 ---p 00103000 08:01 256312                     /lib/x86_64-linux-gnu/libm-2.24.so
+7ffa64846000-7ffa64847000 r--p 00102000 08:01 256312                     /lib/x86_64-linux-gnu/libm-2.24.so
+7ffa64847000-7ffa64848000 rw-p 00103000 08:01 256312                     /lib/x86_64-linux-gnu/libm-2.24.so
+7ffa64848000-7ffa649ba000 r-xp 00000000 08:01 258671                     /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.22
+7ffa649ba000-7ffa64bba000 ---p 00172000 08:01 258671                     /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.22
+7ffa64bba000-7ffa64bc4000 r--p 00172000 08:01 258671                     /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.22
+7ffa64bc4000-7ffa64bc6000 rw-p 0017c000 08:01 258671                     /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.22
+7ffa64bc6000-7ffa64bca000 rw-p 00000000 00:00 0 
+7ffa64bca000-7ffa64be2000 r-xp 00000000 08:01 256323                     /lib/x86_64-linux-gnu/libpthread-2.24.so
+7ffa64be2000-7ffa64de1000 ---p 00018000 08:01 256323                     /lib/x86_64-linux-gnu/libpthread-2.24.so
+7ffa64de1000-7ffa64de2000 r--p 00017000 08:01 256323                     /lib/x86_64-linux-gnu/libpthread-2.24.so
+7ffa64de2000-7ffa64de3000 rw-p 00018000 08:01 256323                     /lib/x86_64-linux-gnu/libpthread-2.24.so
+7ffa64de3000-7ffa64de7000 rw-p 00000000 00:00 0 
+7ffa64de7000-7ffa64e13000 r-xp 00000000 08:01 258667                     /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+7ffa64e13000-7ffa65012000 ---p 0002c000 08:01 258667                     /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+7ffa65012000-7ffa65013000 r--p 0002b000 08:01 258667                     /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+7ffa65013000-7ffa65014000 rw-p 0002c000 08:01 258667                     /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0
+7ffa65014000-7ffa65037000 r-xp 00000000 08:01 256304                     /lib/x86_64-linux-gnu/ld-2.24.so
+7ffa6522d000-7ffa65237000 rw-p 00000000 00:00 0 
+7ffa65237000-7ffa65238000 r--p 00023000 08:01 256304                     /lib/x86_64-linux-gnu/ld-2.24.so
+7ffa65238000-7ffa65239000 rw-p 00024000 08:01 256304                     /lib/x86_64-linux-gnu/ld-2.24.so
+7ffa65239000-7ffa6523a000 rw-p 00000000 00:00 0 
+7fffd0757000-7fffd0791000 rw-p 00000000 00:00 0                          [stack]
+7fffd07b6000-7fffd07b9000 r--p 00000000 00:00 0                          [vvar]
+7fffd07b9000-7fffd07bb000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
