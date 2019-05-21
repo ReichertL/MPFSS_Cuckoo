@@ -28,6 +28,13 @@ cc_library(
    # copts = ["-DDEBUG -g"], 
 )
 
+cc_library(
+    name = "uint128_c",
+    srcs = ["uint128.c"],
+    hdrs = ["uint128.h"],
+    visibility = ["//visibility:public"],
+   # copts = ["-DDEBUG -g"], 
+)
 
 cc_library(
     name = "cuckoo",

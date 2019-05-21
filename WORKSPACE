@@ -19,6 +19,11 @@ load(
 
 _py_image_repos()
 
+local_repository(
+    name = "distributed_vector_ole",
+    path = "../distributed_vector_ole/",
+    )
+
 #local_repository(
 #    name = "semesterprojekt",
 #    path = "../semesterprojekt",

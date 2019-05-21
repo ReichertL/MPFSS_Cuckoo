@@ -1,7 +1,6 @@
 //ensures header file is only included once
 #pragma once
 
-double lap;
 int cp;
 
 
@@ -12,4 +11,5 @@ typedef struct {
 } mpfss;
 
 mpfss * new_mpfss_naive( int t, size_t size);
+void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size);
 void mpfss_naive(void* args);

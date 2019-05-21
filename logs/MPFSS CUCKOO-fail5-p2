@@ -1,0 +1,174 @@
+MPFSS CUCKOO
+=================
+
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunValueProviderVectorOLE:L77) Party 2 
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.cpp:prepare_connection:L36) Connecting to localhost on port 12345 ...
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunValueProviderVectorOLE:L111) Creating Buckets
+DEBUG includes/cuckoo/cuckoo.cpp:create_rand_vector:L205: seed 74211
+
+rands Party 2 :1499465135 518687138 613469294 
+[INFO] (code_master/mpfss_cuckoo/buckets.cpp:preparations:L125) Creating Buckets with size 20 ,b 3 and w 3
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:debug_print_buckets:L38: Bucket 0: 1 2 3 5 5 5 6 7 8 10 11 11 12 12 13 15 17 17 19 
+
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:debug_print_buckets:L38: Bucket 1: 0 0 1 2 3 3 4 4 4 6 7 7 8 9 10 10 11 12 13 13 14 15 16 17 18 
+
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:debug_print_buckets:L38: Bucket 2: 0 1 2 6 8 9 9 14 14 15 16 16 18 18 19 19 
+
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunValueProviderVectorOLE:L137) Time to create Buckets : 0.000148 seconds
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunValueProviderVectorOLE:L142) Creating Assignment
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunValueProviderVectorOLE:L154) Time to create Assignment : 0.000007 seconds
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunValueProviderVectorOLE:L168) Executing Yao Protocol
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L56: -----------DPF Run: 0 -----------
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L75:  call to dpf with size 19, index 14
+
+correction
+skalar
+227 196 7 1 0 167 2 30 236 243 141 183 63 241 118 1 
+Beta
+151 237 84 1 0 205 248 161 117 208 207 102 245 113 231 1 
+229 72 87 74 70 167 190 171 127 162 152 251 124 197 141 185 116 128 144 38 157 253 167 31 137 197 30 216 235 201 2 0 
+0 0 0 0 0 0 0 10 DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L235: dpf
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L267: dpf_with_values 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 226 56 57 171 110 129 211 122 73 42 113 183 209 54 91 63
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L281: activ_value 
+ 226 56 57 171 110 129 211 122 73 42 113 183 209 54 91 63
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L56: -----------DPF Run: 1 -----------
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L75:  call to dpf with size 25, index 6
+
+correction
+skalar
+49 136 215 1 0 116 43 89 160 95 188 236 198 121 103 1 
+Beta
+190 167 169 1 0 245 91 20 129 86 7 55 185 152 220 1 
+94 11 40 17 6 13 177 157 6 51 65 191 213 10 245 191 107 170 163 108 184 213 132 68 10 145 66 226 60 157 2 0 
+0 0 0 0 0 0 0 10 DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L235: dpf
+ 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L267: dpf_with_values 1
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 221 90 133 167 79 222 107 91 16 76 186 217 208 91 231 25
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L281: activ_value 
+ 221 90 133 167 79 222 107 91 16 76 186 217 208 91 231 25
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L56: -----------DPF Run: 2 -----------
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L75:  call to dpf with size 16, index -1
+
+correction
+skalar
+0 32 34 1 0 187 106 230 221 4 13 11 1 159 133 1 
+Beta
+239 44 137 1 0 187 143 133 159 71 197 129 85 219 68 1 
+0 224 91 12 150 82 42 86 33 166 230 61 165 173 83 174 132 57 51 124 106 115 149 219 166 45 123 14 107 238 1 0 
+0 0 0 0 0 0 0 10 DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L235: dpf
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L267: dpf_with_values 2
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 56 30 112 91 93 53 247 138 42 241 5 138 240 237 194 23
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L281: activ_value 
+ 56 30 112 91 93 53 247 138 42 241 5 138 240 237 194 23
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L93: ------------- RESUTLS -------------
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:reveal_vector:L188: Revealed Vector:  0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1
+
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.oc:reveal_vector:L189) Revealed Vector:  0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1
+MPFSS with Values 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+221 90 133 167 79 222 107 91 16 76 186 217 208 91 231 25 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+226 56 57 171 110 129 211 122 73 42 113 183 209 54 91 63 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+56 30 112 91 93 53 247 138 42 241 5 138 240 237 194 23 
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunValueProviderVectorOLE:L175) Time to execute Yao Protocol : 13.967982 seconds
+t:2
+size:20
+b:3
+w:3
+max_loop:10
+evictions:0
+cprg:1
+runtime:13.967982
+runtime_buckets:0.000148
+runtime_assignment:0.000007

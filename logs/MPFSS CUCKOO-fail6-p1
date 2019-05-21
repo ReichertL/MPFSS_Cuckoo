@@ -1,0 +1,375 @@
+=2734==    by 0x420DAA: mpfss_batch_cuckoo (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x482650: mainYaoProtocol (obliv_bits.c:1125)
+==2734==    by 0x4826EE: execYaoProtocol (obliv_bits.c:1140)
+==2734==    by 0x4098F4: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:360)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+196 163 122 135 156 109 225 247 64 176 183 241 255 152 148 91 228 255 255 255 255 255 255 255 255 255 255 255 255 255 255 255 
+30 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+218 163 122 135 156 109 225 247 64 176 183 241 255 152 148 91 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+correction
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L241: dpf
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L273: dpf_with_values 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 91 148 152 255 241 183 176 64 247 225 109 156 135 122 163 196
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L287: activ_value 
+ 91 148 152 255 241 183 176 64 247 225 109 156 135 122 163 196
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L36: index_non_obliv 21
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L56: -----------DPF Run: 1 -----------
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L75:  call to dpf with size 25, index 21
+
+skalar
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10 
+Beta
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5 
+240 79 86 81 225 135 25 87 162 224 119 191 106 155 20 192 188 2 226 35 210 240 164 117 60 28 217 183 82 246 167 207 
+50 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+194 79 86 81 225 135 25 87 162 224 119 191 106 155 20 192 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+correction
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L241: dpf
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L273: dpf_with_values 1
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 192 20 155 106 191 119 224 162 87 25 135 225 81 86 79 240
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L287: activ_value 
+ 192 20 155 106 191 119 224 162 87 25 135 225 81 86 79 240
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L36: index_non_obliv -1
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L38: empty batch!
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L56: -----------DPF Run: 2 -----------
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L75:  call to dpf with size 16, index -1
+
+skalar
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10 
+Beta
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+160 247 175 82 37 214 12 52 156 11 94 249 21 114 84 133 196 255 255 255 255 255 255 255 255 255 255 255 255 255 255 255 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+160 247 175 82 37 214 12 52 156 11 94 249 21 114 84 133 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+correction
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L241: dpf
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L273: dpf_with_values 2
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 133 84 114 21 249 94 11 156 52 12 214 37 82 175 247 160
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L287: activ_value 
+ 133 84 114 21 249 94 11 156 52 12 214 37 82 175 247 160
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L93: ------------- RESUTLS -------------
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:reveal_vector:L188: Revealed Vector:  0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 1
+
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.oc:reveal_vector:L189) Revealed Vector:  0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 1
+MPFSS with Values 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+91 148 152 255 241 183 176 64 247 225 109 156 135 122 163 196 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+192 20 155 106 191 119 224 162 87 25 135 225 81 86 79 240 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+133 84 114 21 249 94 11 156 52 12 214 37 82 175 247 160 
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunIndexProviderVectorOLE:L366) Time to execute Yao Protocol : 25.623796 seconds
+t:2
+size:20
+b:3
+w:3
+max_loop:10
+evictions:0
+runtime:25.623796
+runtime_buckets:0.045615
+runtime_assignment:0.048274
+==2734== Mismatched free() / delete / delete []
+==2734==    at 0x4C2EF90: free (vg_replace_malloc.c:540)
+==2734==    by 0x41381B: free_mc_args_content(mpfss_cuckoo_args<int>) (mpfss_cuckoo.cpp:296)
+==2734==    by 0x406E60: main (mpfss_cuckoo_main.cpp:90)
+==2734==  Address 0x6104d10 is 0 bytes inside a block of size 76 alloc'd
+==2734==    at 0x4C2E4B6: operator new(unsigned long) (vg_replace_malloc.c:344)
+==2734==    by 0x410231: __gnu_cxx::new_allocator<int>::allocate(unsigned long, void const*) (new_allocator.h:104)
+==2734==    by 0x40F0AE: std::allocator_traits<std::allocator<int> >::allocate(std::allocator<int>&, unsigned long) (alloc_traits.h:491)
+==2734==    by 0x40D9F9: std::_Vector_base<int, std::allocator<int> >::_M_allocate(unsigned long) (stl_vector.h:170)
+==2734==    by 0x40ECF4: std::_Vector_base<int, std::allocator<int> >::_M_create_storage(unsigned long) (stl_vector.h:185)
+==2734==    by 0x40D5EE: std::_Vector_base<int, std::allocator<int> >::_Vector_base(unsigned long, std::allocator<int> const&) (stl_vector.h:136)
+==2734==    by 0x40BD88: std::vector<int, std::allocator<int> >::vector(std::vector<int, std::allocator<int> > const&) (stl_vector.h:320)
+==2734==    by 0x410D5E: void std::_Construct<std::vector<int, std::allocator<int> >, std::vector<int, std::allocator<int> > const&>(std::vector<int, std::allocator<int> >*, std::vector<int, std::allocator<int> > const&) (stl_construct.h:75)
+==2734==    by 0x41002E: std::vector<int, std::allocator<int> >* std::__uninitialized_copy<false>::__uninit_copy<__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, std::vector<int, std::allocator<int> >*>(__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, std::vector<int, std::allocator<int> >*) (stl_uninitialized.h:75)
+==2734==    by 0x40EE93: std::vector<int, std::allocator<int> >* std::uninitialized_copy<__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, std::vector<int, std::allocator<int> >*>(__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, std::vector<int, std::allocator<int> >*) (stl_uninitialized.h:126)
+==2734==    by 0x40D714: std::vector<int, std::allocator<int> >* std::__uninitialized_copy_a<__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, std::vector<int, std::allocator<int> >*, std::vector<int, std::allocator<int> > >(__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, std::vector<int, std::allocator<int> >*, std::allocator<std::vector<int, std::allocator<int> > >&) (stl_uninitialized.h:281)
+==2734==    by 0x40C7B0: std::vector<int, std::allocator<int> >* std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > >::_M_allocate_and_copy<__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > > >(unsigned long, __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> > const*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >) (stl_vector.h:1227)
+==2734== 
+==2734== 
+==2734== HEAP SUMMARY:
+==2734==     in use at exit: 293,808 bytes in 117 blocks
+==2734==   total heap usage: 922,529 allocs, 922,412 frees, 33,085,529 bytes allocated
+==2734== 
+==2734== 12 bytes in 1 blocks are definitely lost in loss record 7 of 38
+==2734==    at 0x4C2E4B6: operator new(unsigned long) (vg_replace_malloc.c:344)
+==2734==    by 0x410231: __gnu_cxx::new_allocator<int>::allocate(unsigned long, void const*) (new_allocator.h:104)
+==2734==    by 0x40F0AE: std::allocator_traits<std::allocator<int> >::allocate(std::allocator<int>&, unsigned long) (alloc_traits.h:491)
+==2734==    by 0x40D9F9: std::_Vector_base<int, std::allocator<int> >::_M_allocate(unsigned long) (stl_vector.h:170)
+==2734==    by 0x40C431: int* std::vector<int, std::allocator<int> >::_M_allocate_and_copy<__gnu_cxx::__normal_iterator<int const*, std::vector<int, std::allocator<int> > > >(unsigned long, __gnu_cxx::__normal_iterator<int const*, std::vector<int, std::allocator<int> > >, __gnu_cxx::__normal_iterator<int const*, std::vector<int, std::allocator<int> > >) (stl_vector.h:1224)
+==2734==    by 0x4081FB: std::vector<int, std::allocator<int> >::operator=(std::vector<int, std::allocator<int> > const&) (vector.tcc:195)
+==2734==    by 0x417B63: initialize(int, int, int*, int*, int, int (*)(int, int)) (cuckoo.cpp:186)
+==2734==    by 0x4141A2: create_assignement(mpfss_cuckoo*, int*, match**, int (*)(int, int), std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > >, int*, std::vector<int, std::allocator<int> >) (buckets.cpp:68)
+==2734==    by 0x4096FB: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:337)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== 48 (24 direct, 24 indirect) bytes in 1 blocks are definitely lost in loss record 21 of 38
+==2734==    at 0x4C2E4B6: operator new(unsigned long) (vg_replace_malloc.c:344)
+==2734==    by 0x41C18E: __gnu_cxx::new_allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > >::allocate(unsigned long, void const*) (new_allocator.h:104)
+==2734==    by 0x41B8E2: std::allocator_traits<std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > > >::allocate(std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > >&, unsigned long) (alloc_traits.h:491)
+==2734==    by 0x41AE19: std::_Vector_base<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > >, std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > > >::_M_allocate(unsigned long) (stl_vector.h:170)
+==2734==    by 0x41A051: std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > >* std::vector<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > >, std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > > >::_M_allocate_and_copy<__gnu_cxx::__normal_iterator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > const*, std::vector<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > >, std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > > > > >(unsigned long, __gnu_cxx::__normal_iterator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > const*, std::vector<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > >, std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > > > >, __gnu_cxx::__normal_iterator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > const*, std::vector<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > >, std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > > > >) (stl_vector.h:1224)
+==2734==    by 0x41909A: std::vector<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > >, std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > > >::operator=(std::vector<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > >, std::allocator<std::vector<std::pair<int, int>, std::allocator<std::pair<int, int> > > > > const&) (vector.tcc:195)
+==2734==    by 0x417AC3: initialize(int, int, int*, int*, int, int (*)(int, int)) (cuckoo.cpp:178)
+==2734==    by 0x4141A2: create_assignement(mpfss_cuckoo*, int*, match**, int (*)(int, int), std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > >, int*, std::vector<int, std::allocator<int> >) (buckets.cpp:68)
+==2734==    by 0x4096FB: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:337)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== 48 (40 direct, 8 indirect) bytes in 1 blocks are definitely lost in loss record 22 of 38
+==2734==    at 0x4C2E4B6: operator new(unsigned long) (vg_replace_malloc.c:344)
+==2734==    by 0x41C483: __gnu_cxx::new_allocator<std::vector<bool, std::allocator<bool> > >::allocate(unsigned long, void const*) (new_allocator.h:104)
+==2734==    by 0x41BB12: std::allocator_traits<std::allocator<std::vector<bool, std::allocator<bool> > > >::allocate(std::allocator<std::vector<bool, std::allocator<bool> > >&, unsigned long) (alloc_traits.h:491)
+==2734==    by 0x41B091: std::_Vector_base<std::vector<bool, std::allocator<bool> >, std::allocator<std::vector<bool, std::allocator<bool> > > >::_M_allocate(unsigned long) (stl_vector.h:170)
+==2734==    by 0x41A371: std::vector<bool, std::allocator<bool> >* std::vector<std::vector<bool, std::allocator<bool> >, std::allocator<std::vector<bool, std::allocator<bool> > > >::_M_allocate_and_copy<__gnu_cxx::__normal_iterator<std::vector<bool, std::allocator<bool> > const*, std::vector<std::vector<bool, std::allocator<bool> >, std::allocator<std::vector<bool, std::allocator<bool> > > > > >(unsigned long, __gnu_cxx::__normal_iterator<std::vector<bool, std::allocator<bool> > const*, std::vector<std::vector<bool, std::allocator<bool> >, std::allocator<std::vector<bool, std::allocator<bool> > > > >, __gnu_cxx::__normal_iterator<std::vector<bool, std::allocator<bool> > const*, std::vector<std::vector<bool, std::allocator<bool> >, std::allocator<std::vector<bool, std::allocator<bool> > > > >) (stl_vector.h:1224)
+==2734==    by 0x419414: std::vector<std::vector<bool, std::allocator<bool> >, std::allocator<std::vector<bool, std::allocator<bool> > > >::operator=(std::vector<std::vector<bool, std::allocator<bool> >, std::allocator<std::vector<bool, std::allocator<bool> > > > const&) (vector.tcc:195)
+==2734==    by 0x417ADD: initialize(int, int, int*, int*, int, int (*)(int, int)) (cuckoo.cpp:179)
+==2734==    by 0x4141A2: create_assignement(mpfss_cuckoo*, int*, match**, int (*)(int, int), std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > >, int*, std::vector<int, std::allocator<int> >) (buckets.cpp:68)
+==2734==    by 0x4096FB: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:337)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== 320 bytes in 1 blocks are possibly lost in loss record 28 of 38
+==2734==    at 0x4C2FFAC: calloc (vg_replace_malloc.c:762)
+==2734==    by 0x40138B4: allocate_dtv (dl-tls.c:322)
+==2734==    by 0x40138B4: _dl_allocate_tls (dl-tls.c:539)
+==2734==    by 0x506526E: allocate_stack (allocatestack.c:588)
+==2734==    by 0x506526E: pthread_create@@GLIBC_2.2.5 (pthread_create.c:539)
+==2734==    by 0x4E4A99F: ??? (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==2734==    by 0x4E46CB9: GOMP_parallel (in /usr/lib/x86_64-linux-gnu/libgomp.so.1.0.0)
+==2734==    by 0x44D59B: fss_cprg_offline_parallelizer (fss_cprg.c:352)
+==2734==    by 0x434912: fss_cprg_getblockvector_with_callback (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x434854: fss_cprg_getblockvector (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x421857: dpf_with_beta_skalar (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x41F874: call_dpf_from_matches (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x420DAA: mpfss_batch_cuckoo (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x482650: mainYaoProtocol (obliv_bits.c:1125)
+==2734== 
+==2734== 4,608 bytes in 3 blocks are definitely lost in loss record 32 of 38
+==2734==    at 0x4C2FFAC: calloc (vg_replace_malloc.c:762)
+==2734==    by 0x459583: obig_init (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x421D09: dpf_with_beta_skalar (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x41F874: call_dpf_from_matches (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x420DAA: mpfss_batch_cuckoo (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x482650: mainYaoProtocol (obliv_bits.c:1125)
+==2734==    by 0x4826EE: execYaoProtocol (obliv_bits.c:1140)
+==2734==    by 0x4098F4: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:360)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== 4,608 bytes in 3 blocks are definitely lost in loss record 33 of 38
+==2734==    at 0x4C2FFAC: calloc (vg_replace_malloc.c:762)
+==2734==    by 0x459583: obig_init (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x421D2D: dpf_with_beta_skalar (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x41F874: call_dpf_from_matches (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x420DAA: mpfss_batch_cuckoo (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x482650: mainYaoProtocol (obliv_bits.c:1125)
+==2734==    by 0x4826EE: execYaoProtocol (obliv_bits.c:1140)
+==2734==    by 0x4098F4: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:360)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== 4,608 bytes in 3 blocks are definitely lost in loss record 34 of 38
+==2734==    at 0x4C2FFAC: calloc (vg_replace_malloc.c:762)
+==2734==    by 0x459583: obig_init (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x421D51: dpf_with_beta_skalar (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x41F874: call_dpf_from_matches (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x420DAA: mpfss_batch_cuckoo (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x482650: mainYaoProtocol (obliv_bits.c:1125)
+==2734==    by 0x4826EE: execYaoProtocol (obliv_bits.c:1140)
+==2734==    by 0x4098F4: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:360)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== 9,216 bytes in 3 blocks are definitely lost in loss record 35 of 38
+==2734==    at 0x4C2FFAC: calloc (vg_replace_malloc.c:762)
+==2734==    by 0x459583: obig_init (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x421CE5: dpf_with_beta_skalar (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x41F874: call_dpf_from_matches (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x420DAA: mpfss_batch_cuckoo (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x482650: mainYaoProtocol (obliv_bits.c:1125)
+==2734==    by 0x4826EE: execYaoProtocol (obliv_bits.c:1140)
+==2734==    by 0x4098F4: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:360)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== 9,216 bytes in 3 blocks are definitely lost in loss record 36 of 38
+==2734==    at 0x4C2FFAC: calloc (vg_replace_malloc.c:762)
+==2734==    by 0x459583: obig_init (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x42227A: dpf_with_beta_skalar (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x41F874: call_dpf_from_matches (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x420DAA: mpfss_batch_cuckoo (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x482650: mainYaoProtocol (obliv_bits.c:1125)
+==2734==    by 0x4826EE: execYaoProtocol (obliv_bits.c:1140)
+==2734==    by 0x4098F4: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:360)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== 184,320 bytes in 60 blocks are definitely lost in loss record 38 of 38
+==2734==    at 0x4C2FFAC: calloc (vg_replace_malloc.c:762)
+==2734==    by 0x459583: obig_init (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x42254A: dpf_with_beta_skalar (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x41F874: call_dpf_from_matches (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x420DAA: mpfss_batch_cuckoo (in /home/turing/.cache/bazel/_bazel_turing/cfaa0338a2bca87db2f60f99db77f320/execroot/__main__/bazel-out/k8-dbg/bin/code_master/mpfss_cuckoo/mpfss_cuckoo)
+==2734==    by 0x482650: mainYaoProtocol (obliv_bits.c:1125)
+==2734==    by 0x4826EE: execYaoProtocol (obliv_bits.c:1140)
+==2734==    by 0x4098F4: MPFSS_Cuckoo<int>::RunIndexProviderVectorOLE(absl::Span<int const>, absl::Span<long const>, absl::Span<int>) (mpfss_cuckoo.h:360)
+==2734==    by 0x406DBE: main (mpfss_cuckoo_main.cpp:84)
+==2734== 
+==2734== LEAK SUMMARY:
+==2734==    definitely lost: 216,652 bytes in 78 blocks
+==2734==    indirectly lost: 32 bytes in 2 blocks
+==2734==      possibly lost: 320 bytes in 1 blocks
+==2734==    still reachable: 76,804 bytes in 36 blocks
+==2734==         suppressed: 0 bytes in 0 blocks
+==2734== Reachable blocks (those to which a pointer was found) are not shown.
+==2734== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==2734== 
+==2734== For lists of detected and suppressed errors, rerun with: -s
+==2734== ERROR SUMMARY: 589 errors from 23 contexts (suppressed: 0 from 0)

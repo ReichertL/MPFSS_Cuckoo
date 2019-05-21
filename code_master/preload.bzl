@@ -34,10 +34,11 @@ def code_master_preload():
     if "mpc_utils" not in native.existing_rules():
         http_archive(
             name = "mpc_utils",
-            url = "https://github.com/schoppmp/mpc-utils/archive/2cf3ca2e900b55b9066c09070faa5aeb4550ea9c.zip",
-            sha256 = "3b4fb335f423766b9e7f4ba7456c1eac07f90901543ead7ece5148050b523533",
-            strip_prefix = "mpc-utils-2cf3ca2e900b55b9066c09070faa5aeb4550ea9c",
+            url = "https://github.com/schoppmp/mpc-utils/archive/737cbea41bfd40ea48c29266b27c12ff888b6d47.zip",
+            sha256 = "e4deedc4193e2abd53290f04460ca7c4665e6c556f5132631ef572dc1a59effa",
+            strip_prefix = "mpc-utils-737cbea41bfd40ea48c29266b27c12ff888b6d47",
         )
+
 
     # Transitive dependency of io_bazel_rules_docker
     if "bazel_skylib" not in native.existing_rules():

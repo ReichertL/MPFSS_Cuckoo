@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
     char* remote_host = new char[15];
     strncpy(remote_host, s_host, 15);
 
-    const char* s_port = "99999";
+    const char* s_port = "5555";
     char* port = new char[15];
     strncpy(port, s_port, 15);
 
@@ -26,13 +26,21 @@ int main(int argc, char *argv[]) {
     int indices_set=-1;
 	//vector<int> indices{ 3,5}; 
 
-	int no_runs=30;//2;
+    #ifdef TESTING
+		vector<int> t_vals{ 2 }; 
+		vector<int> n_vals_pow{4}; 
+		int no_runs=2;
+    #else
+	   // vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
+	   // vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
+	  	vector<int> t_vals{ 5205 }; 
+	    vector<int> n_vals_pow{24}; 
+		int no_runs=30;
+  	#endif
 
-    vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
-    vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
 
-	//vector<int> t_vals{ 2 }; 
-	//vector<int> n_vals_pow{4}; 
+	
+
 
     for (int i = 0; i < (int) t_vals.size(); ++i){
     	int t= t_vals.at(i);
@@ -80,6 +88,10 @@ int main(int argc, char *argv[]) {
 			t2.join();
 			this_thread::sleep_for(chrono::seconds(2));
 		}
+
+		free_mc_args(mc_args1);
+    	free_mc_args(mc_args2);
+
 	}
 }
 

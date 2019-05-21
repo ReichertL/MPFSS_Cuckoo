@@ -18,8 +18,6 @@ extern "C" {
 #include "mpfss_cuckoo.h"
 using namespace std;
 
-double lap;
-
 
 
 ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port ){
@@ -28,13 +26,14 @@ ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port
         
         // Make connection between two shells
         // Modified ocTestUtilTcpOrDie() function from obliv-c/test/oblivc/common/util.c
-        log_info("Connecting to %s on port %s ...\n", remote_host, port);
         if(cp == 1) {
+            log_info("Waiting for connection from %s on port %s ...\n", remote_host, port);
             if(protocolAcceptTcp2P(&pd,port)!=0) {
                 log_err("TCP accept from %s failed\n", remote_host);
                 exit(1);
             }
         } else {
+            log_info("Connecting to %s on port %s ...\n", remote_host, port);
             if(protocolConnectTcp2P(&pd,remote_host,port)!=0) {
                 log_err("TCP connect to %s failed\n", remote_host);
                 exit(1);
@@ -51,7 +50,7 @@ ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port
 
 
 
-void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
+/*void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
 
     if(mc_args->print_stdout)log_info("Party %d \n", mc_args->cp);
     if(!mc_args->connection_already_exists){
@@ -133,6 +132,7 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
     		std::chrono::duration<double> runtime_indices = end_indices-start_indices;
             if(mc_args->print_stdout)log_info("Time to create indices : %lf seconds\n", runtime_indices.count());
 
+
         //--------------------Create Buckets----------------------------------------------------------------------
             auto start_buckets = std::chrono::system_clock::now();
 
@@ -176,11 +176,9 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
             }
 
 			std::chrono::duration<double>  runtime_assignment;
-			#if defined(INFO) || defined(DEBUG)
-            	auto end_assi = std::chrono::system_clock::now();
-    			runtime_assignment = end_assi-start_proto;
-            	if(mc_args->print_stdout)log_info("Time to create Assignment : %lf seconds\n", runtime_assignment.count());
-            #endif
+            auto end_assi = std::chrono::system_clock::now();
+    		runtime_assignment = end_assi-start_proto;
+            if(mc_args->print_stdout)log_info("Time to create Assignment : %lf seconds\n", runtime_assignment.count());
 
             yao_arguments *y_args= (yao_arguments *) calloc(1, sizeof(yao_arguments));
             y_args->m=m;
@@ -188,6 +186,7 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
             y_args->matches=matches;
             y_args->all_buckets_array=mc_args->all_buckets_array;
             y_args->set_beta=abs(mc_args->set_beta);
+            y_args->cprg=mc_args->cprg;
 
             int lim=memblocksize;
             if(sizeof(int)<(size_t)memblocksize){
@@ -201,12 +200,17 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
                         for (int j = 0; j < lim; ++j){
                             uint8_t x = ((uint8_t *)(&beta_int))[j];
                             this_beta[j]=x;
-                        }              
+                        } 
+                        //TODO              
                     }
             }else if(mc_args->set_beta==-1){
-                //all distances will be 50
-                y_args->beta_vector=NULL;
-                
+                for (int i = 0; i < b; ++i){
+                    uint8_t *this_beta= (uint8_t *)calloc(16, sizeof(uint8_t));
+                    int beta_int=50;
+                    for (int j = 0; j < lim; ++j){
+                        uint8_t x = ((uint8_t *)(&beta_int))[j];                            this_beta[j]=x;
+                       }      
+                }
             }
 
         //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
@@ -214,7 +218,6 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
             if(mc_args->print_stdout) log_info("Executing Yao Protocol\n");
            
             execYaoProtocol(&mc_args->pd, mpfss_batch_cuckoo, y_args);
-            size_t bytesSent=tcp2PBytesSent(&mc_args->pd);
             cleanupProtocol(&mc_args->pd);
             
         //--------------------Print results----------------------------------------------------------------------
@@ -222,11 +225,26 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
     		std::chrono::duration<double> runtime = end_proto-start_proto;
             if(mc_args->print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
 
+
             if (mc_args->do_benchmark && mc_args->cp==1){
-                std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions", "runtime_indices","runtime_buckets", "runtime_assignment", "bytesSent"};
-                std::vector<string> list_of_values={to_string(runtime.count()),to_string(t),to_string(size),to_string(b),to_string(w),to_string(max_loop), "no", to_string(evictions_logging),to_string(runtime_indices.count()),to_string(runtime_buckets.count()), to_string(runtime_assignment.count()), to_string(int(bytesSent)) };
+                std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions", "runtime_indices","runtime_buckets", "runtime_assignment", };
+                std::vector<string> list_of_values={to_string(runtime.count()),to_string(t),to_string(size),to_string(b),to_string(w),
+                    to_string(max_loop), "no", to_string(evictions_logging),to_string(runtime_indices.count()),
+                    to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
                 benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
             }
+            
+                if(mc_args->print_stdout)printf("t:%d\n"                     , t);
+                if(mc_args->print_stdout)printf("size:%d\n"                  , size);
+                if(mc_args->print_stdout)printf("b:%d\n"                     , b);
+                if(mc_args->print_stdout)printf("w:%d\n"                     , w);
+                if(mc_args->print_stdout)printf("max_loop:%d\n"              , max_loop);
+                if(mc_args->print_stdout)printf("evictions:%d\n"             , evictions_logging);
+                if(mc_args->print_stdout)printf("cprg:%d\n"                  , (int)mc_args->cprg);
+                if(mc_args->print_stdout)printf("runtime:%lf\n"              , runtime.count());
+                if(mc_args->print_stdout)printf("runtime_indices:%lf\n"      , runtime_indices.count());
+                if(mc_args->print_stdout)printf("runtime_buckets:%lf\n"      , runtime_buckets.count());
+                if(mc_args->print_stdout)printf("runtime_assignment:%lf\n"   , runtime_assignment.count());
 
         //--------------------Prepare results for c++----------------------------------------------------------------------     
             std::vector<int> v;
@@ -247,7 +265,7 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
             mc_args->mpfss_bit_output_raw=y_args->mpfss_bit_output;
 
     free(m);
-    if(!mc_args->indices_set){
+    if(!(mc_args->indices_set==1 && mc_args->cp==1)){
     	free(indices_notobliv);
     }
 
@@ -256,15 +274,35 @@ void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args){
     }
     free(matches);
     free(y_args);
-}
+}*/
 
 void free_mc_args( mpfss_cuckoo_args<int> *mc_args){
 
+    for (int i = 0; i < (int)mc_args->rands.size(); ++i){
+        free(mc_args->all_buckets_array[i]);
+    }
     free(mc_args->all_buckets_array);
     free(mc_args->bucket_lenghts);
     free(mc_args->mpfss_output_raw);
     free(mc_args->mpfss_bit_output_raw);
+
     free(mc_args);
+
+}
+
+void free_mc_args_content( mpfss_cuckoo_args<int> mc_args){
+
+    for (int i = 0; i < (int)mc_args.rands.size(); ++i){
+        free(mc_args.all_buckets_array[i]);
+    }
+    free(mc_args.all_buckets_array);
+    free(mc_args.bucket_lenghts);
+    for (int i = 0; i < mc_args.size; ++i){
+        free(mc_args.mpfss_output_raw[i]);
+    }
+    free(mc_args.mpfss_output_raw);
+    free(mc_args.mpfss_bit_output_raw);
+
 
 }
 

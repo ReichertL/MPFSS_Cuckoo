@@ -40,10 +40,13 @@ void ocTestUtilTcpOrDie(ProtocolDesc* pd,const char* remote_host,
 void benchmark(double runtime, size_t size, int t, int cp, char type[]){
 
         char filename[80];
-        sprintf(filename, "benchmark/%s/resutls_t:%d_size:%d", type, t, (int) size);
+        sprintf(filename, "benchmark/%s/results_t:%d_size:%d", type, t, (int) size);
 
         char path[80];
         sprintf(path, "benchmark/%s", type);
+
+        char path_head[80];
+        sprintf(path_head, "benchmark", type);
 
         time_t rawtime;
         struct tm * timeinfo;
@@ -55,6 +58,10 @@ void benchmark(double runtime, size_t size, int t, int cp, char type[]){
         //create dir if not exist
         struct stat st = {0};
 
+        if (stat(path_head, &st) == -1) {
+            mkdir(path_head, 0700);
+        }
+
         if (stat(path, &st) == -1) {
             mkdir(path, 0700);
         }
@@ -64,7 +71,7 @@ void benchmark(double runtime, size_t size, int t, int cp, char type[]){
 
 
         if(fptr == NULL){
-              printf("Error while logging runtime result!");   
+              printf("Error while logging runtime result in %s!", filename );   
               exit(1);             
         }
 

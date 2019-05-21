@@ -31,29 +31,62 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+
     const char *remote_host = strtok(argv[1], ":");
     const char *port = strtok(NULL, ":");
     int cp = (argv[2][0]=='1'? 1 : 2);
     int t = atoi(argv[3]);
     int size = atoi(argv[4]);
 
-    // Initialize protocols and obtain connection information
-    mpfss_cuckoo_args<int> *mc_args=(mpfss_cuckoo_args<int> *)calloc(1, sizeof(mpfss_cuckoo_args<int>));
-    mc_args->cp=cp;
-    mc_args->do_benchmark=true;
+    mpfss_cuckoo_args<int> mc_args;
+    mc_args.cp=cp;
+    mc_args.do_benchmark=true;
+    mc_args.size=size;
+    mc_args.t=t;
+    mc_args.port=port;
+    mc_args.host=remote_host;
+    mc_args.connection_already_exists=false;
+    mc_args.print_stdout=true;
+    mc_args.buckets_set=false;
+    mc_args.cprg=true;
+    MPFSS_Cuckoo<int> mc;
+    mc.mc_args=mc_args;
+    absl::Span<int> span_output;
+    srand (time(NULL));
 
-    mc_args->pd=prepare_connection(mc_args->cp, remote_host, port);
-    mc_args->port=port;
-    mc_args->host=remote_host;
-    mc_args->connection_already_exists=true;
-    mc_args->print_stdout=true;
-    //std::vector<int> v(1.5*t, 50);
-    std::vector<int> v;
-    mc_args->set_beta=-1;
-    //mc_args->beta_vector=NULL;
-    
-    mc_args->buckets_set=false;
-    run_mpfss_cuckoo(t, size, mc_args);
-    free_mc_args(mc_args);
+    if(cp==1){
+        printf("indices: ");
+        std::vector<int64_t> v;
+        for (int i = 0; i < t; ++i){
+            int r=rand()%size;
+            while ((std::find(v.begin(), v.end(), r) != v.end())or r==0){
+                r=rand()%size;
+            }
+            v.push_back((int64_t)(r));     
+            printf("%d ", r);
+        }
+        printf("\n");
+
+        absl::Span<const int64_t> indices(v);
+
+        printf("beta: ");
+        std::vector< int>v_y;
+        for (int i = 0; i < t; ++i){
+            int r=( int) (rand()%size);
+            while(r==0){
+                r=( int) (rand()%size);
+            }
+            v_y.push_back(r);
+            printf("%d ",r );
+        }
+        printf("\n");
+        absl::Span<const int> y (v_y);
+        mpc_utils::Status stat=mc.RunIndexProviderVectorOLE(y, indices, span_output);
+    }else{
+        int x=10;//rand()%size;
+        mpc_utils::Status stat=mc.RunValueProviderVectorOLE(x, size, span_output);
+    }
+
+    free_mc_args_content(mc.mc_args);
     exit(0);
  }

@@ -1,0 +1,168 @@
+MPFSS CUCKOO
+=================
+
+indices: 10 16 
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunIndexProviderVectorOLE:L243) Party 1 
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.cpp:prepare_connection:L30) Waiting for connection from localhost on port 12345 ...
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunIndexProviderVectorOLE:L292) Indices provided by caller
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunIndexProviderVectorOLE:L306) Creating Buckets
+DEBUG includes/cuckoo/cuckoo.cpp:create_rand_vector:L206: seed 1558354643
+
+rands Party 1 :2050260777 336734766 1676511029 
+[INFO] (code_master/mpfss_cuckoo/buckets.cpp:preparations:L123) Creating Buckets with size 20 ,b 3 and w 3
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:debug_print_buckets:L38: Bucket 0: 1 1 1 2 3 4 5 5 9 10 10 11 12 13 13 14 14 14 15 16 16 17 17 
+
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:debug_print_buckets:L38: Bucket 1: 0 2 3 4 5 6 7 8 8 9 9 10 11 12 13 15 16 17 18 19 19 
+
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:debug_print_buckets:L38: Bucket 2: 0 0 2 3 4 6 6 7 7 8 11 12 15 18 18 19 
+
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunIndexProviderVectorOLE:L332) Time to create Buckets : 0.000070 seconds
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunIndexProviderVectorOLE:L337) Creating Assignment
+[INFO] (includes/cuckoo/cuckoo.cpp:initialize:L159) Initializing Cuckoo Hashing
+[INFO] (includes/cuckoo/cuckoo.cpp:cuckoo:L237) Running cuckoo with 2 keys.
+DEBUG includes/cuckoo/cuckoo.cpp:place:L96: key 10 hashed to 1 in Table 0 (length 3) using rand_no 0 
+
+DEBUG includes/cuckoo/cuckoo.cpp:place:L96: key 16 hashed to 0 in Table 0 (length 3) using rand_no 0 
+
+Table 0: 16:0, 10:0, 0:0, 
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:create_assignement:L104: key 16 -> index 19
+
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:create_assignement:L104: key 10 -> index 11
+
+DEBUG code_master/mpfss_cuckoo/buckets.cpp:create_assignement:L96: unused batch: index = -1 
+
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunIndexProviderVectorOLE:L349) Time to create Assignment : 0.000031 seconds
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.h:RunIndexProviderVectorOLE:L363) Executing Yao Protocol
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L35: index_non_obliv 19
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L56: -----------DPF Run: 0 -----------
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L75:  call to dpf with size 23, index 19
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L184: dpf
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L216: dpf_with_values 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 210 105 35 238 155 148 2 185 66 92 96 76 165 12 190 100
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L230: activ_value 
+ 210 105 35 238 155 148 2 185 66 92 96 76 165 12 190 100
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L35: index_non_obliv 11
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L56: -----------DPF Run: 1 -----------
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L75:  call to dpf with size 21, index 11
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L184: dpf
+ 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L216: dpf_with_values 1
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 182 91 148 115 34 190 109 137 47 110 127 56 59 236 62 84
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L230: activ_value 
+ 182 91 148 115 34 190 109 137 47 110 127 56 59 236 62 84
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L35: index_non_obliv -1
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L37: empty batch!
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L56: -----------DPF Run: 2 -----------
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L75:  call to dpf with size 16, index -1
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L184: dpf
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L216: dpf_with_values 2
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 98 225 124 200 159 55 121 219 156 197 132 95 4 114 163 97
+
+
+DEBUG includes/mpfss_naive/mpfss_naive.oc:dpf_with_beta_skalar:L230: activ_value 
+ 98 225 124 200 159 55 121 219 156 197 132 95 4 114 163 97
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:call_dpf_from_matches:L90: ------------- RESUTLS -------------
+
+DEBUG code_master/mpfss_cuckoo/mpfss_cuckoo.oc:reveal_vector:L184: Revealed Vector:  0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 1
+
+[INFO] (code_master/mpfss_cuckoo/mpfss_cuckoo.oc:reveal_vector:L185) Revealed Vector:  0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 1
+MPFSS with Values 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+182 91 148 115 34 190 109 137 47 110 127 56 59 236 62 84 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+210 105 35 238 155 148 2 185 66 92 96 76 165 12 190 100 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+98 225 124 200 159 55 121 219 156 197 132 95 4 114 163 97 

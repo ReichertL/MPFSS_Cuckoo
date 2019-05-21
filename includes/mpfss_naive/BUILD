@@ -1,5 +1,22 @@
 load("@com_github_schoppmp_rules_oblivc//oblivc:oblivc.bzl", "oblivc_library")
 
+cc_binary(
+    name = "mpfss_naive_main",
+    srcs = [
+        "mpfss_naive_main.c",
+    ],
+
+    visibility = ["//visibility:public"],
+
+    deps = [
+        "//includes:util",
+        "//includes:dbg",
+        ":mpfss_naive_obliv",
+    ],
+
+    #copts = ["-DDEBUG -g3"], 
+    #copts = ["-DINFO"], 
+)
 
 oblivc_library(
     name = "mpfss_naive_obliv",
@@ -17,17 +34,27 @@ oblivc_library(
         "//includes:util",
         "//includes:dbg",
         "@ack//:oram_fssl",
+        "@ack//:obig",
+        "//includes:uint128_c",
+
     ],
     visibility = ["//visibility:public"],
     #copts = ["-DDEBUG -g3"], 
 )
 
 
-cc_binary(
+cc_library(
     name = "mpfss_naive",
     srcs = [
         "mpfss_naive.c",
     ],
+
+    hdrs = [
+        "mpfss_naive.h",
+
+    ],
+
+    visibility = ["//visibility:public"],
 
     deps = [
         "//includes:util",
@@ -36,7 +63,7 @@ cc_binary(
     ],
 
     #copts = ["-DDEBUG -g3"], 
-    copts = ["-DINFO"], 
+    #copts = ["-DINFO"], 
 )
 
 

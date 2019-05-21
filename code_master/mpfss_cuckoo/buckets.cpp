@@ -75,6 +75,7 @@ bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matc
 				std::vector<string> list_of_values={"-1",to_string(t),to_string(mpfss->size),to_string(b),to_string(w),to_string(max_loop), "yes", "-1" };
                 benchmark_list("cuckoo", 8, list_of_names, list_of_values);
 			}
+			free(c);
 			return false;
 		}
 		
@@ -105,6 +106,7 @@ bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matc
 			}
 			matches[i]=p;
 		}
+	free(c);
 	}
 	return true;
 

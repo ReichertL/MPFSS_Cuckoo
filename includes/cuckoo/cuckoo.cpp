@@ -171,8 +171,7 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 	{
 		int size=size_hash_tables[i];
 		std::vector<pair<int,int>> t(size);
-		tables.at(i)=t;
-
+		tables.at(i)=t;		
 		std::vector<bool> t_bool(size,false);
 		table_usage.at(i)=t_bool;
 	}
@@ -201,7 +200,7 @@ cuckoo_hashing * initialize(int w, int no_hash_tables, int *size_hash_tables, in
 std::vector<int> create_rand_vector( int no){
   
   //can potenially cause problems in assymetric communication scenarios
-  int now=time(NULL);
+  int now=floor(time(NULL)/21000);
   srand (now);
   debug("seed %d\n",now);
   std::vector<int> res;

@@ -28,6 +28,8 @@ typedef struct  {
 	bool * mpfss_bit_output;
 	uint8_t **beta_vector;
 	bool set_beta;
+	uint8_t *skalar;
+	bool cprg;
 	
 } yao_arguments;
 

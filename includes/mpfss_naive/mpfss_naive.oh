@@ -10,9 +10,6 @@
 //Blocksize =16 (set by fss)
 #define memblocksize 16*block_no
 
-
-void dpf_with_beta_obliv( size_t size, obliv size_t index, uint8_t *beta_non_obliv,obliv uint8_t **beta_obliv, int j,  bool **local_bit_output, uint8_t **local_output);
-
-void dpf_proper( size_t size, obliv size_t index, obliv uint8_t **active_block_delta_ret, int j,  bool **local_bit_output_ret, uint8_t **local_output_ret);
-void dpf( size_t size, obliv size_t index, obliv uint8_t **this_value, int j, bool **vector);
-void get_mpfss_vector(mpfss *mpfss, obliv size_t *indices, bool *vector, obliv uint8_t **values );
+void dpf_with_beta_skalar( size_t size, size_t index, obliv uint8_t *beta, obliv uint8_t *skalar,  int j,  bool **local_bit_output_ret, uint8_t **local_output_ret,bool cprg);
+void dpf_proper( size_t size, size_t index, obliv uint8_t **active_block_delta_ret, int j,  bool **local_bit_output_ret, uint8_t **local_output_ret, bool cprg);
+void get_mpfss_vector(mpfss *mpfss, size_t *indices, bool *vector );

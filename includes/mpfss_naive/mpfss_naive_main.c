@@ -13,17 +13,22 @@
 
 
 
-void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size) {
+int main(int argc, char *argv[]) {
   // call a function in another file
 
+    printf("MPFSS NAIVE\n");
+    printf("=================\n\n");
     // Check args
-
+    if (argc == 5) {
+        // Initialize protocols and obtain connection information
+        const char *remote_host = strtok(argv[1], ":");
+        const char *port = strtok(NULL, ":");
         ProtocolDesc pd;
         
         // Make connection between two shells
         // Modified ocTestUtilTcpOrDie() function from obliv-c/test/oblivc/common/util.c
         log_info("Connecting to %s on port %s ...\n", remote_host, port);
-        if(cp==1) {
+        if(argv[2][0] == '1') {
             if(protocolAcceptTcp2P(&pd,port)!=0) {
                 log_err("TCP accept from %s failed\n", remote_host);
                 exit(1);
@@ -35,9 +40,14 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
             }
         }
 
+        // Final initializations before entering protocol
+        cp = (argv[2][0]=='1'? 1 : 2);
+
 
         log_info("-----Party %d-------\n", cp);
         setCurrentParty(&pd, cp); // only checks for a '1'        
+        int t = atoi(argv[3]);
+        int size = atoi(argv[4]);
 
         mpfss *m=new_mpfss_naive(t, size);
         clock_t clock_time = clock();       
@@ -49,9 +59,14 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
         double runtime = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
 
         // Print results and gate count
-        printf("t: %d\n", t);
-        printf("size: %d\n", size);
-        printf("runtime: %lf\n", runtime);
+        print("Total time: %lf seconds\n", runtime);
       
+        benchmark(runtime, size, t, cp, "Naive");
            
+   } else {
+        print("Usage: %s <hostname:port> <1|2> <t> <size> \n" 
+                 "\tHostname usage:\n" 
+                 "\tlocal -> 'localhost' remote -> IP address or DNS name\n", argv[0]);
+    }
+    exit(0);
 }
