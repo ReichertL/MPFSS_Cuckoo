@@ -24,6 +24,6 @@ std::vector<double> calculate_table_utilizastion(cuckoo_hashing *c);
 void print_tables(cuckoo_hashing *c);
 cuckoo_hashing *initialize(int w, int no_hash_tables, int *size_hash_tables, int *rands_array, int max_loop, int (*func)( int, int));
 std::vector<int> create_rand_vector( int no);
-int cuckoo(int* keys, int no_keys,  cuckoo_hashing *c);
+int cuckoo(std::vector<int> keys, int no_keys,  cuckoo_hashing *c);
 
 //extern "C" void test223();

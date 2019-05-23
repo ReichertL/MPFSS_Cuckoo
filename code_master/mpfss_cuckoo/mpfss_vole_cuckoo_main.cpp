@@ -81,21 +81,10 @@ int main(int argc, char *argv[]) {
         }
         printf("\n");
         absl::Span<const int> y (v_y);
-        mpc_utils::Status stat=mc.RunIndexProvider(y, indices, span_output);
+        mpc_utils::Status stat=mc.RunIndexProviderVectorOLE(y, indices, span_output);
     }else{
-        printf("beta: ");
-        std::vector< int>v_y;
-        for (int i = 0; i < t; ++i){
-            int r=( int) (rand()%size);
-            while(r==0){
-                r=( int) (rand()%size);
-            }
-            v_y.push_back(r);
-            printf("%d ",r );
-        }
-        printf("\n");
-        absl::Span<const int> y (v_y);
-        mpc_utils::Status stat=mc.RunValueProvider(y, span_output);
+        int x=10;//rand()%size;
+        mpc_utils::Status stat=mc.RunValueProviderVectorOLE(x, size, span_output);
     }
 
     free_mc_args_content(mc.mc_args);

@@ -4,7 +4,6 @@
 #include <obliv.oh>
 #include <obliv_float_ops.h>
 #include <fss.oh>
-#include <obig.oh>
 #include <fss_cprg.oh>
 #include <floram_util.h>
 #include <inttypes.h>
@@ -43,10 +42,9 @@ mpfss * new_mpfss_naive( int t, size_t size){
 
 */
 
-void dpf_with_beta_skalar( size_t size, 
+void dpf_with_beta( size_t size, 
 							size_t index_non_obliv,
 							obliv uint8_t *beta, 
-							obliv uint8_t *skalar, 
 							int j,  
 							bool **local_bit_output_ret, 
 							uint8_t **local_output_ret,
@@ -102,26 +100,11 @@ void dpf_with_beta_skalar( size_t size,
 
 	//----Correction-----------------------
 
-	obig prod;	
-	obig obig_s;
-	obig obig_b;
-
-	obig_init(&prod, memblocksize);
-	obig_init(&obig_s, memblocksize);
-	obig_init(&obig_b, memblocksize);
-
-	obig_import_opointed_be(&obig_s, skalar, memblocksize );
-	obig_import_opointed_be(&obig_b, beta, memblocksize );
-	obig_mul(&prod, obig_s, obig_b);		
-
-	obliv uint8_t *xor_prod=calloc(memblocksize, sizeof(obliv uint8_t));
-	obig_export_opointed_be(xor_prod,memblocksize, &prod);
-
 	obliv uint8_t *temp=calloc(1, memblockcpy.eltsize);
 	uint8_t *temp_local=malloc(memblocksize);
 	
 	for (int i = 0; i < memblocksize; ++i){
-		temp[i]= active_block_delta[i] ^ xor_prod[i];
+		temp[i]= active_block_delta[i] ^ beta[i];
 	}
 
 	for (size_t ii = 0; ii < memblocksize/sizeof(uint64_t); ii++){
@@ -137,10 +120,7 @@ void dpf_with_beta_skalar( size_t size,
 
 	free(temp);
 	free(temp_local);
-	free(xor_prod);
-	obig_free(&obig_s);
-	obig_free(&obig_b);
-	obig_free(&prod);
+
 
 	//----Correction for undefinded behaviour of fss for index==-1
 

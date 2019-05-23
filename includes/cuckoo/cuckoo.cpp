@@ -126,7 +126,7 @@ int place(int key, int rand_no, int tableID, int cnt, cuckoo_hashing *c) {
 
 
 std::vector<double> calculate_table_utilizastion(cuckoo_hashing *c){
-	std::vector<double> utilization;
+	std::vector<double> utilization(c->no_hash_tables);
 	for (int i = 0; i < c->no_hash_tables; ++i){
 		int this_len=c->size_hash_tables[i];
 		std::vector<bool> v=c->table_usage.at(i);
@@ -231,14 +231,14 @@ std::vector<int> create_rand_vector( int no){
   return res;
 }
 
-int cuckoo(int* keys, int no_keys, cuckoo_hashing *c){
+int cuckoo(vector<int> keys, int no_keys, cuckoo_hashing *c){
 
 	log_info("Running cuckoo with %d keys.\n",no_keys);
 
 	int evictions=0;
 	for (int i = 0; i < no_keys ; ++i)
 	{
-		int ev=place(keys[i], 0,0, 0, c);
+		int ev=place(keys.at(i), 0,0, 0, c);
 		if(ev==-1){
 			return -1;
 		}

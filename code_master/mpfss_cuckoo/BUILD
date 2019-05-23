@@ -34,6 +34,32 @@ cc_binary(
     #copts = ["-DDEBUG"], 
 )
 
+cc_binary(
+    name = "mpfss_vole_cuckoo",
+    srcs = [
+        "mpfss_vole_cuckoo_main.cpp",
+        "mpfss_cuckoo.cpp",
+        "mpfss_cuckoo.h"
+    
+    ],
+
+    visibility = ["//visibility:public"],
+
+    deps = [
+        "//includes:util",
+        "//includes:dbg",
+        "//includes:cuckoo",
+        "//includes:benchmark-cpp",
+        ":buckets",
+        ":mpfss_cuckoo_obliv",
+        ":create_structs",
+        "@mpc_utils//mpc_utils:status",
+        "@abseil//absl/types:span",
+
+    ],
+
+    #copts = ["-DDEBUG"], 
+)
 
 
 cc_binary(
@@ -84,6 +110,7 @@ oblivc_library(
         #"@semesterprojekt//code_projekt/mpfss_naive:mpfss_naive_obliv",
         "//includes/mpfss_naive:mpfss_naive_obliv",
         ":create_structs",
+        "@ack//:osort",
 
         
     ],
@@ -109,7 +136,8 @@ cc_library(
 oblivc_library(
     name = "create_structs",
     srcs = ["create_structs.c"],
-    hdrs = ["create_structs.h",
+    hdrs = [    "create_structs.h",
+                "create_structs.oh",
            ],
     visibility = ["//visibility:public"],
 

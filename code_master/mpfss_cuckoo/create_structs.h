@@ -13,8 +13,8 @@ typedef struct {
 typedef struct  {
 
 	int val;
-	int batch;
-	int index_in_batch;
+	int bucket;
+	int index_in_bucket;
 } match;
 
 
@@ -26,7 +26,7 @@ typedef struct  {
 	int ** all_buckets_array;
 	uint8_t **mpfss_output;
 	bool * mpfss_bit_output;
-	uint8_t **beta_vector;
+	uint8_t **beta_value_vector;
 	bool set_beta;
 	uint8_t *skalar;
 	bool cprg;

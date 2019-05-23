@@ -8,4 +8,5 @@
 /*one block: 16 byte -> Blockmultiple allow longer */
 #define block_no 1
 
+void mpfss_vole_batch_cuckoo(void* args);
 void mpfss_batch_cuckoo(void* args);

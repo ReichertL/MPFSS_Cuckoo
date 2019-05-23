@@ -54,62 +54,58 @@ vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)(
 	return all_buckets;
 }
 
-bool create_assignement(mpfss_cuckoo *mpfss, int *indices_notobliv, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets , int *evictions_logging, std::vector<int> rands){
+bool create_assignement(mpfss_cuckoo *mpfss,  std::vector<int> indices, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets , int *evictions_logging, std::vector<int> rands){
 	
 	int w=mpfss->w;
 	int b=mpfss->b;
 	int max_loop=mpfss->max_loop;
 	int t=mpfss->t;
-
-	if(mpfss->cp==1){   
-		//array of len 1 holding value b
-		int size_of_hashtable[1]={b};
-		int no_hash_tables=1;
-		cuckoo_hashing *c=initialize( w, no_hash_tables, size_of_hashtable, rands.data(), max_loop, func);
-		
-		int evictions=cuckoo(indices_notobliv, t, c);
-		*evictions_logging=evictions;
-		if(evictions==-1){
-			if(mpfss->do_benchmark==1){
-				std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions"};
-				std::vector<string> list_of_values={"-1",to_string(t),to_string(mpfss->size),to_string(b),to_string(w),to_string(max_loop), "yes", "-1" };
-                benchmark_list("cuckoo", 8, list_of_names, list_of_values);
-			}
-			free(c);
-			return false;
+   
+	//array of len 1 holding value b
+	int size_of_hashtable[1]={b};
+	int no_hash_tables=1;
+	cuckoo_hashing *c=initialize( w, no_hash_tables, size_of_hashtable, rands.data(), max_loop, func);
+	
+	int evictions=cuckoo(indices, t, c);
+	*evictions_logging=evictions;
+	if(evictions==-1){
+		if(mpfss->do_benchmark==1){
+			std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions"};
+			std::vector<string> list_of_values={"-1",to_string(t),to_string(mpfss->size),to_string(b),to_string(w),to_string(max_loop), "yes", "-1" };
+            benchmark_list("cuckoo", 8, list_of_names, list_of_values);
 		}
-		
-		#ifdef DEBUG
-			print_tables(c);
-		#endif
-
-		std::vector<pair<int,int>> table=c->tables.at(0);
-		std::vector<bool> this_usage=c->table_usage.at(0);
-		for (int i = 0; i < b; ++i){
-
-			int val=table.at(i).first;
-			bool bucket_used=this_usage.at(i); //Allows checking if bucket was used
-			match *p=(match *) calloc(1, sizeof(match)); 
-			p->batch=i;
-			if(!bucket_used){
-				p->val=-1;
-				p->index_in_batch=-1;
-				debug("unused batch: index = %d \n", p->index_in_batch );
-			}else{
-				p->val=val;
-				//Search takes O(log(n))
-				std::vector<int> v =all_buckets.at(i);
- 	    		std::vector<int>::iterator upper1, upper2; 
-			    upper1 = std::lower_bound(v.begin(), v.end(), val );
-			    p->index_in_batch= upper1 - v.begin();
-      			debug("key %d -> index %d\n",val, p->index_in_batch );
-			}
-			matches[i]=p;
-		}
-	free(c);
+		free(c);
+		return false;
 	}
-	return true;
+		
+	#ifdef DEBUG
+		print_tables(c);
+	#endif
 
+	std::vector<pair<int,int>> table=c->tables.at(0);
+	std::vector<bool> this_usage=c->table_usage.at(0);
+	for (int i = 0; i < b; ++i){
+		int val=table.at(i).first;
+		bool bucket_used=this_usage.at(i); //Allows checking if bucket was used
+		match *p=(match *) calloc(1, sizeof(match)); 
+		p->bucket=i;
+		if(!bucket_used){
+			p->val=-1;
+			p->index_in_bucket=-1;
+			debug("unused bucket: index = %d \n", p->index_in_bucket );
+		}else{
+			p->val=val;
+			//Search takes O(log(n))
+			std::vector<int> v =all_buckets.at(i);
+    		std::vector<int>::iterator lower; 
+		    lower = std::lower_bound(v.begin(), v.end(), val );
+		    p->index_in_bucket= lower - v.begin();
+   			debug("key %d -> index %d\n",val, p->index_in_bucket );
+		}
+		matches[i]=p;
+	}
+	free(c);
+	return true;
 }
 
 

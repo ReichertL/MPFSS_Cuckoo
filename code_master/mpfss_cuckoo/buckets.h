@@ -13,7 +13,7 @@ std::vector<std::vector<int>> generate_buckets_cuckoo(
 
 bool create_assignement(
 						mpfss_cuckoo *mpfss, 
-						int *indices_notobliv, 
+						std::vector<int> indices, 
 						match **matches, 
 						int (*func)( int, int), 
 						std::vector<std::vector<int>> all_buckets , 
