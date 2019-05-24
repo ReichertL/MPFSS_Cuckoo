@@ -8,6 +8,6 @@
 typedef struct  {
 	match *this_m;
 	obliv int index;
-	obliv int *beta;
+	obliv uint8_t **beta;
 	obliv int bucket;
 } match_ext;

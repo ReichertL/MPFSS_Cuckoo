@@ -325,40 +325,68 @@ obliv int8_t cmp_pair_by_key(OcCopy *cpy, void *el1, void *el2) {
 void full_mpfss_cuckoo(mpfss_cuckoo *m, match **matches, uint8_t **share ){
 
 	debug("full_mpfss_cuckoo");
-	obliv uint8_t *share1=calloc(m->t, memblocksize * sizeof(obliv uint8_t));
-	feedOblivLLongArray((obliv uint64_t *)share1, (uint64_t *) share,  m->t*memblocksize/sizeof(uint64_t), 1);
+	obliv uint8_t **share1=calloc(m->t, sizeof(obliv uint8_t *));
+	for (int i = 0; i < m->t; ++i){	
+		obliv uint8_t *share1_part=calloc(memblocksize, sizeof(obliv uint8_t));
+		feedOblivLLongArray((obliv uint64_t *)share1_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 1);
+		share1[i]=share1_part;
+	}
 
-	obliv uint8_t *share2=calloc(m->t, memblocksize * sizeof(obliv uint8_t));
-	feedOblivLLongArray((obliv uint64_t *)share2, (uint64_t *) share,  m->t*memblocksize/sizeof(uint64_t), 2);
+	obliv uint8_t **share2=calloc(m->t, sizeof(obliv uint8_t *));
+	for (int i = 0; i < m->t; ++i){	
+		obliv uint8_t *share2_part=calloc(memblocksize, sizeof(obliv uint8_t));
+		feedOblivLLongArray((obliv uint64_t *)share2_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 2);
+		share2[i]=share2_part;
+	}
+
 
 	obliv uint8_t **shareXor=calloc(m->t, sizeof(obliv uint8_t*));
 	for (int i = 0; i < m->t; ++i){
 		obliv uint8_t *shareXor_temp=calloc(1, memblocksize * sizeof(obliv uint8_t));
 		shareXor[i]=shareXor_temp;
 		for (int j = 0; j < memblocksize; ++j){
-			shareXor[i][j]=share1[i*memblocksize+j]^share2[i*memblocksize+j];
+			shareXor[i][j]=share1[i][j]^share2[i][j];
 		}
 	}
-	free(share1);
-	free(share2);
 
 	#ifdef DEBUG
-		for (int i = 0; i < m->t; ++i){
-			for (int j = 0; j < memblocksize; ++j){
-				printf("%d ", share[i][j] );
-			}
-			printf("\n");
-		}
-	
+		debug("share party 1\n");
 		for (int i = 0; i < m->t; ++i){
 			for (int ii = 0; ii < memblocksize; ++ii){
 				int bucket_temp;
-				revealOblivInt(&bucket_temp,shareXor[i*memblocksize+ii],0);
+				revealOblivInt(&bucket_temp,share1[i][ii],0);
+				printf("%d ", bucket_temp);
+			}
+			printf("\n");
+		}
+
+		debug("share party 2\n");
+		for (int i = 0; i < m->t; ++i){
+			for (int ii = 0; ii < memblocksize; ++ii){
+				int bucket_temp;
+				revealOblivInt(&bucket_temp,share2[i][ii],0);
+				printf("%d ", bucket_temp);
+			}
+			printf("\n");
+		}
+
+		debug("xor of shares");
+		for (int i = 0; i < m->t; ++i){
+			for (int ii = 0; ii < memblocksize; ++ii){
+				int bucket_temp;
+				revealOblivInt(&bucket_temp,shareXor[i][ii],0);
 				printf("%d ", bucket_temp);
 			}
 			printf("\n");
 		}
 	#endif
+
+	for (int i = 0; i < m->t; ++i){
+		free(share1[i]);
+		free(share2[i]);
+	}
+	free(share1);
+	free(share2);
 
 	OcCopy cpy = ocCopyIntN(2); //set to size of a single element
 	match_ext *matches_ext = calloc (m->b, sizeof(match_ext));
@@ -376,51 +404,57 @@ void full_mpfss_cuckoo(mpfss_cuckoo *m, match **matches, uint8_t **share ){
 		revealOblivInt(&index_temp,list[2*i+0],0);
 		int bucket_temp;
 		revealOblivInt(&bucket_temp,list[2*i+1],0);
-		debug("index %d, batch_no %d", index_temp, matches_ext[bucket_temp].this_m->bucket);
+		debug("index %d, batch_no %d", index_temp, bucket_temp);
 	}
 
-	debug("sorting");
 	osort_batcher(&cpy, (void *) list, (size_t)m->b, cmp_pair_by_key);
-	
+	//ocCopyRelease(&cpy); causes seg fault
+
 	#ifdef DEBUG
 		for (int i = 0; i < m->b; ++i){
 
 			int index_temp;
-			//revealOblivInt(&index_temp,matches_ext[i].index,0);
 			revealOblivInt(&index_temp,list[2*i+0],0);
 			int bucket_temp;
-			//revealOblivInt(&bucket_temp,matches_ext[i].bucket,0);
 			revealOblivInt(&bucket_temp,list[2*i+1],0);
 			debug("index %d, batch_no %d", index_temp, bucket_temp);
-			
 		}
 	#endif
-	
-	for (int i = 0; i < m->t; ++i){
+
+
+	int not_used=m->b-m->t;
+
+	for (int i = 0; i < m->b; ++i){
+		obliv uint8_t *this_beta=calloc(memblocksize, sizeof(obliv uint8_t));
+
 		obliv int index=list[i*2+0];
 		obliv int bucket=list[i*2+1];
 		int bucket_temp;
 		revealOblivInt(&bucket_temp,list[2*i+1],0);
-		obliv uint8_t *this_beta=calloc(memblocksize, sizeof(obliv uint8_t));
-		obliv if(index>=0){
+		//printf("bucket %d\n", bucket_temp );
+
+		if(i>=not_used){
+			int count=(i-not_used )%m->b;
+			//printf("count %d\n",count );
 			for (int j = 0;j < memblocksize; ++j){
-				this_beta[j]=shareXor[j];   //TODO check for faster way to copy these bits
+				this_beta[j]=shareXor[count][j];   //TODO check for faster way to copy these bits
 			}
 		}
 		matches_ext[bucket_temp].beta=this_beta;	
 	}
 
 
-
-
-	for (int i = 0; i < m->b; ++i){
-		for (int ii = 0; ii < memblocksize; ++ii){
-			int part;
-			revealOblivInt(&part,matches_ext[i].beta[ii],0);
-			printf("%d ",part );
+	#ifdef DEBUG
+		for (int i = 0; i < m->b; ++i){
+			obliv uint8_t *this_beta=matches_ext[i].beta;
+			for (int ii = 0; ii < memblocksize; ++ii){
+				int part;
+				revealOblivInt(&part,this_beta[ii],0);
+				printf("%d ",part );
+			}
+			printf("\n");
 		}
-		printf("\n");
-	}
+	#endif
 
 }
 
