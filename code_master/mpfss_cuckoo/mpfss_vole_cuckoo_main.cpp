@@ -72,9 +72,9 @@ int main(int argc, char *argv[]) {
         printf("beta: ");
         std::vector< int>v_y;
         for (int i = 0; i < t; ++i){
-            int r=( int) (rand()%size);
+            int r=( int) (rand()%255);
             while(r==0){
-                r=( int) (rand()%size);
+                r=( int) (rand()%255);
             }
             v_y.push_back(r);
             printf("%d ",r );

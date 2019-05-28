@@ -164,7 +164,7 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
     //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
         
     if(mc_args.print_stdout) log_info("Executing Yao Protocol\n");   
-    execYaoProtocol(&mc_args.pd, mpfss_batch_cuckoo, y_args);
+    execYaoProtocol(&mc_args.pd, mpfss_vole_batch_cuckoo, y_args);
     cleanupProtocol(&mc_args.pd);
         
     //--------------------Print results----------------------------------------------------------------------
@@ -225,9 +225,7 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
     free(y_args);
 
     return mpc_utils::OkStatus();
-
 }
-
 
 mpc_utils::Status RunIndexProviderVectorOLE(absl::Span<const T> y, absl::Span<const int64_t> indices, absl::Span<T> span_output){
 
@@ -268,17 +266,6 @@ mpc_utils::Status RunIndexProviderVectorOLE(absl::Span<const T> y, absl::Span<co
             }
             beta_value_vector[i]=this_beta;
         }
-
-        /*for (int i = 0; i < mc_args.size; ++i)
-        {
-            uint8_t * this_beta=beta_vector[i];
-            printf("%d : ", i );
-            for (int j = 0; j < memblocksize; ++j)
-            {
-                printf("%d ", this_beta[j]);
-            }
-            printf("\n\n");
-        }*/
     	
     //--------------------Create Buckets----------------------------------------------------------------------
         auto start_buckets = std::chrono::system_clock::now();
@@ -421,13 +408,14 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         //Making max_loop dependent on the size of the input field
         //TODO: find good value for max_loop
         int max_loop=0.5*y.size();
-        mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, y.size(), mc_args.w, mc_args.b, max_loop,2, (int)mc_args.do_benchmark);
+        mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,2, (int)mc_args.do_benchmark);
         int (*func)( int, int)=hashfunc_absl;
         int memblocksize=16; //TODO
         int lim=memblocksize;
         if((int)sizeof(T)<lim){
             lim=sizeof(T);
         }
+
 
         uint8_t **beta_value_vector=(uint8_t **)calloc(mc_args.t, sizeof(uint8_t *) );
         for (int i = 0; i < mc_args.t; ++i){
