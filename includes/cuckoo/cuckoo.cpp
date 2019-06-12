@@ -90,10 +90,16 @@ int place(int key, int rand_no, int tableID, int cnt, cuckoo_hashing *c) {
 
 	int (*func)( int, int)=c->hash_function;;
 	int length_of_table=c->size_hash_tables[tableID];
-	int rand=c->rands.at(rand_no);
-	int pos=hash_this(func, key, rand, length_of_table);
+	//BFS Based
+	//int rand=c->rands.at(rand_no);
 	
-	debug("key %d hashed to %d in Table %d (length %d) using rand_no %d \n", key, pos, tableID, length_of_table, rand_no);
+	//random walk based
+	int random_walk=fast_mod(rand(), c->no_hash_functions);
+	int rand=c->rands.at(random_walk);
+
+	int pos=hash_this(func, key, rand, length_of_table);
+//	debug("key %d hashed to %d in Table %d (length %d) using rand_no %d \n", key, pos, tableID, length_of_table, rand_no);
+	debug("key %d hashed to %d in Table %d (length %d) using rand_no %d \n", key, pos, tableID, length_of_table, random_walk);
 
 	//Use separate vector here to see if position is used. Otherwise there would be problems with zero value and unused space.
 	if (!c->table_usage.at(tableID).at(pos)){
@@ -234,6 +240,10 @@ std::vector<int> create_rand_vector( int no){
 int cuckoo(vector<int> keys, int no_keys, cuckoo_hashing *c){
 
 	log_info("Running cuckoo with %d keys.\n",no_keys);
+
+	//used for random walk placement
+    int now=floor(time(NULL)/21000);
+    srand (now);
 
 	int evictions=0;
 	for (int i = 0; i < no_keys ; ++i)

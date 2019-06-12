@@ -67,6 +67,15 @@ void dpf_with_beta( size_t size,
 		if(ocCurrentParty()==1){
 			debug(" call to dpf with size %zu, index %d\n", size, index_non_obliv);
 		}
+		
+		debug("beta");
+		for (int ii = 0; ii < memblocksize; ++ii){
+			int part;
+			revealOblivInt(&part,beta[ii],0);
+			printf("%d ",part );
+		}
+		printf("\n");
+		
 	#endif 
 		
 	void *my_fss;

@@ -13,8 +13,8 @@
 #include "mpfss_cuckoo.oh"
 #include "create_structs.h"
 #include "create_structs.oh"
-
-
+#include "parallel.h"
+ 
 
 void vole_call_dpf_from_matches(match **matches,bool **dpf_vectors,
 	uint8_t *** dpf_value_vectors, mpfss_cuckoo *m, int *bucket_lenghts, 
@@ -31,9 +31,9 @@ void vole_call_dpf_from_matches(match **matches,bool **dpf_vectors,
 			ok= ocBroadcastInt(1, 1);
 		}
 	}
-	printf("test\n");
 
 	int count=0;
+
 	for (int i = 0; i < m->b; ++i){
 		int index_non_obliv;  		
 		if(ocCurrentParty()==1){
@@ -110,74 +110,6 @@ void vole_call_dpf_from_matches(match **matches,bool **dpf_vectors,
 		dpf_vectors[i]=local_bit_output;
 		dpf_value_vectors[i]=local_output;
 	}
-
-
-	#ifdef DEBUG
-		debug("------------- RESUTLS -------------\n");
-	  	for(int i=0; i<m->b; i++){
-	  		
-			/*int bucketsize=bucket_lenghts[i];
-
-			obliv bool *v1= calloc(bucketsize, sizeof(obliv bool));
-			obliv bool *v2= calloc(bucketsize, sizeof(obliv bool));
-			feedOblivBoolArray(v1, dpf_vectors[i], bucketsize, 1);
-			feedOblivBoolArray(v2, dpf_vectors[i], bucketsize, 2);;
-
-			obliv bool *dpf_obliv= calloc(bucketsize, sizeof(obliv bool));
-			for(int i = 0; i <bucketsize ; i++) {
-				dpf_obliv[i]=v1[i]^v2[i]; 
-			}
-			free(v1);
-			free(v2);
-
-			bool *vdpf2= calloc(bucketsize, sizeof(bool));
-			revealOblivBoolArray(vdpf2, dpf_obliv, bucketsize, 0);
-			free(dpf_obliv);
-
-			char *buff=calloc(bucketsize*2+100, sizeof(int));
-			sprintf(buff, "dpf #%d:               ", i);  
-			for(int j = 0; j <bucketsize; j++) {
-				char r[1+ sizeof(int)];
-				sprintf(r, " %d", vdpf2[j]);		
-			  	strcat(buff, r );  
-			}
-			debug("%s\n",buff);
-			free(buff);
-			free(vdpf2);*/
-
-			//----
-			/*int size=bucket_lenghts[i];
-			uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
-			uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
-			ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)dpf_value_vectors[i], size*memblocksize/sizeof(uint64_t), 1);
-			ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)dpf_value_vectors[i],size*memblocksize/sizeof(uint64_t),  2);
-			uint8_t *dpf_with_beta=calloc( size, sizeof(uint8_t)* memblocksize);
-			for (size_t ii = 0; ii< size; ii++) {
-				for (size_t jj = 0; jj < memblocksize; jj++) {
-					uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];
-					dpf_with_beta[ii * memblocksize + jj]=xor;
-				}
-			}
-			free(local_output_1);
-			free(local_output_2);
-
-			char *buff = (char *) calloc((int)size *40*memblocksize+100, sizeof(int));
-			sprintf(buff, "dpf_with_values! %d\n", i);  
-			for(int ii = 0; ii <size ; ii++) {
-				for (int jj=0;jj<memblocksize; ++jj){
-					char r[10*sizeof(int)];	
-					sprintf(r, " %d", dpf_with_beta[ii * memblocksize + jj]);	
-				  	strcat(buff, r );  
-				}	
-				char *eof="\n";	
-				strcat(buff, eof );
-			}
-			debug("%s\n",buff);
-			free(buff);
-			free(dpf_with_beta);*/
-			
-	  	}
-  	#endif 
 }
 
 void call_dpf_from_matches(match_ext **matches_ext,bool **dpf_vectors,
@@ -220,80 +152,13 @@ void call_dpf_from_matches(match_ext **matches_ext,bool **dpf_vectors,
 							i,  									
 							&local_bit_output,
 							&local_output,
-							true);	
+							cprg);	
 
 	  	
 		dpf_vectors[i]=local_bit_output;
 		dpf_value_vectors[i]=local_output;
 	}
 
-
-	#ifdef DEBUG
-		debug("------------- RESUTLS -------------\n");
-	  	for(int i=0; i<m->b; i++){
-	  		
-			/*int bucketsize=bucket_lenghts[i];
-
-			obliv bool *v1= calloc(bucketsize, sizeof(obliv bool));
-			obliv bool *v2= calloc(bucketsize, sizeof(obliv bool));
-			feedOblivBoolArray(v1, dpf_vectors[i], bucketsize, 1);
-			feedOblivBoolArray(v2, dpf_vectors[i], bucketsize, 2);;
-
-			obliv bool *dpf_obliv= calloc(bucketsize, sizeof(obliv bool));
-			for(int i = 0; i <bucketsize ; i++) {
-				dpf_obliv[i]=v1[i]^v2[i]; 
-			}
-			free(v1);
-			free(v2);
-
-			bool *vdpf2= calloc(bucketsize, sizeof(bool));
-			revealOblivBoolArray(vdpf2, dpf_obliv, bucketsize, 0);
-			free(dpf_obliv);
-
-			char *buff=calloc(bucketsize*2+100, sizeof(int));
-			sprintf(buff, "dpf #%d:               ", i);  
-			for(int j = 0; j <bucketsize; j++) {
-				char r[1+ sizeof(int)];
-				sprintf(r, " %d", vdpf2[j]);		
-			  	strcat(buff, r );  
-			}
-			debug("%s\n",buff);
-			free(buff);
-			free(vdpf2);*/
-
-			//----
-			/*int size=bucket_lenghts[i];
-			uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
-			uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
-			ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)dpf_value_vectors[i], size*memblocksize/sizeof(uint64_t), 1);
-			ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)dpf_value_vectors[i],size*memblocksize/sizeof(uint64_t),  2);
-			uint8_t *dpf_with_beta=calloc( size, sizeof(uint8_t)* memblocksize);
-			for (size_t ii = 0; ii< size; ii++) {
-				for (size_t jj = 0; jj < memblocksize; jj++) {
-					uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];
-					dpf_with_beta[ii * memblocksize + jj]=xor;
-				}
-			}
-			free(local_output_1);
-			free(local_output_2);
-
-			char *buff = (char *) calloc((int)size *40*memblocksize+100, sizeof(int));
-			sprintf(buff, "dpf_with_values! %d\n", i);  
-			for(int ii = 0; ii <size ; ii++) {
-				for (int jj=0;jj<memblocksize; ++jj){
-					char r[10*sizeof(int)];	
-					sprintf(r, " %d", dpf_with_beta[ii * memblocksize + jj]);	
-				  	strcat(buff, r );  
-				}	
-				char *eof="\n";	
-				strcat(buff, eof );
-			}
-			debug("%s\n",buff);
-			free(buff);
-			free(dpf_with_beta);*/
-			
-	  	}
-  	#endif 
 }
 
 
@@ -332,92 +197,6 @@ bool *reveal_vector(bool *vector, int vector_size, int print){
 	return reveald_vector;
 }
 
-void create_mpfss_vector_cuckoo(bool *mpfss_bit_vector,uint8_t **mpfss_value_vector, bool **dpf_vectors, uint8_t ***dpf_value_vectors, int ** all_buckets_array, int *bucket_lenghts,  int size, int b){
-    
-
-    for(int i=0;i<b; i++){
-
-    	int *bucket=all_buckets_array[i];
-        int len=bucket_lenghts[i];
-
-        for (int j=0; j<len;j++){
-
-            bool is_set=dpf_vectors[i][j];
-            int position=bucket[j];
-            mpfss_bit_vector[position]=mpfss_bit_vector[position]^is_set;
-
-            for (int k = 0; k < memblocksize; ++k){
-            	uint8_t *vec=dpf_value_vectors[i];
-            	uint8_t value=vec[j*memblocksize +k ];
-        		mpfss_value_vector[position][k]^=value;
-        	}
-        }
-    }
-
-    /*#ifdef  INFO
-        bool * v1=reveal_vector(mpfss_bit_vector, size, 1);  
-        free(v1);
-    #endif*/
-
-    #ifdef DEBUG
-        bool * v=reveal_vector(mpfss_bit_vector, size, 1);  
-
-
-	        /*char filename[80];
-	        sprintf(filename, "results_debug_mpfss_cuckoo_result.txt");
-
-	        FILE *fptr;
-	        fptr = fopen(filename,"w");
-
-	        if(fptr == NULL){
-	              printf("Error while opening results_debug_mpfss_cuckoo!");               
-	        }else{
-
-	        	fseek (fptr, 0, SEEK_END);
-	        	int len = ftell(fptr);
-	       	 	if (0 == len) {
-	       	 		for (int i = 0; i < size; ++i){
-	       	 			uint8_t *local_output_1=calloc(memblocksize, sizeof(uint8_t));
-						uint8_t *local_output_2=calloc(memblocksize, sizeof(uint8_t));
-						ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)mpfss_value_vector[i], memblocksize/sizeof(uint64_t), 1);
-						ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)mpfss_value_vector[i],memblocksize/sizeof(uint64_t),  2);
-						uint8_t *this_vector=calloc( memblocksize, sizeof(uint8_t));
-						
-						for (size_t jj = 0; jj < memblocksize; jj++) {
-							uint8_t xor=  local_output_1[i * memblocksize + jj]^ local_output_2[i * memblocksize + jj];
-							this_vector[i * memblocksize + jj]=xor;
-						}
-						
-						free(local_output_1);
-						free(local_output_2);
-	       	 			char *buff=calloc(memblocksize+100, sizeof(int));
-	       	 			for (int k = 0; k < memblocksize; ++k){    
-						   	char r[10+ sizeof(int)];	
-							sprintf(r, " %d", this_vector[k]);		
-						  	strcat(buff, r ); 
-						}
-						
-						if(ocCurrentParty()==1){
-	            			fprintf(fptr,"%d, %s\n",v[i],buff );
-	       	 			}
-	       	 		}
-	        	}
-	    	}
-	    	fclose(fptr);*/
-        free(v);
-
-        printf("MPFSS with Values \n");
-        for (int i = 0; i < size; ++i){
-        	for (int k = 0; k < memblocksize; ++k){
-	            uint8_t value=mpfss_value_vector[i][k ];
-	            uint8_t val1=ocBroadcastInt(value, 1);
-	            uint8_t val2=ocBroadcastInt(value, 2);
-	            printf("%d ",val1 ^val2);
-        	}
-        	printf("\n");
-        }
-    #endif
-}
 
 
 obliv int8_t cmp_pair_by_key(OcCopy *cpy, void *el1, void *el2) {
@@ -428,10 +207,6 @@ obliv int8_t cmp_pair_by_key(OcCopy *cpy, void *el1, void *el2) {
 	}
 
 	return ret;
-	/*__obliv_c__setLessThanUnsigned(&el1_is_less, ((match_ext)el1)->index, ((match_ext*)el2)->index, 8 * sizeof(obliv int));
-	obliv char ret = 1;
-	obliv if (el1_is_less) { ret = -1; }
-	return ret;*/
 }
 
 
@@ -561,7 +336,7 @@ void create_beta_vals(mpfss_cuckoo *m, match **matches, uint8_t **share, match_e
 
 }
 
-
+//simplification: one side has to know indices
 void mpfss_vole_batch_cuckoo(void* args){
 
 	yao_arguments *y_args= (yao_arguments *) args;
@@ -591,7 +366,21 @@ void mpfss_vole_batch_cuckoo(void* args){
 
 	create_mpfss_vector_cuckoo(	mpfss_bit_vector, mpfss_value_vector, 
 								dpf_vectors, dpf_value_vectors, 
-								all_buckets_array, bucket_lenghts, size, b);
+								all_buckets_array, bucket_lenghts, size, b, memblocksize);
+
+
+	#ifdef DEBUG
+        printf("MPFSS VOLE with Values \n");
+        for (int i = 0; i < size; ++i){
+        	for (int k = 0; k < memblocksize; ++k){
+	            uint8_t value=mpfss_value_vector[i][k];
+	            uint8_t val1=ocBroadcastInt(value, 1);
+	            uint8_t val2=ocBroadcastInt(value, 2);
+	            printf("%d ",val1 ^val2);
+        	}
+        	printf("\n");
+        }
+	#endif
 
 	for (int i = 0; i < b; ++i){
 		free(dpf_vectors[i]);
@@ -604,7 +393,7 @@ void mpfss_vole_batch_cuckoo(void* args){
 	y_args->mpfss_output=mpfss_value_vector;
 }
 
-
+//more generall version: not nececarry for one  side to now indicies
 void mpfss_batch_cuckoo(void* args){
 
 	yao_arguments *y_args= (yao_arguments *) args;
@@ -636,7 +425,20 @@ void mpfss_batch_cuckoo(void* args){
 
 	create_mpfss_vector_cuckoo(	mpfss_bit_vector, mpfss_value_vector, 
 								dpf_vectors, dpf_value_vectors, 
-								all_buckets_array, bucket_lenghts, size, b);
+								all_buckets_array, bucket_lenghts, size, b, memblocksize);
+
+	#ifdef DEBUG
+        printf("MPFSS with Values \n");
+        for (int i = 0; i < size; ++i){
+        	for (int k = 0; k < memblocksize; ++k){
+	            uint8_t value=mpfss_value_vector[i][k];
+	            uint8_t val1=ocBroadcastInt(value, 1);
+	            uint8_t val2=ocBroadcastInt(value, 2);
+	            printf("%d ",val1 ^val2);
+        	}
+        	printf("\n");
+        }
+	#endif
 
 	for (int i = 0; i < b; ++i){
 		free(dpf_vectors[i]);
@@ -649,3 +451,5 @@ void mpfss_batch_cuckoo(void* args){
 	y_args->mpfss_bit_output=mpfss_bit_vector;
 	y_args->mpfss_output=mpfss_value_vector;
 }
+
+

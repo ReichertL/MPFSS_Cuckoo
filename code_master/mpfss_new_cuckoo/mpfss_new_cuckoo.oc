@@ -1,0 +1,217 @@
+#include <stdlib.h>
+#include <stdint.h>
+
+#include <obliv.oh>
+#include <copy.oh>
+#include <obig.oh>
+#include <osort.oh>
+#include <floram_util.h>
+
+#include "dbg.h"
+#include "mpfss_naive.h"
+#include "mpfss_naive.oh"
+#include "code_master/mpfss_cuckoo/create_structs.h"
+#include "code_master/mpfss_cuckoo/create_structs.oh"
+#include "create_structs_new.h"
+
+
+
+obliv int8_t cmp_pair_by_key(OcCopy *cpy, void *el1, void *el2) {
+	obliv char ret=1;
+
+	obliv if(((obliv int *) el1)[0] <  ((obliv int *) el2)[0]){
+		ret=-1;
+	}
+
+	return ret;
+}
+
+//TODO:Nach inlcudes verlagern und mit function von mpfss_cuckoo zusammen nehmen
+void create_beta_vals(mpfss_cuckoo *m, match **matches, uint8_t **share, match_ext **matches_ext ){
+
+	obliv uint8_t **share1=calloc(m->t, sizeof(obliv uint8_t *));
+	for (int i = 0; i < m->t; ++i){	
+		obliv uint8_t *share1_part=calloc(memblocksize, sizeof(obliv uint8_t));
+		feedOblivLLongArray((obliv uint64_t *)share1_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 1);
+		share1[i]=share1_part;
+	}
+
+	obliv uint8_t **share2=calloc(m->t, sizeof(obliv uint8_t *));
+	for (int i = 0; i < m->t; ++i){	
+		obliv uint8_t *share2_part=calloc(memblocksize, sizeof(obliv uint8_t));
+		feedOblivLLongArray((obliv uint64_t *)share2_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 2);
+		share2[i]=share2_part;
+	}
+
+
+	obliv uint8_t **shareXor=calloc(m->t, sizeof(obliv uint8_t*));
+	for (int i = 0; i < m->t; ++i){
+		obliv uint8_t *shareXor_temp=calloc(1, memblocksize * sizeof(obliv uint8_t));
+		shareXor[i]=shareXor_temp;
+		for (int j = 0; j < memblocksize; ++j){
+			shareXor[i][j]=share1[i][j]^share2[i][j];
+		}
+	}
+
+	/*#ifdef DEBUG
+		debug("share party 1\n");
+		for (int i = 0; i < m->t; ++i){
+			for (int ii = 0; ii < memblocksize; ++ii){
+				int bucket_temp;
+				revealOblivInt(&bucket_temp,share1[i][ii],0);
+				printf("%d ", bucket_temp);
+			}
+			printf("\n");
+		}
+
+		debug("share party 2\n");
+		for (int i = 0; i < m->t; ++i){
+			for (int ii = 0; ii < memblocksize; ++ii){
+				int bucket_temp;
+				revealOblivInt(&bucket_temp,share2[i][ii],0);
+				printf("%d ", bucket_temp);
+			}
+			printf("\n");
+		}
+
+		debug("xor of shares");
+		for (int i = 0; i < m->t; ++i){
+			for (int ii = 0; ii < memblocksize; ++ii){
+				int bucket_temp;
+				revealOblivInt(&bucket_temp,shareXor[i][ii],0);
+				printf("%d ", bucket_temp);
+			}
+			printf("\n");
+		}
+	#endif*/
+
+	for (int i = 0; i < m->t; ++i){
+		free(share1[i]);
+		free(share2[i]);
+	}
+	free(share1);
+	free(share2);
+
+	OcCopy cpy = ocCopyIntN(2); //set to size of a single element
+	
+	obliv int *list=calloc(m->b*2,sizeof(obliv int));
+	for (int i = 0; i < m->b; ++i){
+		match_ext *me=calloc(1, sizeof(match_ext));
+		me->this_m=matches[i];
+		me->index=feedOblivInt( matches[i]->val, 1);
+		
+		matches_ext[i]=me;
+		list[2*i+0]=me->index;
+		list[2*i+1]=i;
+	}
+
+	osort_batcher(&cpy, (void *) list, (size_t)m->b, cmp_pair_by_key);
+	//ocCopyRelease(&cpy); causes seg fault
+
+	#ifdef DEBUG
+		for (int i = 0; i < m->b; ++i){
+
+			int index_temp;
+			revealOblivInt(&index_temp,list[2*i+0],0);
+			int bucket_temp;
+			revealOblivInt(&bucket_temp,list[2*i+1],0);
+			debug("index %d, batch_no %d", index_temp, bucket_temp);
+		}
+	#endif
+
+
+	int not_used=m->b-m->t;
+
+	for (int i = 0; i < m->b; ++i){
+		obliv uint8_t *this_beta=calloc(memblocksize, sizeof(obliv uint8_t));
+		obliv int index=list[i*2+0];
+		obliv int bucket=list[i*2+1];
+		int bucket_temp;
+		revealOblivInt(&bucket_temp,list[2*i+1],0);
+		if(i>=not_used){
+			int count=(i-not_used )%m->b;
+			for (int j = 0;j < memblocksize; ++j){
+				this_beta[j]=shareXor[count][j];   //TODO check for faster way to copy these bits
+			}
+		}
+		matches_ext[bucket_temp]->beta=this_beta;	
+	}
+
+
+	#ifdef DEBUG
+		for (int i = 0; i < m->b; ++i){
+			obliv uint8_t *this_beta=matches_ext[i]->beta;
+			for (int ii = 0; ii < memblocksize; ++ii){
+				int part;
+				revealOblivInt(&part,this_beta[ii],0);
+				printf("%d ",part );
+			}
+			printf("\n");
+		}
+	#endif
+
+}
+
+
+void mpfss_single_bucket(void* args){
+	yao_arguments_new *y_args= (yao_arguments_new *) args;
+	mpfss_cuckoo *m=(mpfss_cuckoo *) y_args->m;
+	int *bucket_lenghts=(int *) y_args->bucket_lenghts;
+    match **matches =(match **) y_args->matches;
+	uint8_t **share=(uint8_t **) y_args->beta_value_vector;
+	int bucket_no=y_args->bucket_no;
+
+
+	match_ext **matches_ext = calloc (m->b, sizeof(match_ext *));
+	create_beta_vals(m, matches, share, matches_ext );
+	
+	//synchronize	
+	if(ocCurrentParty()==1){
+		ocBroadcastInt(1, 1);
+	}else{
+		int ok=3;
+		while(!( ok==1)){
+			ok= ocBroadcastInt(1, 1);
+		}
+	}
+
+	match_ext *me = matches_ext[bucket_no];
+	size_t index_non_obliv;  		
+	if(ocCurrentParty()==1){
+  		index_non_obliv=(size_t)me->this_m->index_in_bucket;
+  		if(index_non_obliv==-1){
+  			debug("index in batch %d: %d, empty batch!\n",bucket_no,  index_non_obliv);
+  		}else{
+  			debug("index in batch %d: %d\n",bucket_no,  index_non_obliv);
+		}
+  	}
+
+  	bool *local_bit_output;
+	uint8_t *local_output;
+	size_t bl=bucket_lenghts[bucket_no];
+	bool cprg=y_args->cprg;
+	dpf_with_beta( 	bl,
+					index_non_obliv, 
+					me->beta, 
+					bucket_no,  									
+					&local_bit_output,
+					&local_output,
+					cprg);	
+	y_args->dpf_bit_output=local_bit_output;
+	y_args->dpf_output=local_output;
+
+
+/*	#ifdef DEBUG
+        printf("DPF with Values \n");
+        for (int i = 0; i < m->size; ++i){
+        	for (int k = 0; k < memblocksize; ++k){
+	            uint8_t value=local_output[i*memblocksize+k];
+	            uint8_t val1=ocBroadcastInt(value, 1);
+	            uint8_t val2=ocBroadcastInt(value, 2);
+	            printf("%d ",val1 ^val2);
+        	}
+        	printf("\n");
+        }
+	#endif*/
+
+}

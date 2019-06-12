@@ -94,12 +94,11 @@ cc_binary(
 oblivc_library(
     name = "mpfss_cuckoo_obliv",
     srcs = [
-        
         "mpfss_cuckoo.oc",
-
     ],
     hdrs = [
         "mpfss_cuckoo.oh",
+        "parallel.h",
     ],
     visibility = ["//visibility:public"],
 
@@ -110,11 +109,27 @@ oblivc_library(
         #"@semesterprojekt//code_projekt/mpfss_naive:mpfss_naive_obliv",
         "//includes/mpfss_naive:mpfss_naive_obliv",
         ":create_structs",
-        "@ack//:osort",
+        "@ack//:osort",  
+        ":parallel"
 
-        
     ],
     #copts = ["-DDEBUG"], 
+)
+
+cc_library(
+    name="parallel",
+    srcs = [
+        "parallel.c",
+    ],
+    hdrs = [
+        "parallel.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//includes:dbg",
+    ],
+    copts = ["-fopenmp"], 
+    linkopts=["-fopenmp"],
 )
 
 cc_library(
