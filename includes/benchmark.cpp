@@ -26,7 +26,7 @@ void benchmark_list(string type, int len_of_lists, std::vector<string> list_of_n
         std::ostringstream oss;
         oss << "benchmark/" << type << "/results_t:" <<t<<"_size:"<<size;
         std::string filename = oss.str();
-
+        
         std::ostringstream oss2;
         oss2 << "benchmark/" << type;
         std::string path = oss2.str();
@@ -57,7 +57,7 @@ void benchmark_list(string type, int len_of_lists, std::vector<string> list_of_n
                 const int dir_err = mkdir(part.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
                 if (-1 == dir_err){
                     printf("Error creating directory %s!\n", part.c_str());
-                    exit(1);
+                    //exit(1);
                 }
             }
         }

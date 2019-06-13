@@ -5,6 +5,7 @@
 #include <fstream>
 #include<iostream>
 #include <chrono>
+#include <thread>
 #include <ctime> 
 
 extern "C" {
@@ -201,8 +202,8 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
         uint8_t *this_value_vector=y_args->mpfss_output[i];
         T value;
         
-        for (int i = 0; i < lim; ++i){
-            value = ((T)value << 8*i) | this_value_vector[i];
+        for (int ii = memblocksize-lim; ii < memblocksize; ++ii){
+            value = ((T)value << 8) | this_value_vector[ii];
         }
         
         v.push_back(value);
@@ -216,6 +217,7 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
     mc_args.mpfss_output_raw=y_args->mpfss_output;
     mc_args.mpfss_bit_output_raw=y_args->mpfss_bit_output;
     
+
 
     free(m);
     for (int i = 0; i < mc_args.b; ++i){
@@ -364,8 +366,8 @@ mpc_utils::Status RunIndexProviderVectorOLE(absl::Span<const T> y, absl::Span<co
         for (int i = 0; i < mc_args.size; ++i){
             uint8_t *this_value_vector=y_args->mpfss_output[i];
             T value;
-            for (int i = 0; i < lim; ++i){
-                value = ((T)value << 8*i) | this_value_vector[i];
+            for (int ii = memblocksize-lim; ii < memblocksize; ++ii){
+                value = ((T)value << 8) | this_value_vector[ii];
             }
             v.push_back(value);
             v_bit.push_back(y_args->mpfss_bit_output[i]);
@@ -398,6 +400,7 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
     if(!mc_args.connection_already_exists){
         mc_args.pd=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
     }
+
 
     //--------------------Setting Parameters ------------------------------------------------------
 
@@ -499,7 +502,6 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         
         if(mc_args.print_stdout) log_info("Executing Yao Protocol\n");   
         execYaoProtocol(&mc_args.pd, mpfss_batch_cuckoo, y_args);
-        cleanupProtocol(&mc_args.pd);
         
     //--------------------Print results----------------------------------------------------------------------
         auto end_proto = std::chrono::system_clock::now();
@@ -535,22 +537,69 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
             uint8_t *this_value_vector=y_args->mpfss_output[i];
             T value;
             
-            for (int i = 0; i < lim; ++i){
-                value = ((T)value << 8*i) | this_value_vector[i];
+            for (int ii = memblocksize-lim; ii < memblocksize; ++ii){
+                value = ((T)value << 8) | this_value_vector[ii];
             }
             
-            v.push_back(value);
-            v_bit.push_back(y_args->mpfss_bit_output[i]);
+            v.at(i)=value;
+            bool b =y_args->mpfss_bit_output[i];
+            v_bit.at(i)=b;
 
         }
+        printf("\n");
     
         span_output=absl::Span<T>(v);
         mc_args.mpfss_output=v;
         mc_args.mpfss_bit_output=v_bit;
         mc_args.mpfss_output_raw=y_args->mpfss_output;
         mc_args.mpfss_bit_output_raw=y_args->mpfss_bit_output;
-    
+        
+    #ifdef DEBUG
+       
+        int other_p;
+        if (mc_args.cp==1){
+            other_p=2;
+        }else{
+            other_p=1;
+        }
+        std::vector<bool> v_bit_op(mc_args.size);
+        for (int i = 0; i < mc_args.size; ++i){
+            bool b;
+            orecv(&mc_args.pd,1 ,&b,sizeof(bool));
+            v_bit_op.at(i)=b;
+        }
 
+        for (int i = 0; i < mc_args.size; ++i){
+            bool b=mc_args.mpfss_bit_output.at(i);
+            osend(&mc_args.pd,2,&b,sizeof(bool));
+        }
+
+        printf("MPFSS bit results\n");
+        for (int i = 0; i < mc_args.size; ++i){
+            bool v=mc_args.mpfss_bit_output.at(i)^v_bit_op.at(i);
+            cout<<v<<" ";
+        }
+        printf("\n");
+
+        std::vector<T> v_value_op(mc_args.size);
+        for (int i = 0; i < mc_args.size; ++i){
+            orecv(&mc_args.pd,1 ,&v_value_op.at(i),sizeof(T));
+        }
+
+        for (int i = 0; i < mc_args.size; ++i){
+            osend(&mc_args.pd,2,&mc_args.mpfss_output.at(i),sizeof(T));
+        }
+
+        printf("MPFSS results \n");
+        for (int i = 0; i < mc_args.size; ++i){
+            T v=mc_args.mpfss_output.at(i)^v_value_op.at(i);
+            cout<<v<<" ";
+        }
+        printf("\n");
+
+    #endif
+
+    cleanupProtocol(&mc_args.pd);
     free(m);
     for (int i = 0; i < mc_args.b; ++i){
         free(matches[i]);   
@@ -573,6 +622,7 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
     if(!mc_args.connection_already_exists){
         mc_args.pd=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
     }
+
 
     //--------------------Setting Parameters ------------------------------------------------------
 
@@ -681,7 +731,6 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         
         if(mc_args.print_stdout) log_info("Executing Yao Protocol\n");   
         execYaoProtocol(&mc_args.pd, mpfss_batch_cuckoo, y_args);
-        cleanupProtocol(&mc_args.pd);
         
     //--------------------Print results----------------------------------------------------------------------
         auto end_proto = std::chrono::system_clock::now();
@@ -715,13 +764,14 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
 
             uint8_t *this_value_vector=y_args->mpfss_output[i];
             T value;
-            
-            for (int i = 0; i < lim; ++i){
-                value = ((T)value << 8*i) | this_value_vector[i];
+
+            for (int ii = memblocksize-lim; ii < memblocksize; ++ii){
+                value = ((T)value << 8) | this_value_vector[ii];
             }
             
-            v.push_back(value);
-            v_bit.push_back(y_args->mpfss_bit_output[i]);
+            v.at(i)=value;
+            bool b =y_args->mpfss_bit_output[i];
+            v_bit.at(i)=b;
 
         }
         
@@ -731,6 +781,54 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         mc_args.mpfss_output_raw=y_args->mpfss_output;
         mc_args.mpfss_bit_output_raw=y_args->mpfss_bit_output;
     
+
+    #ifdef DEBUG
+
+        int other_p;
+        if (mc_args.cp==1){
+            other_p=2;
+        }else{
+            other_p=1;
+        }
+
+        for (int i = 0; i < mc_args.size; ++i){
+            bool b= mc_args.mpfss_bit_output.at(i);
+            osend(&mc_args.pd,1,&b,sizeof(bool));
+        }
+
+        std::vector<bool> v_bit_op(mc_args.size);
+        for (int i = 0; i < mc_args.size; ++i){
+            bool b;
+            orecv(&mc_args.pd,2,&b,sizeof(bool));
+            v_bit_op.at(i)=b;
+        }
+
+        printf("MPFSS bit results\n");
+        for (int i = 0; i < mc_args.size; ++i){
+            bool v=mc_args.mpfss_bit_output.at(i)^v_bit_op.at(i);
+            cout<<v<<" ";
+        }
+        printf("\n");
+
+        for (int i = 0; i < mc_args.size; ++i){
+            osend(&mc_args.pd,1,&mc_args.mpfss_output.at(i),sizeof(T));
+        }
+
+        std::vector<T> v_value_op(mc_args.size);
+        for (int i = 0; i < mc_args.size; ++i){
+            orecv(&mc_args.pd,2,&v_value_op.at(i),sizeof(T));
+        }
+
+        printf("MPFSS results\n");
+        for (int i = 0; i < mc_args.size; ++i){
+            T v=mc_args.mpfss_output.at(i)^v_value_op.at(i);
+            cout<<v<<" ";
+        }
+        printf("\n");
+
+    #endif
+
+    cleanupProtocol(&mc_args.pd);
     free(m);
     for (int i = 0; i < mc_args.b; ++i){
         free(matches[i]);   

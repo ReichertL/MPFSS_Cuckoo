@@ -31,7 +31,7 @@ cc_binary(
 
     ],
 
-    #copts = ["-DDEBUG"], 
+    copts = ["-DDEBUG"], 
 )
 
 cc_binary(

@@ -201,7 +201,7 @@ void print_measurements(int max_loop){
                 to_string(runtime_buckets.count()), 
                 to_string(runtime_assignment.count()) 
             };
-            benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
+            benchmark_list("cuckoo_new", list_of_names.size(), list_of_names, list_of_values);
         }
                 
         if(mc_args.print_stdout)printf("t:%d\n"                     , mc_args.t);
