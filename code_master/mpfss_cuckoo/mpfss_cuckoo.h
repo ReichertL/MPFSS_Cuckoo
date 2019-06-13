@@ -178,7 +178,7 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
         std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
         to_string(max_loop), "no", to_string(evictions_logging),
         to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
-        benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
+        benchmark_list("cuckoo_vole", list_of_names.size(), list_of_names, list_of_values);
     }
             
     if(mc_args.print_stdout)printf("t:%d\n"                     , mc_args.t);
@@ -206,8 +206,9 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
             value = ((T)value << 8) | this_value_vector[ii];
         }
         
-        v.push_back(value);
-        v_bit.push_back(y_args->mpfss_bit_output[i]);
+        v.at(i)=value;
+        bool b =y_args->mpfss_bit_output[i];
+        v_bit.at(i)=b;
 
     }
     
@@ -345,7 +346,7 @@ mpc_utils::Status RunIndexProviderVectorOLE(absl::Span<const T> y, absl::Span<co
             std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
             to_string(max_loop), "no", to_string(evictions_logging),
             to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
-            benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
+            benchmark_list("cuckoo_vole", list_of_names.size(), list_of_names, list_of_values);
         }
                 
         if(mc_args.print_stdout)printf("t:%d\n"                     , mc_args.t);
@@ -369,8 +370,9 @@ mpc_utils::Status RunIndexProviderVectorOLE(absl::Span<const T> y, absl::Span<co
             for (int ii = memblocksize-lim; ii < memblocksize; ++ii){
                 value = ((T)value << 8) | this_value_vector[ii];
             }
-            v.push_back(value);
-            v_bit.push_back(y_args->mpfss_bit_output[i]);
+            v.at(i)=value;
+            bool b =y_args->mpfss_bit_output[i];
+            v_bit.at(i)=b;
         }
         
         span_output=absl::Span<T>(v);
