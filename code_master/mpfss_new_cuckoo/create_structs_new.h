@@ -10,8 +10,6 @@ typedef struct  {
 	uint8_t *dpf_output;
 	bool * dpf_bit_output;
 	uint8_t **beta_value_vector;
-	bool set_beta;
-	uint8_t *skalar;
 	bool cprg;
 	int bucket_no;
 } yao_arguments_new;

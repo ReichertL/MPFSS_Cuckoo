@@ -85,10 +85,10 @@ void dpf_with_beta( size_t size,
 		my_fss= (fss *)fss_new(size, block_no,1);
 	}
 
-	uint8_t *local_output;
-	bool *local_bit_output;
-	floram_pma(&local_output, 16, size* memblocksize);
-	floram_pma(&local_bit_output, 16, size * sizeof(bool));
+	uint8_t *local_output=(uint8_t *)calloc(size, memblocksize*sizeof(uint8_t));
+	bool *local_bit_output=(bool *) calloc(size, sizeof(bool));
+	//floram_pma(&local_output, 16, size* memblocksize);
+	//floram_pma(&local_bit_output, 16, size * sizeof(bool));
 
 
 	obliv uint8_t *active_block_delta = calloc(1, memblocksize * sizeof(obliv uint8_t));
@@ -204,8 +204,8 @@ void dpf_with_beta( size_t size,
 		uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
 		ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)local_output, size*memblocksize/sizeof(uint64_t), 1);
 		ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)local_output,size*memblocksize/sizeof(uint64_t),  2);
-		uint8_t *dpf_with_beta;
-		floram_pma(&dpf_with_beta, 16, size* memblocksize);
+		uint8_t *dpf_with_beta=(uint8_t *) calloc(size, memblocksize*sizeof(uint8_t));
+		//floram_pma(&dpf_with_beta, 16, size* memblocksize);
 		for (size_t ii = 0; ii< size; ii++) {
 			for (size_t jj = 0; jj < memblocksize; jj++) {
 				uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];

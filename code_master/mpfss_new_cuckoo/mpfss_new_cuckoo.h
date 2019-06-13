@@ -73,13 +73,13 @@ template <class T>
 class MPFSS_Cuckoo_New {
 
 public:
-int memblocksize=16; //TODO
-int lim;
+int memblocksize=16; //TODO: get definitions from elsewhere
+int lim=16;
 mpfss_cuckoo_args_new<T> mc_args;
-std::chrono::duration<double> runtime_assignment; 
-std::chrono::duration<double> runtime_buckets;
-std::chrono::duration<double> runtime;
-int evictions_logging;
+std::chrono::duration<double> runtime_assignment=  std::chrono::duration<double>::zero();
+std::chrono::duration<double> runtime_buckets=     std::chrono::duration<double>::zero();
+std::chrono::duration<double> runtime=              std::chrono::duration<double>::zero();
+int evictions_logging=0;
 
 void create_buckets(){
         auto start_buckets = std::chrono::system_clock::now();
@@ -116,7 +116,6 @@ bool  run_create_assignement( std::vector<ProtocolDesc> pd_vec, std::vector<int>
         auto start_assi = std::chrono::system_clock::now();
         
         if(mc_args.print_stdout) log_info("Creating Assignment\n");
-        int evictions_logging=0;
         bool succ;        
         match **matches = (match **) calloc(mc_args.b, sizeof(match*));
         if(mc_args.cp==1){
@@ -157,7 +156,6 @@ bool run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec)
         y_args->bucket_lenghts=mc_args.bucket_lenghts;
         y_args->matches=mc_args.matches;
         y_args->all_buckets_array=mc_args.all_buckets_array;
-        y_args->set_beta=1;
         y_args->beta_value_vector=beta_value_vector; 
         y_args->cprg=mc_args.cprg;
         y_args->bucket_no=i;
@@ -174,39 +172,6 @@ bool run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec)
     auto end_proto = std::chrono::system_clock::now();
     runtime = end_proto-start_proto;
     if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
-}
-
-absl::Span<T> prepare_results_new(){
-
-    std::vector<T> v_value(mc_args.size);
-    std::vector<bool> v_bit(mc_args.size);
-
-   /* #pragma omp parallel for*/
-    for(int i=0;i<mc_args.b; ++i){
-    int *bucket=mc_args.all_buckets_array[i];
-    int len=mc_args.bucket_lenghts[i];
-    bool *dpf_bit_vector=mc_args.y_args_all.at(i)->dpf_bit_output;
-    uint8_t *dpf_value_vector=mc_args.y_args_all.at(i)->dpf_output;
-
-    for (int j=0; j<len;j++){
-        bool is_set=dpf_bit_vector[j];
-        int position=bucket[j];
-        v_bit.at(position)=v_bit.at(position)^is_set;
-        T value;
-                
-            for (int ii = 0; ii < lim; ++ii){
-                uint8_t value_part=dpf_value_vector[position*memblocksize+ii];
-                value = ((T)value << 8*ii) | value_part;
-            }
-            v_value.at(position)=v_value.at(position)^value;
-        }
-    }
-    
-    absl::Span<T> span_output=absl::Span<T>(v_value);
-    mc_args.mpfss_output=v_value;
-    mc_args.mpfss_bit_output=v_bit;
-
-    return span_output;
 }
 
 void print_measurements(int max_loop){ 
@@ -251,6 +216,40 @@ void print_measurements(int max_loop){
         if(mc_args.print_stdout)printf("runtime_assignment:%lf\n"   , runtime_assignment.count());
 }
 
+absl::Span<T> prepare_results_new(){
+
+    std::vector<T> v_value(mc_args.size);
+    std::vector<bool> v_bit(mc_args.size);
+
+
+    //#pragma omp parallel for <- causes errors in results
+    for(int i=0;i<mc_args.b; ++i){
+        int *bucket=mc_args.all_buckets_array[i];
+        int len=mc_args.bucket_lenghts[i];
+        bool *dpf_bit_vector=mc_args.y_args_all.at(i)->dpf_bit_output;
+        uint8_t *dpf_value_vector=mc_args.y_args_all.at(i)->dpf_output;
+
+        for (int j=0; j<len;j++){
+            bool is_set=dpf_bit_vector[j];
+            int position=bucket[j];
+            v_bit.at(position)=v_bit.at(position)^is_set;
+            T value=0;
+
+            for (int ii = memblocksize-lim; ii < memblocksize;++ii){
+                uint8_t value_part=dpf_value_vector[j*memblocksize+ii];
+                value = ((T)value << 8) | value_part;
+            }
+            v_value.at(position)=v_value.at(position)^value;
+        }
+    }
+    
+    absl::Span<T> span_output=absl::Span<T>(v_value);
+    mc_args.mpfss_output=v_value;
+    mc_args.mpfss_bit_output=v_bit;
+    return span_output;
+}
+
+
 //TODO:rename?
 //cp should be 2
 mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_output) {
@@ -275,15 +274,12 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
 
         #endif
 
-        //Making max_loop dependent on the size of the input field
         //TODO: find good value for max_loop
         int max_loop=0.5*y.size();
         mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,2, (int)mc_args.do_benchmark);
         mc_args.m=m;
-        //int (*func)( int, int)=hashfunc_absl;
         mc_args.func=hashfunc_absl;
 
-        lim=memblocksize;
         if((int)sizeof(T)<lim){
             lim=sizeof(T);
         }
@@ -323,38 +319,66 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
 
 
     #ifdef DEBUG
-        printf("MPFSS results\n");
+       
+        int other_p;
+        if (mc_args.cp==1){
+            other_p=2;
+        }else{
+            other_p=1;
+        }
+        std::vector<bool> v_bit_op(mc_args.size);
+        for (int i = 0; i < mc_args.size; ++i){
+            bool b;
+            orecv(&pd_dbg,1 ,&b,sizeof(bool));
+            v_bit_op.at(i)=b;
+        }
+
+        for (int i = 0; i < mc_args.size; ++i){
+            bool b=mc_args.mpfss_bit_output.at(i);
+            osend(&pd_dbg,2,&b,sizeof(bool));
+        }
+
+        printf("MPFSS bit results\n");
+        for (int i = 0; i < mc_args.size; ++i){
+            bool v=mc_args.mpfss_bit_output.at(i)^v_bit_op.at(i);
+            cout<<v<<" ";
+        }
+        printf("\n");
+
         std::vector<T> v_value_op(mc_args.size);
         for (int i = 0; i < mc_args.size; ++i){
-            orecv(&pd_dbg,mc_args.cp ,&v_value_op.at(i),sizeof(T));
-            //printf("%d ", v_value_op.at(i));
+            orecv(&pd_dbg,1 ,&v_value_op.at(i),sizeof(T));
         }
 
         for (int i = 0; i < mc_args.size; ++i){
-            osend(&pd_dbg,mc_args.cp,&span_output.at(i),sizeof(T));
+            osend(&pd_dbg,2,&mc_args.mpfss_output.at(i),sizeof(T));
         }
 
+        printf("MPFSS results \n");
         for (int i = 0; i < mc_args.size; ++i){
-            printf("%d ", span_output.at(i)^v_value_op.at(i));
+            T v=mc_args.mpfss_output.at(i)^v_value_op.at(i);
+            cout<<v<<" ";
         }
         printf("\n");
 
     #endif
 
 
-    /*free(m);
+    free(mc_args.m);
     for (int i = 0; i < mc_args.b; ++i){
-        free(matches[i]);   
+        free(mc_args.matches[i]);   
     }
-    free(matches);
-    //free(y_args);
+    free(mc_args.matches);
     for (int i = 0; i < mc_args.t; ++i){
         free(beta_value_vector[i]);
     }
     free(beta_value_vector);
     for (int i = 0; i < mc_args.b; ++i){
-        free(y_args_all.at(i));
-    }*/
+        yao_arguments_new *y_args=mc_args.y_args_all.at(i);
+        free(y_args->dpf_bit_output);
+        free(y_args->dpf_output);
+        free(y_args);
+    }
 
     return mpc_utils::OkStatus();
 
@@ -390,7 +414,6 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,1, (int)mc_args.do_benchmark);
         mc_args.m=m;
         mc_args.func=hashfunc_absl;
-        lim=memblocksize;
         if((int)sizeof(T)<memblocksize){
             lim=sizeof(T);
         }
@@ -433,43 +456,68 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         span_output=prepare_results_new();
 
     #ifdef DEBUG
-        printf("MPFSS results\n");
+
+        int other_p;
+        if (mc_args.cp==1){
+            other_p=2;
+        }else{
+            other_p=1;
+        }
 
         for (int i = 0; i < mc_args.size; ++i){
-            osend(&pd_dbg,mc_args.cp,&span_output.at(i),sizeof(T));
+            bool b= mc_args.mpfss_bit_output.at(i);
+            osend(&pd_dbg,1,&b,sizeof(bool));
+        }
+
+        std::vector<bool> v_bit_op(mc_args.size);
+        for (int i = 0; i < mc_args.size; ++i){
+            bool b;
+            orecv(&pd_dbg,2,&b,sizeof(bool));
+            v_bit_op.at(i)=b;
+        }
+
+        printf("MPFSS bit results\n");
+        for (int i = 0; i < mc_args.size; ++i){
+            bool v=mc_args.mpfss_bit_output.at(i)^v_bit_op.at(i);
+            cout<<v<<" ";
+        }
+        printf("\n");
+
+        for (int i = 0; i < mc_args.size; ++i){
+            osend(&pd_dbg,1,&mc_args.mpfss_output.at(i),sizeof(T));
         }
 
         std::vector<T> v_value_op(mc_args.size);
         for (int i = 0; i < mc_args.size; ++i){
-            orecv(&pd_dbg,mc_args.cp ,&v_value_op.at(i),sizeof(T));
-            //printf("%d ", v_value_op.at(i));
+            orecv(&pd_dbg,2,&v_value_op.at(i),sizeof(T));
         }
 
+        printf("MPFSS results\n");
         for (int i = 0; i < mc_args.size; ++i){
-            printf("%d ", span_output.at(i)^v_value_op.at(i));
+            T v=mc_args.mpfss_output.at(i)^v_value_op.at(i);
+            cout<<v<<" ";
         }
         printf("\n");
 
     #endif
 
     
-
-
-
-   /* free(m);
+    free(mc_args.m);
     for (int i = 0; i < mc_args.b; ++i){
-        free(matches[i]);   
+        free(mc_args.matches[i]);   
     }
-    free(matches);
+    free(mc_args.matches);
     for (int i = 0; i < mc_args.t; ++i){
         free(beta_value_vector[i]);
     }
     free(beta_value_vector);
 
     for (int i = 0; i < mc_args.b; ++i){
-        free(y_args_all.at(i));
-    }*/
-
+        yao_arguments_new *y_args=mc_args.y_args_all.at(i);
+        free(y_args->dpf_bit_output);
+        free(y_args->dpf_output);
+        free(y_args);
+    }
     return mpc_utils::OkStatus();
 }
 };

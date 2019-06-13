@@ -145,7 +145,7 @@ cc_library(
         "//includes:cuckoo",
         ":create_structs",
     ],
-    #copts = ["-DDEBUG"], 
+    copts = ["-DDEBUG"], 
 )
 
 oblivc_library(

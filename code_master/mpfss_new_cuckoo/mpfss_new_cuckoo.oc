@@ -137,6 +137,7 @@ void create_beta_vals(mpfss_cuckoo *m, match **matches, uint8_t **share, match_e
 		matches_ext[bucket_temp]->beta=this_beta;	
 	}
 
+	free(list);
 
 	#ifdef DEBUG
 		for (int i = 0; i < m->b; ++i){
@@ -176,7 +177,7 @@ void mpfss_single_bucket(void* args){
 	}
 
 	match_ext *me = matches_ext[bucket_no];
-	size_t index_non_obliv;  		
+	size_t index_non_obliv=0;  		
 	if(ocCurrentParty()==1){
   		index_non_obliv=(size_t)me->this_m->index_in_bucket;
   		if(index_non_obliv==-1){
@@ -197,21 +198,26 @@ void mpfss_single_bucket(void* args){
 					&local_bit_output,
 					&local_output,
 					cprg);	
+  	
+  	for (int i = 0; i < m->b; ++i){
+  		free(matches_ext[i]->beta);
+  		free(matches_ext[i]);
+  	}
+  	free(matches_ext);
 	y_args->dpf_bit_output=local_bit_output;
 	y_args->dpf_output=local_output;
 
-
-/*	#ifdef DEBUG
+	#ifdef DEBUG
         printf("DPF with Values \n");
-        for (int i = 0; i < m->size; ++i){
-        	for (int k = 0; k < memblocksize; ++k){
+        for (int i = 0; i < bucket_lenghts[bucket_no]; ++i){
+        	for (int k = 0; k < memblocksize;k++){
 	            uint8_t value=local_output[i*memblocksize+k];
-	            uint8_t val1=ocBroadcastInt(value, 1);
-	            uint8_t val2=ocBroadcastInt(value, 2);
+	            int val1=ocBroadcastInt((int)value, 1);
+	            int val2=ocBroadcastInt((int)value, 2);
 	            printf("%d ",val1 ^val2);
         	}
         	printf("\n");
         }
-	#endif*/
+	#endif
 
 }

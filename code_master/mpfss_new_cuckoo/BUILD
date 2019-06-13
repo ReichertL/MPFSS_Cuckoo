@@ -26,7 +26,7 @@ cc_binary(
 
     ],
 
-    copts = ["-fopenmp"], 
+    copts = ["-fopenmp -DDEBUG"], 
     linkopts=["-fopenmp"],
 )
 
