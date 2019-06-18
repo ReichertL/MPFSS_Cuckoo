@@ -25,13 +25,13 @@ cc_binary(
         "//includes:benchmark-cpp",
         ":buckets",
         ":mpfss_cuckoo_obliv",
-        ":create_structs",
+        "//includes/create_structs:create_structs",
         "@mpc_utils//mpc_utils:status",
         "@abseil//absl/types:span",
 
     ],
 
-    copts = ["-DDEBUG"], 
+    #copts = ["-DDEBUG"], 
 )
 
 cc_binary(
@@ -52,7 +52,7 @@ cc_binary(
         "//includes:benchmark-cpp",
         ":buckets",
         ":mpfss_cuckoo_obliv",
-        ":create_structs",
+        "//includes/create_structs:create_structs",
         "@mpc_utils//mpc_utils:status",
         "@abseil//absl/types:span",
 
@@ -60,35 +60,6 @@ cc_binary(
 
     #copts = ["-DDEBUG"], 
 )
-
-
-cc_binary(
-    name = "interface",
-    srcs = [
-        "mpfss_cuckoo_interface.cpp",
-        "mpfss_cuckoo.cpp",
-        "mpfss_cuckoo.h"
-    
-    ],
-
-    visibility = ["//visibility:public"],
-
-    deps = [
-        "//includes:util",
-        "//includes:dbg",
-        "//includes:cuckoo",
-        "//includes:benchmark-cpp",
-        ":buckets",
-        ":mpfss_cuckoo_obliv",
-        ":create_structs",
-        "@mpc_utils//mpc_utils:status",
-        "@abseil//absl/types:span",
-
-    ],
-
-    #copts = ["-DDEBUG"], 
-)
-
 
 
 oblivc_library(
@@ -108,9 +79,9 @@ oblivc_library(
         "//includes:uint128_c",
         #"@semesterprojekt//code_projekt/mpfss_naive:mpfss_naive_obliv",
         "//includes/mpfss_naive:mpfss_naive_obliv",
-        ":create_structs",
-        "@ack//:osort",  
-        ":parallel"
+        "//includes/create_structs:create_structs",
+        ":parallel",
+        "//includes:secret_share_beta",
 
     ],
     #copts = ["-DDEBUG"], 
@@ -143,21 +114,12 @@ cc_library(
         "//includes:dbg",
         "//includes:benchmark-cpp",
         "//includes:cuckoo",
-        ":create_structs",
+        "//includes/create_structs:create_structs",
     ],
-    copts = ["-DDEBUG"], 
-)
-
-oblivc_library(
-    name = "create_structs",
-    srcs = ["create_structs.c"],
-    hdrs = [    "create_structs.h",
-                "create_structs.oh",
-           ],
-    visibility = ["//visibility:public"],
-
     #copts = ["-DDEBUG"], 
 )
+
+
 
 cc_library(
     name = "mpfss_cuckoo_lib",
@@ -176,7 +138,7 @@ cc_library(
         "//includes:cuckoo",
         ":buckets",
         ":mpfss_cuckoo_obliv",
-        ":create_structs",
+        "//includes/create_structs:create_structs",
         "@mpc_utils//mpc_utils:status",
         "@abseil//absl/types:span",
 
@@ -205,7 +167,7 @@ cc_test(
         "//includes:util",
         "//includes:cuckoo",
         ":buckets",
-        ":create_structs",
+        "//includes/create_structs:create_structs",
         "@com_google_googletest//:gtest_main",
     ],
    #copts = ["-DDEBUG"], 

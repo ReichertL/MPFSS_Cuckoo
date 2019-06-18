@@ -8,7 +8,7 @@
 
 //for match struct
 extern "C"{
-	#include "create_structs.h"
+	#include "includes/create_structs/create_structs.h"
 }
 #include "includes/cuckoo/cuckoo.h"
 #include "buckets.h"

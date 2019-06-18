@@ -8,7 +8,7 @@ extern "C" {
     #include "includes/util.h"
     #include "includes/dbg.h"
     #include "mpfss_cuckoo.oh"
-    #include "create_structs.h"
+    #include "includes/create_structs/create_structs.h"
 }
 #include "includes/benchmark.h"
 #include "buckets.h"
