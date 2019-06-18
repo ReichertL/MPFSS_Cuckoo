@@ -9,7 +9,7 @@
 #include "includes/create_structs/create_structs.h"
 #include "includes/create_structs/create_structs.oh"
 #include "create_structs_new.h"
-#include "includes/secret_share_beta.h"
+#include "includes/secret_share_beta.oh"
 
 
 

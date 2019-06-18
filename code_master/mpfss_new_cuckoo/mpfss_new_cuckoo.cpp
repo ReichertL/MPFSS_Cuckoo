@@ -9,7 +9,6 @@ extern "C" {
     #include "obliv.h"
     #include "includes/util.h"
     #include "includes/dbg.h"
-    #include "code_master/mpfss_cuckoo/mpfss_cuckoo.oh"
     #include "includes/create_structs/create_structs.h"
 }
 #include "includes/benchmark.h"

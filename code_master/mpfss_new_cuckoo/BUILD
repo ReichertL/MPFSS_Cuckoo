@@ -75,7 +75,6 @@ oblivc_library(
         "//includes:dbg",
         "//includes/mpfss_naive:mpfss_naive_obliv",
         "//includes/create_structs:create_structs",
-        "//code_master/mpfss_cuckoo:mpfss_cuckoo_obliv",
         "//includes:secret_share_beta",
 
     ],
