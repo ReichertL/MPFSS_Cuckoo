@@ -15,7 +15,7 @@ extern "C" {
     #include "includes/util.h"
     #include "includes/dbg.h"
     #include "mpfss_new_cuckoo.oh"
-    #include "code_master/mpfss_cuckoo/create_structs.h"
+    #include "includes/create_structs/create_structs.h"
 }
 
 #include "mpc_utils/status_macros.h"
@@ -138,7 +138,7 @@ bool  run_create_assignement( std::vector<ProtocolDesc> pd_vec, std::vector<int>
         return succ;
 }
 
-bool run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec){
+void run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec){
   auto start_proto = std::chrono::system_clock::now();
 
     std::vector<yao_arguments_new *> y_args_all(mc_args.b);
@@ -150,7 +150,7 @@ bool run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec)
 
     #pragma omp parallel for
     for (int i = 0; i < mc_args.b; ++i){
-        printf("Work started by tid %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
+        //printf("Work started by tid %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
         yao_arguments_new *y_args = y_args_all.at(i);
         y_args->m=mc_args.m;
         y_args->bucket_lenghts=mc_args.bucket_lenghts;
@@ -168,7 +168,7 @@ bool run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec)
     }  
 
     #pragma omp master
-    printf("\n"); //needs to be here
+    printf(""); //needs to be here
     auto end_proto = std::chrono::system_clock::now();
     runtime = end_proto-start_proto;
     if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
@@ -269,6 +269,10 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
             pd_vec.at(i)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
             this_thread::sleep_for(chrono::seconds(1));
         }
+        /*TODO 
+         ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
+    ocSplitProto(pd_split, ocCurrentProto());
+        */
         #ifdef DEBUG
             ProtocolDesc pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port+1);
 
@@ -401,7 +405,7 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         std::vector<ProtocolDesc> pd_vec(mc_args.b);
         for (int i = 0; i < mc_args.b; ++i){
             pd_vec.at(i)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
-            this_thread::sleep_for(chrono::seconds(1));
+            //this_thread::sleep_for(chrono::seconds(1));
         }
         #ifdef DEBUG
             ProtocolDesc pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port+1);

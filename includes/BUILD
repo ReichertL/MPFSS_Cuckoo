@@ -17,6 +17,22 @@ oblivc_library(
     ],
    # copts = ["-DDEBUG -g"], 
 )
+
+oblivc_library(
+    name = "secret_share_beta",
+    srcs = ["secret_share_beta.oc"],
+    hdrs = ["secret_share_beta.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":dbg",
+        "@ack//:oram_fssl",
+        "@ack//:osort",
+        "//includes/create_structs:create_structs"
+    ],
+   # copts = ["-DDEBUG -g"], 
+)
+
+
 cc_library(
     name = "benchmark-cpp",
     srcs = ["benchmark.cpp"],

@@ -10,7 +10,7 @@ extern "C" {
     #include "includes/util.h"
     #include "includes/dbg.h"
     #include "code_master/mpfss_cuckoo/mpfss_cuckoo.oh"
-    #include "code_master/mpfss_cuckoo/create_structs.h"
+    #include "includes/create_structs/create_structs.h"
 }
 #include "includes/benchmark.h"
 #include "code_master/mpfss_cuckoo/buckets.h"
@@ -31,13 +31,13 @@ ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port
         if(cp == 1) {
             log_info("Waiting for connection from %s on port %s ...\n", remote_host, port);
             if(protocolAcceptTcp2P(&pd,port)!=0) {
-                log_err("TCP accept from %s failed\n", remote_host);
+                log_err("TCP accept from %s:%s failed\n", remote_host,port);
                 exit(1);
             }
         } else {
             log_info("Connecting to %s on port %s ...\n", remote_host, port);
             if(protocolConnectTcp2P(&pd,remote_host,port)!=0) {
-                log_err("TCP connect to %s failed\n", remote_host);
+                log_err("TCP connect to %s:%s failed\n", remote_host, port);
                 exit(1);
             }
         }
