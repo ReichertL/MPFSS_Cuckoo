@@ -34,6 +34,8 @@ oblivc_library(
         "//includes:util",
         "//includes:dbg",
         "@ack//:oram_fssl",
+        #"//includes/fss-altered:fss_cprg_altered",
+        #"//includes/fss-altered:fss_altered",
         "@ack//:obig",
         "//includes:uint128_c",
 

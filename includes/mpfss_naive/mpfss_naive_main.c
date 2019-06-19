@@ -59,12 +59,12 @@ int main(int argc, char *argv[]) {
         double runtime = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
 
         // Print results and gate count
-        print("Total time: %lf seconds\n", runtime);
+        printf("Total time: %lf seconds\n", runtime);
       
         benchmark(runtime, size, t, cp, "Naive");
            
    } else {
-        print("Usage: %s <hostname:port> <1|2> <t> <size> \n" 
+        printf("Usage: %s <hostname:port> <1|2> <t> <size> \n" 
                  "\tHostname usage:\n" 
                  "\tlocal -> 'localhost' remote -> IP address or DNS name\n", argv[0]);
     }

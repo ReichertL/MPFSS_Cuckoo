@@ -492,7 +492,7 @@ void dpf_proper( size_t size,  size_t index_non_obliv, obliv uint8_t **active_bl
 	  Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
 	  Return type is void.
 */
-void get_mpfss_vector(mpfss *mpfss, size_t *indices_notobliv, bool *vector){
+void get_mpfss_vector(mpfss *mpfss, int *indices_notobliv, bool *vector){
   //int memblocksize=BLOCKSIZE*block_no;
   size_t size=mpfss->size;
   int t=mpfss->t;

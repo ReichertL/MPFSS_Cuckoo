@@ -28,4 +28,4 @@ bool **local_bit_output_ret,
 uint8_t **local_output_ret, 
 bool cprg);
 
-void get_mpfss_vector(mpfss *mpfss, size_t *indices, bool *vector );
+void get_mpfss_vector(mpfss *mpfss, int *indices, bool *vector );
