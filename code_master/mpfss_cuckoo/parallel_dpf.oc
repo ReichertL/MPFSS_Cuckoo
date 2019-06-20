@@ -6,37 +6,48 @@
 #include "dbg.h"
 #include "mpfss_naive.h"
 #include "mpfss_naive.oh"
-#include "mpfss_cuckoo.oh"
 #include "create_structs.h"
 #include "create_structs.oh"
-#include "parallel.h"
 
-void call_dpf_threaded(void * params_less){
+void call_dpf_threaded(void * params_less, int i, void * pd_void){
 
 
 
 	void ** params = (void **) params_less;
-	int index_non_obliv=*(params[0]);
+	
+	match_ext ** matches_ext=(match_ext **)params[0];
+	
 	bool **dpf_vectors = (bool **) params[1];
 	uint8_t *** dpf_value_vectors= (uint8_t ***) params[2];
 	int * bucket_lenghts=(int *)params[3];
 	bool cprg= (bool) params[4];
-	int i= (int) params[5];
+
+	ProtocolDesc *pd=(ProtocolDesc *) pd_void;
+	if (pd != NULL) ocSetCurrentProto(pd);
 
 
-	  	bool *local_bit_output;
-	  	uint8_t *local_output;
+	match_ext *me = matches_ext[i];
+	int index_non_obliv;  		
+	if(ocCurrentParty()==1){
+  		index_non_obliv=(size_t)me->this_m->index_in_bucket;
+  		if(index_non_obliv==-1){
+  			debug("index in batch %d: %d, empty batch!\n",i,  index_non_obliv);
+  		}else{
+  			debug("index in batch %d: %d\n",i,  index_non_obliv);
+		}
+	}
 
-		dpf_with_beta( 		(size_t) bucket_lenghts[i],
-							index_non_obliv, 
-							me->beta, 
-							i,  									
-							&local_bit_output,
-							&local_output,
-							cprg);	
+  	bool *local_bit_output;
+  	uint8_t *local_output;
+	dpf_with_beta( 		(size_t) bucket_lenghts[i],
+						index_non_obliv, 
+						me->beta, 
+						i,  									
+						&local_bit_output,
+						&local_output,
+						cprg);	 	
+	dpf_vectors[i]=local_bit_output;
+	dpf_value_vectors[i]=local_output;
 
-	  	
-		dpf_vectors[i]=local_bit_output;
-		dpf_value_vectors[i]=local_output;
-
+	if (pd != NULL) oflush(pd);
 }

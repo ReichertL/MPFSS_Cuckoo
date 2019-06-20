@@ -81,6 +81,7 @@ oblivc_library(
         "//includes/mpfss_naive:mpfss_naive_obliv",
         "//includes/create_structs:create_structs",
         ":parallel",
+        ":parallel_dpf",
         "//includes:secret_share_beta",
 
     ],
@@ -101,6 +102,24 @@ cc_library(
     ],
     copts = ["-fopenmp"], 
     linkopts=["-fopenmp"],
+)
+
+oblivc_library(
+    name="parallel_dpf",
+    srcs = [
+        "parallel_dpf.oc",
+    ],
+    hdrs = [
+        "parallel_dpf.h"
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//includes:dbg",
+        "//includes:uint128_c",
+        "//includes/mpfss_naive:mpfss_naive_obliv",
+        "//includes/create_structs:create_structs",
+        ":parallel",
+    ],
 )
 
 cc_library(
