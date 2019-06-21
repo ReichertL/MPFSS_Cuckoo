@@ -18,61 +18,118 @@ int main(int argc, char *argv[]) {
     const char *port = strtok(NULL, ":");
 	int cp = (argv[2][0]=='1'? 1 : 2);
 
-
-    bool do_benchmark=true;
-    int set_beta=0;
-    bool exists=false;
-    bool buckets=false;
-    int indices_set=-1;
+	bool cprg=true;
 
     #ifdef TESTING
 		vector<int> t_vals{ 2 }; 
 		vector<int> n_vals_pow{4}; 
 		int no_runs=2;
-	    vector<int> thread_vals{1, 2, 4, 8, 16, 32};
+	    vector<int> v_threads{1, 2, 4, 8};
     #else
-	   // vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
-	   // vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
-	  	vector<int> t_vals{ 5205 }; 
-	    vector<int> n_vals_pow{24 };
-	    vector<int> thread_vals{1, 2, 4, 8, 16, 32};
+	   vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
+	    vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
+	  	//vector<int> t_vals{ 5205 }; 
+	    //vector<int> n_vals_pow{24 };
+	    //vector<int> v_threads{1, 2, 4, 8};
+	    vector<int> v_threads{8};
 		int no_runs=10;
   	#endif
 
-	for (int k = 0; k < (int)thread_vals.size(); ++k){
+	for (int k = 0; k < (int)v_threads.size(); ++k){
 
-		omp_set_num_threads(thread_vals.at(k));
+		omp_set_num_threads(v_threads.at(k));
 	    for (int i = 0; i < (int) t_vals.size(); ++i){
 	    	int t= t_vals.at(i);
 	    	int size=pow(2,n_vals_pow.at(i));
 
-		    mpfss_cuckoo_args<int> *mc_args=(mpfss_cuckoo_args<int> *)calloc(1, sizeof(mpfss_cuckoo_args<int>));
-		    mc_args->cp=cp;
-		    mc_args->do_benchmark=do_benchmark;    
+		    mpfss_cuckoo_args<int> mc_args;
+		    mc_args.cp=cp;
+		    mc_args.do_benchmark=true;
+		    mc_args.size=size;
+		    mc_args.t=t;
+		    mc_args.port=port;
+		    mc_args.host=remote_host;
+		    mc_args.connection_already_exists=false;
+		    mc_args.print_stdout=true;
+		    mc_args.buckets_set=false;
+		    mc_args.cprg=cprg;
+		    MPFSS_Cuckoo<int> mc;
+		    mc.mc_args=mc_args;
+		    absl::Span<int> span_output;
+		    srand (time(NULL));
 
-		    mc_args->port=port;
-		    mc_args->host=remote_host;
-			mc_args->connection_already_exists=exists;
-
-			mc_args->buckets_set=buckets;
-		    mc_args->set_beta=set_beta;
-		    mc_args->indices_set=indices_set;
-		    mc_args->print_stdout=true;
-		    mc_args->cprg=true;
+			absl::Span<const int64_t> indices;
+			absl::Span<const int> y;
 
 	    	for (int j = 0; j < no_runs; ++j){
 	    		printf("--------------------------------t %d, size %d, run %d----------------------------------------------------------------------\n", t, size, j);
-				printf("threads:%d\n", thread_vals.at(k));
+				printf("threads:%d\n", v_threads.at(k));
+				printf("cprg:%d\n", cprg);
+
 				if(j>0){
-					mc_args->buckets_set=true;
-					mc_args->indices_set=true;
+					mc.mc_args.buckets_set=true;
 				}    		
 
-				thread t1(run_mpfss_cuckoo, t,size,mc_args);
-				t1.join();
-				this_thread::sleep_for(chrono::seconds(cp*4));
+				if (cp==1){
+					#ifdef DEBUG
+			        debug("indices: ");
+			        #endif
+			        std::vector<int64_t> v;
+			        for (int i = 0; i < t; ++i){
+			            int r=rand()%size;
+			            while ((std::find(v.begin(), v.end(), r) != v.end())or r==0){
+			                r=rand()%size;
+			            }
+			            v.push_back((int64_t)(r));     
+			            #ifdef DEBUG
+			            printf("%d ", r);
+			            #endif
+			        }
+			        #ifdef DEBUG
+			        printf("\n");
+			        #endif
+
+			        indices=absl::Span<const int64_t>(v);
+
+			        #ifdef DEBUG
+			        printf("beta: ");
+			        #endif
+			        std::vector<int>v_y;
+			        for (int i = 0; i < t; ++i){
+			            int r=( int) (rand()%size);
+			            while(r==0){
+			                r=( int) (rand()%size);
+			            }
+			            v_y.push_back(r);
+			            #ifdef DEBUG
+			            printf("%d ",r );
+			            #endif
+			        }
+			        y=absl::Span<const int>(v_y);
+			        #ifdef DEBUG
+			        printf("\n");
+			        #endif	
+        			mpc_utils::Status stat=mc.RunIndexProvider(y, indices, span_output);
+					this_thread::sleep_for(chrono::seconds(cp*1));
+				}else{
+					#ifdef DEBUG
+			        printf("beta: ");
+			        #endif
+			        std::vector<int>v_y;
+			        for (int i = 0; i < t; ++i){
+			            int r=( int) (rand()%255);
+			            while(r==0){
+			                r=( int) (rand()%255);
+			            }
+			            v_y.push_back(r);
+			        }
+					y=absl::Span<const int>(v_y);
+        			mpc_utils::Status stat=mc.RunValueProvider(y, span_output);
+
+					this_thread::sleep_for(chrono::seconds(cp*1));
+				}
 			}
-		}
+		}	
 	}
 }
 
