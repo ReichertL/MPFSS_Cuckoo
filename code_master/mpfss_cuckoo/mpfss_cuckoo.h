@@ -69,7 +69,7 @@ public:
 mpfss_cuckoo_args<T> mc_args;
 
 // x is skalar so that output vector = x*(y_vector)
-mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_output) {
+/*mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_output) {
 
     //cp should be 2
     if(mc_args.print_stdout)log_info("Party %d \n", mc_args.cp);
@@ -136,7 +136,7 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
 
     
     //--------------------Create Assignment----------------------------------------------------------------------
-    auto start_proto = std::chrono::system_clock::now();
+    auto start_assi = std::chrono::system_clock::now();
     if(mc_args.print_stdout) log_info("Creating Assignment\n");
             
     match **matches = (match **) calloc(mc_args.b, sizeof(match*));
@@ -149,9 +149,11 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
 
 	std::chrono::duration<double>  runtime_assignment;
     auto end_assi = std::chrono::system_clock::now();
-    runtime_assignment = end_assi-start_proto;
+    runtime_assignment = end_assi-start_assi;
     if(mc_args.print_stdout)log_info("Time to create Assignment : %lf seconds\n", runtime_assignment.count());
-
+    
+    //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
+    auto start_proto = std::chrono::system_clock::now();
     yao_arguments *y_args= (yao_arguments *) calloc(1, sizeof(yao_arguments));
     y_args->m=m;
     y_args->bucket_lenghts=mc_args.bucket_lenghts;
@@ -162,7 +164,6 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
     y_args->skalar=skalar;
     y_args->cprg=mc_args.cprg;
 
-    //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
         
     if(mc_args.print_stdout) log_info("Executing Yao Protocol\n");   
     execYaoProtocol(&mc_args.pd, mpfss_vole_batch_cuckoo, y_args);
@@ -174,24 +175,13 @@ mpc_utils::Status RunValueProviderVectorOLE(T x, int y_len, absl::Span<T> span_o
     if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
 
     if (mc_args.do_benchmark){
-        std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
+        std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
         std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
         to_string(max_loop), "no", to_string(evictions_logging),
         to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
         benchmark_list("cuckoo_vole", list_of_names.size(), list_of_names, list_of_values);
     }
             
-    if(mc_args.print_stdout)printf("t:%d\n"                     , mc_args.t);
-    if(mc_args.print_stdout)printf("size:%d\n"                  , mc_args.size);
-    if(mc_args.print_stdout)printf("b:%d\n"                     , mc_args.b);
-    if(mc_args.print_stdout)printf("w:%d\n"                     , mc_args.w);
-    if(mc_args.print_stdout)printf("max_loop:%d\n"              , max_loop);
-    if(mc_args.print_stdout)printf("evictions:%d\n"             , evictions_logging);
-    if(mc_args.print_stdout)printf("cprg:%d\n"                  , (int)mc_args.cprg);
-    if(mc_args.print_stdout)printf("runtime:%lf\n"              , runtime.count());
-    if(mc_args.print_stdout)printf("runtime_buckets:%lf\n"      , runtime_buckets.count());
-    if(mc_args.print_stdout)printf("runtime_assignment:%lf\n"   , runtime_assignment.count());
-
     
     //--------------------Prepare results for c++----------------------------------------------------------------------     
 
@@ -342,23 +332,13 @@ mpc_utils::Status RunIndexProviderVectorOLE(absl::Span<const T> y, absl::Span<co
         if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
 
         if (mc_args.do_benchmark){
-            std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
+            std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
             std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
             to_string(max_loop), "no", to_string(evictions_logging),
             to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
             benchmark_list("cuckoo_vole", list_of_names.size(), list_of_names, list_of_values);
         }
                 
-        if(mc_args.print_stdout)printf("t:%d\n"                     , mc_args.t);
-        if(mc_args.print_stdout)printf("size:%d\n"                  , mc_args.size);
-        if(mc_args.print_stdout)printf("b:%d\n"                     , mc_args.b);
-        if(mc_args.print_stdout)printf("w:%d\n"                     , mc_args.w);
-        if(mc_args.print_stdout)printf("max_loop:%d\n"              , max_loop);
-        if(mc_args.print_stdout)printf("evictions:%d\n"             , evictions_logging);
-        if(mc_args.print_stdout)printf("runtime:%lf\n"              , runtime.count());
-        if(mc_args.print_stdout)printf("runtime_buckets:%lf\n"      , runtime_buckets.count());
-        if(mc_args.print_stdout)printf("runtime_assignment:%lf\n"   , runtime_assignment.count());
-
     
     //--------------------Prepare results for c++----------------------------------------------------------------------    
 
@@ -393,7 +373,7 @@ mpc_utils::Status RunIndexProviderVectorOLE(absl::Span<const T> y, absl::Span<co
     free(beta_value_vector);
 
     return mpc_utils::OkStatus();
-}
+}*/
 
 mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_output) {
 
@@ -479,9 +459,10 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         }
         
         int evictions_logging=0;
-        bool succ;
-        orecv(&mc_args.pd,2,&succ,sizeof(bool));
-        if(!succ ){
+        int succ=-1;
+        orecv(&mc_args.pd,1,&succ,sizeof(int));
+
+        if(succ==-1 ){
             return mpc_utils::Status{mpc_utils::StatusCode::kFailedPrecondition, "Assignment could not be created."};
         }
 
@@ -511,25 +492,14 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
 
         if (mc_args.do_benchmark){
-            std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
+            std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
             std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
             to_string(max_loop), "no", to_string(evictions_logging),
             to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
             benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
         }
                 
-        if(mc_args.print_stdout)printf("t:%d\n"                     , mc_args.t);
-        if(mc_args.print_stdout)printf("size:%d\n"                  , mc_args.size);
-        if(mc_args.print_stdout)printf("b:%d\n"                     , mc_args.b);
-        if(mc_args.print_stdout)printf("w:%d\n"                     , mc_args.w);
-        if(mc_args.print_stdout)printf("max_loop:%d\n"              , max_loop);
-        if(mc_args.print_stdout)printf("evictions:%d\n"             , evictions_logging);
-        if(mc_args.print_stdout)printf("cprg:%d\n"                  , (int)mc_args.cprg);
-        if(mc_args.print_stdout)printf("runtime:%lf\n"              , runtime.count());
-        if(mc_args.print_stdout)printf("runtime_buckets:%lf\n"      , runtime_buckets.count());
-        if(mc_args.print_stdout)printf("runtime_assignment:%lf\n"   , runtime_assignment.count());
 
-    
     //--------------------Prepare results for c++----------------------------------------------------------------------     
 
         std::vector<T> v(mc_args.size);
@@ -548,7 +518,6 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
             v_bit.at(i)=b;
 
         }
-        printf("\n");
     
         span_output=absl::Span<T>(v);
         mc_args.mpfss_output=v;
@@ -708,9 +677,10 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
                 
         match **matches = (match **) calloc(mc_args.b, sizeof(match*));
         int evictions_logging=0;
-        bool succ=create_assignement(m, indices_no, matches, func, mc_args.all_buckets, &evictions_logging, mc_args.rands );
-        osend(&mc_args.pd,2,&succ,sizeof(bool));
-        if(!succ ){
+        int succ=create_assignement(m, indices_no, matches, func, mc_args.all_buckets, &evictions_logging, mc_args.rands );
+        osend(&mc_args.pd,1,&succ,sizeof(int));
+        oflush(&mc_args.pd);
+        if(succ==-1 ){
             return mpc_utils::Status{mpc_utils::StatusCode::kFailedPrecondition, "Assignment could not be created."};
         }
 
@@ -740,23 +710,13 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
 
         if (mc_args.do_benchmark){
-            std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
+            std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
             std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
             to_string(max_loop), "no", to_string(evictions_logging),
             to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
             benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
         }
                 
-        if(mc_args.print_stdout)printf("t:%d\n"                     , mc_args.t);
-        if(mc_args.print_stdout)printf("size:%d\n"                  , mc_args.size);
-        if(mc_args.print_stdout)printf("b:%d\n"                     , mc_args.b);
-        if(mc_args.print_stdout)printf("w:%d\n"                     , mc_args.w);
-        if(mc_args.print_stdout)printf("max_loop:%d\n"              , max_loop);
-        if(mc_args.print_stdout)printf("evictions:%d\n"             , evictions_logging);
-        if(mc_args.print_stdout)printf("runtime:%lf\n"              , runtime.count());
-        if(mc_args.print_stdout)printf("runtime_buckets:%lf\n"      , runtime_buckets.count());
-        if(mc_args.print_stdout)printf("runtime_assignment:%lf\n"   , runtime_assignment.count());
-
     
     //--------------------Prepare results for c++----------------------------------------------------------------------    
 

@@ -41,7 +41,7 @@ void parallize(split_fn fn, void ** list_pd_split, int b, void * params){
 
 
     //#pragma single   
-    printf("finisehd parallel  %d \n", omp_get_num_threads());
+    //printf("finisehd parallel  %d \n", omp_get_num_threads());
     
 }
 

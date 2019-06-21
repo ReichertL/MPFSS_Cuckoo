@@ -54,7 +54,7 @@ vector<vector<int>> generate_buckets_cuckoo(int size, int w, int b, int (*func)(
 	return all_buckets;
 }
 
-bool create_assignement(mpfss_cuckoo *mpfss,  std::vector<int> indices, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets , int *evictions_logging, std::vector<int> rands){
+int create_assignement(mpfss_cuckoo *mpfss,  std::vector<int> indices, match **matches, int (*func)( int, int), vector<vector<int>> all_buckets , int *evictions_logging, std::vector<int> rands){
 	
 	int w=mpfss->w;
 	int b=mpfss->b;
@@ -68,14 +68,15 @@ bool create_assignement(mpfss_cuckoo *mpfss,  std::vector<int> indices, match **
 	
 	int evictions=cuckoo(indices, t, c);
 	*evictions_logging=evictions;
+	//evictions=-1;
 	if(evictions==-1){
 		if(mpfss->do_benchmark==1){
 			std::vector<string> list_of_names={"runtime","t","size","no_buckets b", "no_hashfunctions w", "max_loop", "max_loop_reached", "evictions"};
 			std::vector<string> list_of_values={"-1",to_string(t),to_string(mpfss->size),to_string(b),to_string(w),to_string(max_loop), "yes", "-1" };
-            benchmark_list("cuckoo", 8, list_of_names, list_of_values);
+            benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
 		}
 		free(c);
-		return false;
+		return -1;
 	}
 		
 	#ifdef DEBUG
@@ -105,7 +106,7 @@ bool create_assignement(mpfss_cuckoo *mpfss,  std::vector<int> indices, match **
 		matches[i]=p;
 	}
 	free(c);
-	return true;
+	return 1;
 }
 
 

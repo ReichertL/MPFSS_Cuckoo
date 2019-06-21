@@ -11,7 +11,7 @@ std::vector<std::vector<int>> generate_buckets_cuckoo(
 						int (*func)( int, int),
 						std::vector<int> rands);
 
-bool create_assignement(
+int create_assignement(
 						mpfss_cuckoo *mpfss, 
 						std::vector<int> indices, 
 						match **matches, 

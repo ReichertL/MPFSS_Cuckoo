@@ -55,21 +55,31 @@ int main(int argc, char *argv[]) {
     srand (time(NULL));
 
     if(cp==1){
-        printf("indices: ");
+
+        #ifdef DEBUG
+        debug("indices: ");
+        #endif
         std::vector<int64_t> v;
         for (int i = 0; i < t; ++i){
             int r=rand()%size;
             while ((std::find(v.begin(), v.end(), r) != v.end())or r==0){
                 r=rand()%size;
             }
-            v.push_back((int64_t)(r));     
+            v.push_back((int64_t)(r));  
+            #ifdef DEBUG
             printf("%d ", r);
+            #endif
         }
+        #ifdef DEBUG
         printf("\n");
+        #endif
 
         absl::Span<const int64_t> indices(v);
 
+        #ifdef DEBUG
         printf("beta: ");
+        #endif
+
         std::vector< int>v_y;
         for (int i = 0; i < t; ++i){
             int r=( int) (rand()%size);
@@ -77,13 +87,24 @@ int main(int argc, char *argv[]) {
                 r=( int) (rand()%size);
             }
             v_y.push_back(r);
+            
+            #ifdef DEBUG
             printf("%d ",r );
+            #endif
         }
+
+        #ifdef DEBUG
         printf("\n");
+        #endif
+
         absl::Span<const int> y (v_y);
         mpc_utils::Status stat=mc.RunIndexProvider(y, indices, span_output);
     }else{
+
+        #ifdef DEBUG
         printf("beta: ");
+        #endif
+
         std::vector< int>v_y;
         for (int i = 0; i < t; ++i){
             int r=( int) (rand()%255);
@@ -91,9 +112,16 @@ int main(int argc, char *argv[]) {
                 r=( int) (rand()%255);
             }
             v_y.push_back(r);
+ 
+            #ifdef DEBUG
             printf("%d ",r );
+            #endif
         }
+
+        #ifdef DEBUG
         printf("\n");
+        #endif
+        
         absl::Span<const int> y (v_y);
         mpc_utils::Status stat=mc.RunValueProvider(y, span_output);
     }
