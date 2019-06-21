@@ -33,9 +33,9 @@ oblivc_library(
     deps = [
         "//includes:util",
         "//includes:dbg",
-        "@ack//:oram_fssl",
-        #"//includes/fss-altered:fss_cprg_altered",
-        #"//includes/fss-altered:fss_altered",
+        #"@ack//:oram_fssl",
+        "//includes/fss-altered:fss_cprg_altered",
+        "//includes/fss-altered:fss_altered",
         "@ack//:obig",
         "//includes:uint128_c",
 
@@ -44,6 +44,31 @@ oblivc_library(
     #copts = ["-DDEBUG -g3"], 
 )
 
+oblivc_library(
+    name = "mpfss_naive_obliv_original",
+    srcs = [
+        
+        "mpfss_naive.oc",
+
+    ],
+    hdrs = [
+        "mpfss_naive.oh",
+        "mpfss_naive.h",
+
+    ],
+    deps = [
+        "//includes:util",
+        "//includes:dbg",
+        #"@ack//:oram_fssl",
+        "//includes/fss-altered:fss_cprg_altered",
+        "//includes/fss-altered:fss_altered",
+        "@ack//:obig",
+        "//includes:uint128_c",
+
+    ],
+    visibility = ["//visibility:public"],
+    copts = ["-DOriginal_FSS"], 
+)
 
 cc_library(
     name = "mpfss_naive",

@@ -3,8 +3,14 @@
 
 #include <obliv.oh>
 #include <obliv_float_ops.h>
-#include <fss.oh>
-#include <fss_cprg.oh>
+#ifdef Original_FSS
+	#include <fss.oh>
+	#include <fss_cprg.oh>
+#else
+	#include "fss_altered.oh"
+	#include "fss_cprg_altered.oh"
+#endif
+
 #include <floram_util.h>
 #include <inttypes.h>
 
@@ -12,6 +18,8 @@
 #include "util.h"
 #include "mpfss_naive.h"
 #include "mpfss_naive.oh"
+
+
 
 
 
@@ -50,6 +58,12 @@ void dpf_with_beta( size_t size,
 							uint8_t **local_output_ret,
 							bool cprg_set){
 
+/*	#ifdef Original_FSS
+		printf("fss:original\n");
+	#else
+		printf("fss:altered\n");
+	#endif*/
+
 	debug("-----------DPF Run: %d -----------\n",j );
 	OcCopy memblockcpy=ocCopyCharN(memblocksize);
 
@@ -87,8 +101,6 @@ void dpf_with_beta( size_t size,
 
 	uint8_t *local_output=(uint8_t *)calloc(size, memblocksize*sizeof(uint8_t));
 	bool *local_bit_output=(bool *) calloc(size, sizeof(bool));
-	//floram_pma(&local_output, 16, size* memblocksize);
-	//floram_pma(&local_bit_output, 16, size * sizeof(bool));
 
 
 	obliv uint8_t *active_block_delta = calloc(1, memblocksize * sizeof(obliv uint8_t));
@@ -106,6 +118,8 @@ void dpf_with_beta( size_t size,
 									my_fss, 
 									index);
 	}
+
+
 
 	//----Correction-----------------------
 
@@ -133,34 +147,32 @@ void dpf_with_beta( size_t size,
 
 	//----Correction for undefinded behaviour of fss for index==-1
 
-	obliv uint8_t *local_bit_output_obliv1=calloc(size, sizeof(obliv uint8_t));
+	obliv bool *local_bit_output_obliv1=calloc(size, sizeof(obliv uint8_t));
 	feedOblivBoolArray((obliv uint64_t *)local_bit_output_obliv1, (uint64_t *) local_bit_output,  size, 1);
-	obliv uint8_t *local_bit_output_obliv2=calloc(size, sizeof(obliv uint8_t));
+	obliv bool *local_bit_output_obliv2=calloc(size, sizeof(obliv uint8_t));
 	feedOblivBoolArray((obliv uint64_t *)local_bit_output_obliv2, (uint64_t *) local_bit_output,  size, 2);
 	
-	obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
 	obliv int sum=0;
-	obliv int index_corretion;
+	obliv int index_correction=-1;
 	for(int i = 0; i <size ; i++) {
-		dpf_obliv[i]=local_bit_output_obliv1[i]^local_bit_output_obliv2[i]; 
-		sum=sum+dpf_obliv[i];
-		obliv if(dpf_obliv[i]==1){
-			index_corretion=i;
+		obliv bool temp=local_bit_output_obliv1[i]^local_bit_output_obliv2[i]; 
+		sum=sum+(obliv int) temp;
+		obliv if(temp==1){
+			index_correction=i;
 		}
 	}
 	
 	int sum_no;
 	revealOblivInt(&sum_no, sum,1);
 	int ic_no;
-	revealOblivInt(&ic_no, index_corretion,1);
+	revealOblivInt(&ic_no, index_correction,1);
 	if(index_non_obliv==-1 && sum_no>0){
 		local_bit_output[ic_no]=!local_bit_output[ic_no];
-		debug("Undefined behavior in fss. Correction of local_bit_output was needed.");
+		log_err("Undefined behavior in fss. Correction of local_bit_output was needed.\n");
 	}	
 
 	free(local_bit_output_obliv1);
 	free(local_bit_output_obliv2);
-	free(dpf_obliv);
 
 	//----Return Values-------------------
 	
@@ -188,7 +200,7 @@ void dpf_with_beta( size_t size,
 
 		revealOblivBoolArray(dpf, dpf_obliv, size, 0);
 		char buff [(int)size * sizeof(int) + 100];
-		sprintf(buff, "dpf\n", j);  
+		sprintf(buff, "\ndpf\n", j);  
 		for(int i = 0; i <size ; i++) {
 			char r[1+ sizeof(int)];
 			sprintf(r, " %d", dpf[i]);		
@@ -199,19 +211,25 @@ void dpf_with_beta( size_t size,
 		free(dpf);
 
 		//------------------------------------------------------------
+		//TODO: GIVES Wrong result! 
+		/*uint64_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		uint64_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		for (int i = 0; i < size*memblocksize/sizeof(uint64_t); ++i){
+			feedOblivLLongArray((obliv uint64_t *)local_output_1, (uint64_t *) local_output,  size* memblocksize/sizeof(uint64_t), 1);
+			feedOblivLLongArray((obliv uint64_t *)local_output_2, (uint64_t *) local_output,  size* memblocksize/sizeof(uint64_t), 2);
 
-		uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
-		uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
-		ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)local_output, size*memblocksize/sizeof(uint64_t), 1);
-		ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)local_output,size*memblocksize/sizeof(uint64_t),  2);
-		uint8_t *dpf_with_beta=(uint8_t *) calloc(size, memblocksize*sizeof(uint8_t));
-		//floram_pma(&dpf_with_beta, 16, size* memblocksize);
-		for (size_t ii = 0; ii< size; ii++) {
-			for (size_t jj = 0; jj < memblocksize; jj++) {
-				uint8_t xor=  local_output_1[ii * memblocksize + jj]^ local_output_2[ii * memblocksize + jj];
-				dpf_with_beta[ii * memblocksize + jj]=xor;
-			}
 		}
+
+		obliv uint64_t *dpf_with_beta_obliv=calloc(size, memblocksize*sizeof(obliv uint8_t));
+		for (size_t ii = 0; ii< size*memblocksize*sizeof(uint8_t)/sizeof(uint64_t); ii++) {
+			uint8_t xor=  local_output_1[ii]^ local_output_2[ii];
+			dpf_with_beta_obliv[ii ]=xor;
+		}
+		uint8_t *dpf_with_beta=calloc(size, memblocksize*sizeof(uint8_t));
+		for (int i = 0; i < size*memblocksize/sizeof(uint64_t); ++i){
+			revealOblivLLong(&((uint64_t *)dpf_with_beta)[i], dpf_with_beta_obliv[i], 2);
+		}
+	
 		free(local_output_1);
 		free(local_output_2);
 
@@ -228,7 +246,7 @@ void dpf_with_beta( size_t size,
 		}
 		debug("%s\n",buff);
 		free(buff);
-		free(dpf_with_beta);
+		free(dpf_with_beta);*/
 
 		//----------------------------------------------------------------------------------
 		/*char *buff = (char *) calloc( memblocksize+100, sizeof(int));
@@ -251,7 +269,7 @@ void dpf_with_beta( size_t size,
 		fss_cprg_free(my_fss);
 	}else{
 	 	fss_free(my_fss);
-	}	
+	}
 } 
 
 /*	Input:
@@ -341,35 +359,32 @@ void dpf_proper( size_t size,  size_t index_non_obliv, obliv uint8_t **active_bl
 
 	//----Correction for undefinded behaviour of fss for index==-1
 
-	obliv uint8_t *local_bit_output_obliv1=calloc(size, sizeof(obliv uint8_t));
+	obliv bool *local_bit_output_obliv1=calloc(size, sizeof(obliv uint8_t));
 	feedOblivBoolArray((obliv uint64_t *)local_bit_output_obliv1, (uint64_t *) local_bit_output,  size, 1);
-	obliv uint8_t *local_bit_output_obliv2=calloc(size, sizeof(obliv uint8_t));
+	obliv bool *local_bit_output_obliv2=calloc(size, sizeof(obliv uint8_t));
 	feedOblivBoolArray((obliv uint64_t *)local_bit_output_obliv2, (uint64_t *) local_bit_output,  size, 2);
 	
-	obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
 	obliv int sum=0;
-	obliv int index_corretion;
+	obliv int index_correction=-1;
 	for(int i = 0; i <size ; i++) {
-		dpf_obliv[i]=local_bit_output_obliv1[i]^local_bit_output_obliv2[i]; 
-		sum=sum+dpf_obliv[i];
-		obliv if(dpf_obliv[i]==1){
-			index_corretion=i;
+		obliv bool temp=local_bit_output_obliv1[i]^local_bit_output_obliv2[i]; 
+		sum=sum+(obliv int) temp;
+		obliv if(temp==1){
+			index_correction=i;
 		}
 	}
 	
 	int sum_no;
 	revealOblivInt(&sum_no, sum,1);
 	int ic_no;
-	revealOblivInt(&ic_no, index_corretion,1);
+	revealOblivInt(&ic_no, index_correction,1);
 	if(index_non_obliv==-1 && sum_no>0){
 		local_bit_output[ic_no]=!local_bit_output[ic_no];
-		debug("Undefined behavior in fss. Correction of local_bit_output was needed.");
+		log_err("Undefined behavior in fss. Correction of local_bit_output was needed.\n");
 	}	
 
 	free(local_bit_output_obliv1);
 	free(local_bit_output_obliv2);
-	free(dpf_obliv);
-	
 
 	//----Return Values-------------------
 	
@@ -421,7 +436,7 @@ void dpf_proper( size_t size,  size_t index_non_obliv, obliv uint8_t **active_bl
 		free(dpf);
 		//------------------------------------------------------------
 
-		uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+		/*uint8_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
 		uint8_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
 		ocBroadcastLLongArray((uint64_t *)local_output_1, (uint64_t *)local_output, size*memblocksize/sizeof(uint64_t), 1);
 		ocBroadcastLLongArray((uint64_t *)local_output_2, (uint64_t *)local_output,size*memblocksize/sizeof(uint64_t),  2);
@@ -449,7 +464,7 @@ void dpf_proper( size_t size,  size_t index_non_obliv, obliv uint8_t **active_bl
 		}
 		debug("%s\n",buff);
 		free(buff);
-		free(dpf_with_beta);
+		free(dpf_with_beta);*/
 
 
 
@@ -505,14 +520,24 @@ void get_mpfss_vector(mpfss *mpfss, int *indices_notobliv, bool *vector){
 	  bool *local_bit_output_ret;
 	  uint8_t *local_output_ret;
 	  int index_non_obliv=indices_notobliv[j];
-	  
-	  dpf_proper(	(size_t) size,  
+	  bool cprg_set=false;
+	  /*dpf_proper(	(size_t) size,  
 	  				(size_t) index_non_obliv, 
 	  				&active_block_delta_ret, 
 	  				j,  
 	  				&local_bit_output_ret, 
 	  				&local_output_ret, 
-	  				true);
+	  				cprg_set);*/
+
+	  obliv uint8_t *beta=calloc(memblocksize, sizeof(obliv uint8_t));
+	  beta[0]=8;
+	  dpf_with_beta( 		(size_t) size, 
+							(size_t) index_non_obliv,
+							beta, 
+							j,  
+							&local_bit_output_ret, 
+	  						&local_output_ret, 
+							cprg_set);
 
 	  for (int i = 0; i < size; i++){
 		vector[i]=vector[i]^local_bit_output_ret[i];
