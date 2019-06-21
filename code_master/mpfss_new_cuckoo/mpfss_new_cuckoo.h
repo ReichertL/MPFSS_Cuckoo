@@ -87,20 +87,35 @@ std::vector<ProtocolDesc> pd_vec;
 #endif
 
 void establish_connections(){
-    std::vector<ProtocolDesc> pd_temp(mc_args.b);
-    for (int i = 0; i < mc_args.b; ++i){
-        pd_temp.at(i)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
-        this_thread::sleep_for(chrono::seconds(1));
-    }
-    pd_vec=pd_temp;
-        /*TODO 
-         ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
-    ocSplitProto(pd_split, ocCurrentProto());
-        */
-    #ifdef DEBUG
-        pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port+1);
-    #endif
+    //#ifndef new_connect
+        std::vector<ProtocolDesc> pd_temp(mc_args.b);
+        pd_temp.at(0)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
 
+        for (int i = 1; i < mc_args.b; ++i){
+            ProtocolDesc pd_split;
+            ocSplitProto(&pd_split, &pd_vec.at(0));
+            pd_temp.at(i)=pd_split;
+        }
+        pd_vec=pd_temp;
+        #ifdef DEBUG
+            ocSplitProto(&pd_dbg, &pd_vec.at(0));
+        #endif
+    /*#else
+
+        std::vector<ProtocolDesc> pd_temp(mc_args.b);
+        for (int i = 0; i < mc_args.b; ++i){
+            printf("connection no %d/%d\n", i, mc_args.b );
+            pd_temp.at(i)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
+            if(mc_args.cp==2){
+                this_thread::sleep_for(chrono::seconds(1));
+            }
+        }
+        pd_vec=pd_temp;
+
+        #ifdef DEBUG
+            pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port+1);
+        #endif
+    #endif*/
 }
 
 void create_buckets(){
