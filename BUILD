@@ -55,62 +55,6 @@ cc_binary(
     copts = ["-DTESTING"], 
 )
 
-#---------------------single party--------------------------------------------------
-container_push(
-   name = "push_single_party",
-   image = ":run_cuckoo_single_party_image",
-   format = "Docker",
-   registry = "gitlab.informatik.hu-berlin.de:4567",
-   repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
-   tag= "run_cuckoo_single_party_image"
-)
-
-cc_image(
-    name = "run_cuckoo_single_party_image",
-    binary = ":run_cuckoo_single_party",
-)
-
-cc_binary(
-    name = "run_cuckoo_single_party",
-    srcs = [ "run_cuckoo_single_party.cpp" ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//code_master/mpfss_cuckoo:mpfss_cuckoo_lib"
-
-    ],
-    #copts = ["-DTESTING"], 
-)
-
-
-
-#--------------------single party test---------------------------------------------
-container_push(
-   name = "push_test_single_party",
-   image = ":test_single_party_image",
-   format = "Docker",
-   registry = "gitlab.informatik.hu-berlin.de:4567",
-   repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
-   tag= "test_single_party_image"
-)
-
-cc_image(
-    name = "test_single_party_image",
-    binary = ":run_cuckoo_single_party_test",
-)
-
-cc_binary(
-    name = "run_cuckoo_single_party_test",
-    srcs = [ "run_cuckoo_single_party.cpp" ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//code_master/mpfss_cuckoo:mpfss_cuckoo_lib"
-
-    ],
-    copts = ["-DTESTING"], 
-)
-
-
-
 
 #--------------------single party threads---------------------------------------------
 container_push(
@@ -135,9 +79,37 @@ cc_binary(
         "//code_master/mpfss_cuckoo:mpfss_cuckoo_lib"
 
     ],
+    #copts=["-DDEBUG"],
 )
 
+#--------------------new single party threads---------------------------------------------
+container_push(
+    name = "push_threads_new",
+    image = ":threads_new_single_party",
+    format = "Docker",
+    registry = "gitlab.informatik.hu-berlin.de:4567",
+    repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
+    tag= "threads_new"
+)
 
+cc_image(
+    name = "threads_new_single_party",
+    binary = ":threads_new",
+)
+
+cc_binary(
+    name = "threads_new",
+    srcs = [ "run_cuckoo_new_single_party_threads.cpp" ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//code_master/mpfss_new_cuckoo:mpfss_new_cuckoo_lib",
+        "@abseil//absl/types:span",
+
+    ],
+
+    copts = ["-fopenmp"], 
+    linkopts=["-fopenmp"],
+)
 
 #--------------------dpf---------------------------------------------
 container_push(

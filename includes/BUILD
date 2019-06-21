@@ -21,7 +21,7 @@ oblivc_library(
 oblivc_library(
     name = "secret_share_beta",
     srcs = ["secret_share_beta.oc"],
-    hdrs = ["secret_share_beta.h"],
+    hdrs = ["secret_share_beta.oh"],
     visibility = ["//visibility:public"],
     deps = [
         ":dbg",

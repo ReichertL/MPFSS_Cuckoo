@@ -1,0 +1,160 @@
+#include "fss_cprg_altered.oh"
+#include "fss.oh"
+#include "fss_cprg_altered.h"
+#include "floram_util.oh"
+#include "ackutil.h"
+#include <obliv.h>
+#include <copy.oh>
+
+struct fss_cprg {
+	uint32_t startlevel;
+	uint32_t endlevel;
+	size_t size;
+	size_t blockmultiple;
+	obliv uint8_t * diff_L;
+	obliv uint8_t * diff_R;
+	obliv uint8_t * Z;
+	obliv bool * advicebits;
+	uint8_t * L_local;
+	uint8_t * R_local;
+	uint8_t * Z_local;
+	ProtocolDesc * pd2;
+	fss_cprg_offline * fsso;
+};
+
+void fss_cprg_traverselevels(obliv uint8_t * active_block_delta, uint8_t * local_output, bool * local_bit_output, fss_cprg * fss, obliv size_t * indexp) {
+#ifdef ORAM_PROFILE_SCHEDULING
+	printf("START FSS CPRG ONLINE %lld\n", current_timestamp());
+#endif
+
+	obliv uint32_t levelindex;
+	obliv size_t index = *indexp;
+
+	fss_cprg_offline_start(local_output, local_bit_output, fss->L_local, fss->R_local, fss->fsso);
+
+	for (size_t ii = fss->startlevel+1; ii <= fss->endlevel; ii++) {
+
+		levelindex = (index >> (fss->endlevel - ii)) & 1;
+
+		ocFromSharedCharN(ocCurrentProto(), fss->diff_L, fss->L_local, BLOCKSIZE);
+		ocFromSharedCharN(ocCurrentProto(), fss->diff_R, fss->R_local, BLOCKSIZE);
+		
+		obliv if (levelindex == 0) {
+			ocCopyN(&ocCopyChar, fss->Z, fss->diff_R, BLOCKSIZE);
+		} else {
+			ocCopyN(&ocCopyChar, fss->Z, fss->diff_L, BLOCKSIZE);
+		}
+
+		fss_cprg_getadvice(fss->advicebits, fss->diff_L, fss->diff_R, levelindex);
+
+		bool advicebit_L_local;
+		bool advicebit_R_local;
+
+		revealOblivBool(&advicebit_L_local, fss->advicebits[0], 2);
+		revealOblivBool(&advicebit_R_local, fss->advicebits[1], 2);
+		for( size_t jj=0; jj< BLOCKSIZE/sizeof(uint64_t); jj++) revealOblivLLong(&((uint64_t *)fss->Z_local)[jj], ((obliv uint64_t *)fss->Z)[jj], 2);
+		revealOblivBool(&advicebit_L_local, fss->advicebits[0], 1);
+		revealOblivBool(&advicebit_R_local, fss->advicebits[1], 1);
+		for( size_t jj=0; jj< BLOCKSIZE/sizeof(uint64_t); jj++) revealOblivLLong(&((uint64_t *)fss->Z_local)[jj], ((obliv uint64_t *)fss->Z)[jj], 1);
+
+		//make sure both parties have transmitted everything before we start the offline phase.
+		oflush(ocCurrentProto());
+
+		if (ii < fss->endlevel) {
+			fss_cprg_offline_process_round(fss->L_local, fss->R_local, fss->Z_local, advicebit_L_local, advicebit_R_local, fss->fsso);	
+		} else {
+			fss_cprg_offline_finalize(fss->L_local, fss->Z_local, advicebit_L_local, advicebit_R_local, fss->fsso);
+		}
+	}
+
+	ocFromSharedCharN(ocCurrentProto(), active_block_delta, fss->L_local, BLOCKSIZE*fss->blockmultiple);
+
+#ifdef ORAM_PROFILE_SCHEDULING
+	printf("END FSS CPRG ONLINE %lld\n", current_timestamp());
+#endif
+}
+
+void fss_cprg_getblockvector(obliv uint8_t * active_block_delta, uint8_t * local_output, bool * local_bit_output, fss_cprg * fss, obliv size_t index) {
+	fss_cprg_getblockvector_with_callback(active_block_delta, local_output, local_bit_output, fss, index, NULL, NULL);
+}
+
+void fss_cprg_getblockvector_with_callback(obliv uint8_t * active_block_delta, uint8_t * local_output, bool * local_bit_output, fss_cprg * fss, obliv size_t index, facb_fn cbfn, void* cbpass) {
+
+#ifdef _OPENMP
+	//This is a hack to work around the fact that openmp and obliv-c are incompatible.
+	fss_cprg_offline_parallelizer(fss, &index, active_block_delta, local_output, local_bit_output, fss->pd2, fss_cprg_traverselevels, cbfn, cbpass);
+#else
+	fss_cprg_offline_parallelizer(fss, &index, active_block_delta, local_output, local_bit_output, NULL, fss_cprg_traverselevels, cbfn, cbpass);
+#endif
+
+}
+
+void fss_cprg_getadvice(obliv bool * advicebits, obliv uint8_t * diff_L, obliv uint8_t * diff_R, obliv bool rightblock) {
+	advicebits[0] = ((obliv bool *)diff_L)[0] ^ rightblock ^ 1;
+	advicebits[1] = ((obliv bool *)diff_R)[0] ^ rightblock;
+}
+
+fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
+	fss_cprg * fss = malloc(sizeof(fss_cprg));
+	fss->size = size;
+	fss->blockmultiple = blockmultiple;
+	fss->startlevel = 0;
+	fss->endlevel = LOG2LL(size) + (((1ll << LOG2LL(size)) < size)? 1:0);
+	fss->diff_L = calloc(1, BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->diff_R = calloc(1, BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->Z = calloc(1, BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->advicebits = calloc(1, 2*sizeof(obliv bool));
+	fss->Z_local = malloc(BLOCKSIZE);
+	floram_zpma(&fss->L_local, 16, BLOCKSIZE*blockmultiple);
+	floram_zpma(&fss->R_local, 16, BLOCKSIZE);
+
+	//Generator chooses keys so that we don't incur round trips. Since we're semi-honest I guess it's OK? Should probably change it anyway.
+	uint8_t * keyL = malloc(KEYSIZE);
+	uint8_t * keyR = malloc(KEYSIZE);
+
+	if (ocCurrentParty() == 1) {
+		get_random_bytes(keyL, KEYSIZE);
+		get_random_bytes(keyR, KEYSIZE);
+	}
+	
+	for (size_t ii=0; ii< KEYSIZE/sizeof(uint64_t);ii++){
+		
+			uint64_t kl=((uint64_t *)keyL)[ii];
+			obliv uint64_t this_tempL=feedOblivLLong(kl,1);
+			uint64_t partL=0;
+			revealOblivLLong(&partL,this_tempL,2);
+			if(ocCurrentParty()==2) ((uint64_t *)keyL)[ii]=partL;
+
+			uint64_t kr=((uint64_t *)keyR)[ii];
+			obliv uint64_t this_tempR=feedOblivLLong(kr,1);
+			uint64_t partR=0;
+			revealOblivLLong(&partR,this_tempR,2);
+			if(ocCurrentParty()==2) ((uint64_t  *)keyR)[ii]=partR;
+	}
+	fss->fsso = fss_cprg_offline_new(size, fss->blockmultiple, keyL, keyR);
+	free(keyL);
+	free(keyR);
+
+#ifdef _OPENMP
+	fss->pd2 = calloc(1,sizeof(ProtocolDesc));
+	ocSplitProto(fss->pd2, ocCurrentProto());
+#endif
+
+	return fss;
+}
+
+void fss_cprg_free(fss_cprg * fss) {
+	free(fss->diff_L);
+	free(fss->diff_R);
+	free(fss->Z);
+	free(fss->Z_local);
+	free(fss->L_local);
+	free(fss->R_local);
+	free(fss->advicebits);
+	fss_cprg_offline_free(fss->fsso);
+#ifdef _OPENMP
+	ocCleanupProto(fss->pd2);
+	free(fss->pd2);
+#endif
+	free(fss);
+}

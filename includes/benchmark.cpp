@@ -21,6 +21,10 @@ using namespace std;
 */
 void benchmark_list(string type, int len_of_lists, std::vector<string> list_of_names, std::vector<string> list_of_values){
 
+        for (int i = 0; i < len_of_lists; ++i){
+            cout<<list_of_names.at(i)<<":"<<list_of_values.at(i)<<endl;
+        }
+
 		string t=list_of_values.at(1);
 		string size=list_of_values.at(2);
         std::ostringstream oss;

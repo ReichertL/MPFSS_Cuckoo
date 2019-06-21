@@ -80,29 +80,42 @@ std::chrono::duration<double> runtime_assignment=  std::chrono::duration<double>
 std::chrono::duration<double> runtime_buckets=     std::chrono::duration<double>::zero();
 std::chrono::duration<double> runtime=              std::chrono::duration<double>::zero();
 int evictions_logging=0;
-
 std::vector<ProtocolDesc> pd_vec;
 #ifdef DEBUG
-    ProtocolDesc pd_dbg;
+ProtocolDesc pd_dbg;
 #endif
 
 void establish_connections(){
-    std::vector<ProtocolDesc> pd_temp(mc_args.b);
-    for (int i = 0; i < mc_args.b; ++i){
-        pd_temp.at(i)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
-        this_thread::sleep_for(chrono::seconds(1));
-    }
-    pd_vec=pd_temp;
-        /*TODO 
-         ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
-    ocSplitProto(pd_split, ocCurrentProto());
-        */
-    #ifdef DEBUG
-        pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port+1);
-    #endif
+    #ifdef new_connect
+            std::vector<ProtocolDesc> pd_temp(mc_args.b);
+            pd_temp.at(0)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
 
+            for (int i = 1; i < mc_args.b; ++i){
+                ProtocolDesc pd_split;
+                ocSplitProto(&pd_split, &pd_vec.at(0));
+                pd_temp.at(i)=pd_split;
+                //this_thread::sleep_for(chrono::seconds(1));
+            }
+            pd_vec=pd_temp;
+            #ifdef DEBUG
+                ocSplitProto(&pd_dbg, &pd_vec.at(0));
+            #endif
+        #else
+            std::vector<ProtocolDesc> pd_temp(mc_args.b);
+
+            for (int i = 0; i < mc_args.b; ++i){
+                pd_temp.at(i)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
+                this_thread::sleep_for(chrono::seconds(1));
+                int a=5;
+                osend(&pd_temp.at(i),1,&a,sizeof(int));
+
+            }
+            pd_vec=pd_temp;
+            #ifdef DEBUG
+                pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
+            #endif
+        #endif    
 }
-
 void create_buckets(){
         auto start_buckets = std::chrono::system_clock::now();
         if(!mc_args.buckets_set){
@@ -134,11 +147,11 @@ void create_buckets(){
         if(mc_args.print_stdout)log_info("Time to create Buckets : %lf seconds\n", runtime_buckets.count());
 }
 
-bool  run_create_assignement( std::vector<ProtocolDesc> pd_vec, std::vector<int> indices_no){
+bool  run_create_assignement(std::vector<int> indices_no){
         auto start_assi = std::chrono::system_clock::now();
         
         if(mc_args.print_stdout) log_info("Creating Assignment\n");
-        int succ;        
+        int succ=-1;        
         match **matches = (match **) calloc(mc_args.b, sizeof(match*));
         if(mc_args.cp==1){
             succ=create_assignement(mc_args.m, indices_no, matches, mc_args.func, mc_args.all_buckets, &evictions_logging, mc_args.rands );
@@ -152,21 +165,14 @@ bool  run_create_assignement( std::vector<ProtocolDesc> pd_vec, std::vector<int>
             }
             orecv(&pd_vec.at(0),1,&succ,sizeof(int));
         }
-
         mc_args.matches=matches;
-
         auto end_assi = std::chrono::system_clock::now();
         runtime_assignment = end_assi-start_assi;
         if(mc_args.print_stdout)log_info("Time to create Assignment : %lf seconds\n", runtime_assignment.count());
-        
-        if(succ==-1){
-            return false;
-        }else{
-            return true;
-        }
+        return succ;
 }
 
-void run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec){
+void run_exec_yao(uint8_t **beta_value_vector){
   auto start_proto = std::chrono::system_clock::now();
 
     std::vector<yao_arguments_new *> y_args_all(mc_args.b);
@@ -176,7 +182,7 @@ void run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec)
     }
     mc_args.y_args_all=y_args_all;
 
-    //#pragma omp parallel for
+  // #pragma omp parallel for
     for (int i = 0; i < mc_args.b; ++i){
         //printf("Work started by tid %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
         yao_arguments_new *y_args = y_args_all.at(i);
@@ -195,6 +201,7 @@ void run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec)
 
     }  
 
+
     auto end_proto = std::chrono::system_clock::now();
     runtime = end_proto-start_proto;
     if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
@@ -207,8 +214,8 @@ void print_measurements(int max_loop){
                 "runtime",
                 "t",
                 "size",
-                "no_buckets b", 
-                "no_hashfunctions w", 
+                "no_buckets", 
+                "no_hashfunctions", 
                 "max_loop", 
                 "max_loop_reached", 
                 "evictions",
@@ -229,6 +236,7 @@ void print_measurements(int max_loop){
             };
             benchmark_list("cuckoo_new", list_of_names.size(), list_of_names, list_of_values);
         }
+            
 }
 
 absl::Span<T> prepare_results_new(){
@@ -278,8 +286,9 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         //following Angle et al. : PIR..
         mc_args.w= 3;   //Number of hash functions
         mc_args.b= 1.5*mc_args.t; //Number of buckets --> TODO: AB oder AUF runden
-    
-        establish_connections();
+       
+       establish_connections();
+
         //TODO: find good value for max_loop
         int max_loop=0.5*y.size();
         mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,2, (int)mc_args.do_benchmark);
@@ -305,14 +314,14 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         create_buckets();
 
     //--------------------Create Assignment----------------------------------------------------------------------
-        bool succ=run_create_assignement(pd_vec, indices_no);
+        bool succ=run_create_assignement( indices_no);
         if(!succ){
             return mpc_utils::Status{mpc_utils::StatusCode::kFailedPrecondition, "Assignment could not be created."};
         }
     
     //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
         
-        run_exec_yao(beta_value_vector, pd_vec);
+        run_exec_yao(beta_value_vector);
     
     //--------------------Print results----------------------------------------------------------------------
 
@@ -326,6 +335,12 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
 
     #ifdef DEBUG
        
+        int other_p;
+        if (mc_args.cp==1){
+            other_p=2;
+        }else{
+            other_p=1;
+        }
         std::vector<bool> v_bit_op(mc_args.size);
         for (int i = 0; i < mc_args.size; ++i){
             bool b;
@@ -353,8 +368,6 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         for (int i = 0; i < mc_args.size; ++i){
             osend(&pd_dbg,2,&mc_args.mpfss_output.at(i),sizeof(T));
         }
-
-        oflush(&pd_dbg);
 
         printf("MPFSS results \n");
         for (int i = 0; i < mc_args.size; ++i){
@@ -432,14 +445,14 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
 
     //--------------------Create Assignment----------------------------------------------------------------------
         
-        bool succ=run_create_assignement(pd_vec, indices_no);
+        bool succ=run_create_assignement( indices_no);
         if(!succ){
             return mpc_utils::Status{mpc_utils::StatusCode::kFailedPrecondition, "Assignment could not be created."};
         }
     
     //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
 
-        run_exec_yao(beta_value_vector, pd_vec);
+        run_exec_yao(beta_value_vector);
 
     //--------------------Print results----------------------------------------------------------------------
 
@@ -451,6 +464,12 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
 
     #ifdef DEBUG
 
+        int other_p;
+        if (mc_args.cp==1){
+            other_p=2;
+        }else{
+            other_p=1;
+        }
 
         for (int i = 0; i < mc_args.size; ++i){
             bool b= mc_args.mpfss_bit_output.at(i);
@@ -479,8 +498,6 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         for (int i = 0; i < mc_args.size; ++i){
             orecv(&pd_dbg,2,&v_value_op.at(i),sizeof(T));
         }
-
-        oflush(&pd_dbg);
 
         printf("MPFSS results\n");
         for (int i = 0; i < mc_args.size; ++i){

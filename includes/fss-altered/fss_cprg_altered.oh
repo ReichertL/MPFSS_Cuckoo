@@ -1,0 +1,14 @@
+#ifndef BITPRAPOGATE_CPRG_OH
+#define BITPRAPOGATE_CPRG_OH
+#include "floram.oh"
+#include "fss.oh"
+
+typedef struct fss_cprg fss_cprg;
+
+void fss_cprg_getblockvector(obliv uint8_t * active_block_delta, uint8_t * local_output, bool * local_bit_output, fss_cprg * fss, obliv size_t index);
+void fss_cprg_getblockvector_with_callback(obliv uint8_t * active_block_delta, uint8_t * local_output, bool * local_bit_output, fss_cprg * fss, obliv size_t index, facb_fn cbfn, void* cbpass);
+void fss_cprg_getadvice(obliv bool * advicebits, obliv uint8_t * diff_L, obliv uint8_t * diff_R, obliv bool rightblock);
+fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple);
+void fss_cprg_free(fss_cprg * fss);
+
+#endif

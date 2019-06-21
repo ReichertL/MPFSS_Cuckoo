@@ -18,9 +18,9 @@ def code_master_preload():
     if "com_github_schoppmp_rules_oblivc" not in native.existing_rules():
         http_archive(
             name = "com_github_schoppmp_rules_oblivc",
-            sha256 = "52a1370d6ee47d62791a8a3b61f0ef0c93d3465d774f41fa5516c1e2f3541e0d",
-            url = "https://github.com/schoppmp/rules_oblivc/archive/14282988a60fbaa1aa428b1678e07b9d94b8be62.zip",
-            strip_prefix = "rules_oblivc-14282988a60fbaa1aa428b1678e07b9d94b8be62",
+            sha256 = "7727be81abceab5e31c30319c14a414a6392bf6527bb62b1a53252b299de3b21",
+            url = "https://github.com/schoppmp/rules_oblivc/archive/master.zip",
+            strip_prefix = "rules_oblivc-master",
         )
     if "rules_foreign_cc" not in native.existing_rules():
         http_archive(

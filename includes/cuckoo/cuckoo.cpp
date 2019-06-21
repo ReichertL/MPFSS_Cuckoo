@@ -112,7 +112,9 @@ int place(int key, int rand_no, int tableID, int cnt, cuckoo_hashing *c) {
 		int new_cnt=cnt+1;
 		if(new_cnt==c->max_loop){
 			log_err("MAX_ITER reached, stopping. max_loop: %d\n", c->max_loop);
-			print_tables(c);
+			#ifdef DEBUG
+				print_tables(c);
+			#endif
 			vector<double> u= calculate_table_utilizastion(c);
 			for (std::vector<double>::const_iterator it = u.begin(); it != u.end(); ++it)
 	    		std::cout << *it << ' ';

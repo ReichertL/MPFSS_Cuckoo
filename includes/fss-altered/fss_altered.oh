@@ -1,0 +1,20 @@
+#ifndef BITPRAPOGATE_OH
+#define BITPRAPOGATE_OH
+#include "floram.oh"
+
+typedef struct fss fss;
+
+typedef void (* facb_fn)(void *, void*);
+
+void fss_getblockvector(obliv uint8_t * activeblock_delta, 
+						uint8_t * local_output, 
+						bool * local_bit_output, 
+						fss * fss, 
+						obliv size_t index);
+
+void fss_getblockvector_with_callback(obliv uint8_t * activeblock_delta, uint8_t * local_output, bool * local_bit_output, fss * fss, obliv size_t index, facb_fn cbfn, void* cbpass);
+void fss_getadvice(obliv bool * advicebits, obliv uint8_t * blocks_A, obliv uint8_t * blocks_B, obliv bool rightblock);
+fss * fss_new(size_t size, size_t blockmultiple, uint32_t truncated_levels);
+void fss_free(fss * fss);
+
+#endif

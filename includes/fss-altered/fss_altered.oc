@@ -1,0 +1,292 @@
+#include "fss.oh"
+#include "fss.h"
+#include "floram_util.oh"
+#include "ackutil.h"
+#include <obliv.h>
+
+struct fss {
+	uint32_t startlevel;
+	uint32_t endlevel;
+	size_t size;
+	size_t blockmultiple;
+	obliv uint8_t * toplevel;
+	uint8_t * toplevel_local;
+	obliv uint8_t * blockzero;
+	obliv uint8_t * blocktemp_A;
+	obliv uint8_t * blocktemp_B;
+	obliv uint8_t * activeblock_A;
+	obliv uint8_t * activeblock_B;
+	obliv uint8_t * expanded_A;
+	obliv uint8_t * expanded_B;
+	obliv uint8_t * Z;
+	obliv bool * advicebits;
+	obliv uint8_t * keyL;
+	obliv uint8_t * keyR;
+	ProtocolDesc * pd2;
+	uint32_t readycount;
+	fss_offline * fsso;
+};
+
+void fss_Z_pusher(fss * fss, fss_offline * fsso, ProtocolDesc* pd) {
+
+	if (pd != NULL) ocSetCurrentProto(pd);
+
+	uint32_t readycount_cache = 0;
+
+	bool advicebit_local_l, advicebit_local_r;
+	uint8_t * Z_local = malloc(BLOCKSIZE);
+
+	for (size_t ii = fss->startlevel+1; ii <= fss->endlevel; ii++) {
+		size_t thislevel = ii- fss->startlevel -1;
+
+		if (readycount_cache < thislevel + 1) {
+			while ((readycount_cache = floram_atomic_read(&fss->readycount)) < thislevel + 1) floram_usleep(SLEEP_TIME);
+		}
+
+		for (size_t jj = 0; jj < BLOCKSIZE/sizeof(uint64_t); jj++) revealOblivLLong(&((uint64_t *)Z_local)[jj], ((obliv uint64_t *)(&fss->Z[thislevel*BLOCKSIZE]))[jj], 2);
+		revealOblivBool(&advicebit_local_l, fss->advicebits[thislevel*2+0], 2);
+		revealOblivBool(&advicebit_local_r, fss->advicebits[thislevel*2+1], 2);
+		for (size_t jj = 0; jj < BLOCKSIZE/sizeof(uint64_t); jj++) revealOblivLLong(&((uint64_t *)Z_local)[jj], ((obliv uint64_t *)(&fss->Z[thislevel*BLOCKSIZE]))[jj], 1);
+		revealOblivBool(&advicebit_local_l, fss->advicebits[thislevel*2+0], 1);
+		revealOblivBool(&advicebit_local_r, fss->advicebits[thislevel*2+1], 1);
+
+		//Other threads may depend on the fact that we've pushed successfully
+		oflush(ocCurrentProto());
+
+		fss_offline_push_Z(fsso, Z_local, advicebit_local_l, advicebit_local_r, ii);
+	}
+
+	free(Z_local);
+}
+
+void fss_traverselevels(fss * fss, obliv size_t * indexp) {
+#ifdef ORAM_PROFILE_SCHEDULING
+	printf("START FSS ONLINE %lld\n", current_timestamp());
+#endif
+
+	obliv uint32_t levelindex;
+	obliv size_t index = *indexp;
+	obliv bool control_bit_A_next, control_bit_B_next;
+	obliv bool control_bit_A = ((obliv bool *)fss->activeblock_A)[0];
+	obliv bool control_bit_B = ((obliv bool *)fss->activeblock_B)[0];
+
+	for (size_t ii = fss->startlevel+1; ii <= fss->endlevel; ii++) {
+		levelindex = (index >> (fss->endlevel - ii)) & 1;
+
+		obliv uint8_t * Z = &fss->Z[(ii - fss->startlevel - 1)*BLOCKSIZE];
+
+		//first expand our active blocks into two blocks (L/R)
+		online_prg_double(fss->expanded_A, &fss->expanded_A[BLOCKSIZE], fss->activeblock_A, fss->activeblock_A, fss->keyL, fss->keyR);
+		online_prg_double(fss->expanded_B, &fss->expanded_B[BLOCKSIZE], fss->activeblock_B, fss->activeblock_B, fss->keyL, fss->keyR);
+
+		obliv if (levelindex == 0) {
+			//copy the branch to be kept
+			ocCopyN(&ocCopyChar, fss->activeblock_A, fss->expanded_A, BLOCKSIZE);
+			ocCopyN(&ocCopyChar, fss->activeblock_B, fss->expanded_B, BLOCKSIZE);
+			//Z = block_A XOR block_B for the silenced branch
+			ocCopyN(&ocCopyChar, Z, &fss->expanded_A[BLOCKSIZE], BLOCKSIZE);
+			for (size_t jj = 0; jj < BLOCKSIZE; jj ++) {
+				Z[jj] ^= fss->expanded_B[BLOCKSIZE+jj];
+			}
+		} else {
+			//copy the branch to be kept
+			ocCopyN(&ocCopyChar, fss->activeblock_A, &fss->expanded_A[BLOCKSIZE], BLOCKSIZE);
+			ocCopyN(&ocCopyChar, fss->activeblock_B, &fss->expanded_B[BLOCKSIZE], BLOCKSIZE);
+			//Z = block_A XOR block_B for the silenced branch
+			ocCopyN(&ocCopyChar, Z, fss->expanded_A, BLOCKSIZE);
+			for (size_t jj = 0; jj < BLOCKSIZE; jj ++) {
+				Z[jj] ^= fss->expanded_B[jj];
+			}
+		}
+
+		fss_getadvice(&fss->advicebits[(ii - fss->startlevel - 1)*2], fss->expanded_A, fss->expanded_B, levelindex);
+
+		oflush(ocCurrentProto());
+		floram_atomic_inc(&fss->readycount);
+
+		control_bit_A_next = control_bit_A;
+		control_bit_B_next = control_bit_B;		
+
+		obliv if (levelindex == 0) {
+			control_bit_A_next &= fss->advicebits[(ii - fss->startlevel - 1)*2];
+			control_bit_B_next &= fss->advicebits[(ii - fss->startlevel - 1)*2];	
+		} else {
+			control_bit_A_next &= fss->advicebits[(ii - fss->startlevel - 1)*2+1];
+			control_bit_B_next &= fss->advicebits[(ii - fss->startlevel - 1)*2+1];
+		}
+		control_bit_A_next ^= ((obliv bool *)fss->activeblock_A)[0];
+		control_bit_B_next ^= ((obliv bool *)fss->activeblock_B)[0];
+
+		//XOR the live branches with Z if they will also be XORed by the offline component
+		obliv if (control_bit_A) {
+			for (size_t jj = 0; jj < BLOCKSIZE; jj ++) {
+				fss->activeblock_A[jj] ^= Z[jj];
+			}
+		}
+		obliv if (control_bit_B) {
+			for (size_t jj = 0; jj < BLOCKSIZE; jj ++) {
+				fss->activeblock_B[jj] ^= Z[jj];
+			}
+		}
+
+		control_bit_A = control_bit_A_next;
+		control_bit_B = control_bit_B_next;
+	}
+
+	for (size_t ii = 1; ii < fss->blockmultiple; ii++) {
+		online_prg_double(&fss->activeblock_A[BLOCKSIZE * ii], &fss->activeblock_B[BLOCKSIZE * ii], &fss->activeblock_A[BLOCKSIZE * (ii-1)], &fss->activeblock_B[BLOCKSIZE * (ii-1)], fss->keyL, fss->keyL);
+	}
+
+#ifdef ORAM_PROFILE_SCHEDULING
+	printf("END FSS ONLINE %lld\n", current_timestamp());
+#endif
+}
+
+void fss_getblockvector(obliv uint8_t * activeblock_delta, uint8_t * local_output, bool * local_bit_output, fss * fss, obliv size_t index) {
+	fss_getblockvector_with_callback(activeblock_delta, local_output, local_bit_output, fss, index, NULL, NULL);
+}
+
+void fss_getblockvector_with_callback(obliv uint8_t * activeblock_delta, uint8_t * local_output, bool * local_bit_output, fss * fss, obliv size_t index, facb_fn cbfn, void* cbpass) {
+#ifdef ORAM_PROFILE_SCHEDULING
+	printf("START FSS SETUP %lld\n", current_timestamp());
+#endif
+
+	//Collect a set of random blocks for the top level
+	get_random_bytes(fss->toplevel_local, ((1ll << fss->startlevel) + 1) * BLOCKSIZE);
+	ocFromSharedCharN(ocCurrentProto(), fss->toplevel, fss->toplevel_local, ((1ll << fss->startlevel) + 1) * BLOCKSIZE);
+
+	//now send identical blocks for all except the one branch that we're interested in.
+	obliv size_t levelindex = index >> (fss->endlevel - fss->startlevel);
+
+	for (size_t ii = 0; ii < (1ll << fss->startlevel); ii++) {
+		ocCopyN(&ocCopyChar, &fss->blocktemp_A[ii*BLOCKSIZE], &fss->toplevel[ii * BLOCKSIZE], BLOCKSIZE);
+		obliv if (levelindex != ii) {
+			ocCopyN(&ocCopyChar, &fss->blocktemp_B[ii*BLOCKSIZE], &fss->toplevel[ii * BLOCKSIZE], BLOCKSIZE);
+		} else {
+			ocCopyN(&ocCopyChar, fss->activeblock_A, &fss->toplevel[ii * BLOCKSIZE], BLOCKSIZE);
+			// ensure the root advice bits are opposite
+			((obliv bool *)(&fss->toplevel[(1ll << fss->startlevel)*BLOCKSIZE]))[0] = ~((obliv bool *)fss->activeblock_A)[0];
+			ocCopyN(&ocCopyChar, &fss->blocktemp_B[ii*BLOCKSIZE], &fss->toplevel[(1ll << fss->startlevel)*BLOCKSIZE], BLOCKSIZE);
+		}
+	}
+	for (size_t ii = 0; ii < (1ll << fss->startlevel); ii++) for (size_t jj = 0; jj < BLOCKSIZE/sizeof(uint64_t); jj++) revealOblivLLong(&((uint64_t *)(&fss->toplevel_local[ii * BLOCKSIZE]))[jj], ((obliv uint64_t *)(&fss->blocktemp_A[ii * BLOCKSIZE]))[jj], 1);
+	for (size_t ii = 0; ii < (1ll << fss->startlevel); ii++) for (size_t jj = 0; jj < BLOCKSIZE/sizeof(uint64_t); jj++) revealOblivLLong(&((uint64_t *)(&fss->toplevel_local[ii * BLOCKSIZE]))[jj], ((obliv uint64_t *)(&fss->blocktemp_B[ii * BLOCKSIZE]))[jj], 2);
+
+	ocCopyN(&ocCopyChar, fss->activeblock_B, &fss->toplevel[(1ll << fss->startlevel)*BLOCKSIZE], BLOCKSIZE);
+
+#ifdef ORAM_PROFILE_SCHEDULING
+	printf("END FSS SETUP %lld\n", current_timestamp());
+#endif
+
+	if (fss->endlevel > fss->startlevel) {
+			fss_offline_start(fss->fsso, fss->toplevel_local);
+		fss->readycount = 0;
+
+#ifdef _OPENMP
+		//This is a hack to work around the fact that openmp and obliv-c are incompatible.
+		fss_offline_parallelizer(fss, fss->fsso, &index, local_output, local_bit_output, fss->pd2, fss_traverselevels, fss_Z_pusher, cbfn, cbpass);
+#else 
+		fss_offline_parallelizer(fss, fss->fsso, &index, local_output, local_bit_output, NULL, fss_traverselevels, fss_Z_pusher, cbfn, cbpass);
+#endif
+	} else if (*cbfn!=NULL) {
+		cbfn(cbpass, NULL);
+		memcpy(local_output, fss->toplevel_local, (1ll << fss->startlevel) * BLOCKSIZE);
+		for (size_t ii = 0; ii < (1ll << fss->startlevel); ii++) local_bit_output[ii] = fss->toplevel_local[ii * BLOCKSIZE] & 1;
+	}
+
+	//write output
+	ocCopyN(&ocCopyChar, activeblock_delta, fss->activeblock_A, BLOCKSIZE*fss->blockmultiple);
+	for (size_t ii = 0; ii < (BLOCKSIZE*fss->blockmultiple)/sizeof(uint64_t); ii++) {
+		((obliv uint64_t *)activeblock_delta)[ii] ^= ((obliv uint64_t *)fss->activeblock_B)[ii];
+	}
+}
+
+void fss_getadvice(obliv bool * advicebits, obliv uint8_t * blocks_A, obliv uint8_t * blocks_B, obliv bool rightblock) {
+	advicebits[0] = ((obliv bool *)blocks_A)[0] ^ ((obliv bool *)blocks_B)[0] ^ rightblock ^ 1;
+	advicebits[1] = ((obliv bool *)blocks_A)[BLOCKSIZE*8] ^ ((obliv bool *)blocks_B)[BLOCKSIZE*8] ^ rightblock;
+}
+
+fss * fss_new(size_t size, size_t blockmultiple, uint32_t startlevel) {
+	online_expand_init();
+	fss * fss = malloc(sizeof(fss));
+	fss->size = size;
+	fss->blockmultiple = blockmultiple;
+	fss->endlevel = LOG2LL(size) + (((1ll << LOG2LL(size)) < size)? 1:0);
+	fss->startlevel = MIN(startlevel,fss->endlevel-1);
+	fss->toplevel = calloc((1ll << fss->startlevel) + 1, BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->toplevel_local = malloc(((1ll << fss->startlevel) + 1) * BLOCKSIZE);
+	fss->blockzero = calloc(1, BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->blocktemp_A = calloc((1ll << fss->startlevel), BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->blocktemp_B = calloc((1ll << fss->startlevel), BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->activeblock_A = calloc(1, BLOCKSIZE * blockmultiple * sizeof(obliv uint8_t));
+	fss->activeblock_B = calloc(1, BLOCKSIZE * blockmultiple * sizeof(obliv uint8_t));
+	fss->expanded_A = calloc(2, BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->expanded_B = calloc(2, BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->Z = calloc((fss->endlevel - fss->startlevel), BLOCKSIZE * sizeof(obliv uint8_t));
+	fss->advicebits = calloc((fss->endlevel - fss->startlevel),  2*sizeof(obliv bool));
+
+	//Generator chooses keys so that we don't incur round trips. Since we're semi-honest I guess it's OK? Should probably change it anyway.
+	uint8_t * keyL = malloc(KEYSIZE);
+	uint8_t * keyR = malloc(KEYSIZE);
+	
+	if (ocCurrentParty() == 1) {
+		get_random_bytes(keyL, KEYSIZE);
+		get_random_bytes(keyR, KEYSIZE);
+	}
+	
+	for (size_t ii=0; ii< KEYSIZE/sizeof(uint64_t);ii++){
+		
+			uint64_t kl=((uint64_t *)keyL)[ii];
+			obliv uint64_t this_tempL=feedOblivLLong(kl,1);
+			uint64_t partL=0;
+			revealOblivLLong(&partL,this_tempL,2);
+			if(ocCurrentParty()==2) ((uint64_t *)keyL)[ii]=partL;
+
+			uint64_t kr=((uint64_t *)keyR)[ii];
+			obliv uint64_t this_tempR=feedOblivLLong(kr,1);
+			uint64_t partR=0;
+			revealOblivLLong(&partR,this_tempR,2);
+			if(ocCurrentParty()==2) ((uint64_t  *)keyR)[ii]=partR;
+	}
+	
+
+	offline_prg_init();
+	online_prg_keyschedule_double(&fss->keyL, &fss->keyR, keyL, keyR);
+	fss->fsso = fss_offline_new(size, blockmultiple, fss->startlevel, keyL, keyR);
+
+	free(keyL);
+	free(keyR);
+
+	fss->readycount = 0;
+
+#ifdef _OPENMP
+	fss->pd2 = calloc(1, sizeof(ProtocolDesc));
+	ocSplitProto(fss->pd2, ocCurrentProto());
+#endif
+
+	return fss;
+}
+
+void fss_free(fss * fss) {
+	free(fss->toplevel);
+	free(fss->toplevel_local);
+	free(fss->blockzero);
+	free(fss->blocktemp_A);
+	free(fss->blocktemp_B);
+	free(fss->activeblock_A);
+	free(fss->activeblock_B);
+	free(fss->expanded_A);
+	free(fss->expanded_B);
+	free(fss->Z);
+	free(fss->keyL); free(fss->keyR);
+	free(fss->advicebits);
+	fss_offline_free(fss->fsso);
+
+#ifdef _OPENMP
+	ocCleanupProto(fss->pd2);
+	free(fss->pd2);
+#endif
+
+	online_expand_deinit();
+	free(fss);
+}
