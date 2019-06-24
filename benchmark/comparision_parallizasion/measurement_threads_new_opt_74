@@ -1,0 +1,130 @@
+--------------------------------t 74, size 2048, run 0----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:64.806322
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000621
+runtime_assignment:0.000050
+--------------------------------t 74, size 2048, run 1----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:67.599394
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000041
+--------------------------------t 74, size 2048, run 2----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:63.696023
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000046
+--------------------------------t 74, size 2048, run 3----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:64.332389
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000050
+--------------------------------t 74, size 2048, run 4----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:63.870882
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000055
+--------------------------------t 74, size 2048, run 5----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:65.335976
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000018
+--------------------------------t 74, size 2048, run 6----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:63.908582
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000055
+--------------------------------t 74, size 2048, run 7----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:64.089162
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000056
+--------------------------------t 74, size 2048, run 8----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:63.389257
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000049
+--------------------------------t 74, size 2048, run 9----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:63.781473
+t:74
+size:2048
+no_buckets b:111
+no_hashfunctions w:3
+max_loop:37
+max_loop_reached:no
+evictions:0
+runtime_buckets:0.000000
+runtime_assignment:0.000049
