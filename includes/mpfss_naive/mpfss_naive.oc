@@ -3,6 +3,8 @@
 
 #include <obliv.oh>
 #include <obliv_float_ops.h>
+#include <osort.oh>
+#include <floram_util.h>
 #ifdef Original_FSS
 	#include <fss.oh>
 	#include <fss_cprg.oh>
@@ -51,18 +53,12 @@ mpfss * new_mpfss_naive( int t, size_t size){
 */
 
 void dpf_with_beta( size_t size, 
-							size_t index_non_obliv,
-							obliv uint8_t *beta, 
-							int j,  
-							bool **local_bit_output_ret, 
-							uint8_t **local_output_ret,
-							bool cprg_set){
-
-/*	#ifdef Original_FSS
-		printf("fss:original\n");
-	#else
-		printf("fss:altered\n");
-	#endif*/
+	size_t index_non_obliv,
+	obliv uint8_t *beta, 
+	int j,  
+	bool **local_bit_output_ret, 
+	uint8_t **local_output_ret,
+	bool cprg_set){
 
 	debug("-----------DPF Run: %d -----------\n",j );
 	OcCopy memblockcpy=ocCopyCharN(memblocksize);
@@ -491,6 +487,15 @@ void dpf_proper( size_t size,  size_t index_non_obliv, obliv uint8_t **active_bl
 	free(beta_non_obliv);
 }
 
+obliv int8_t cmp_alphas(OcCopy *cpy, void *el1, void *el2) {
+	obliv char ret=1;
+
+	obliv if((obliv int) el1 <  (obliv int) el2){
+		ret=-1;
+	}
+
+	return ret;
+}
 
 /*  Interface for calling MPFSS. Tested. 
 	Creates a obliv multi-point function. 
@@ -507,102 +512,153 @@ void dpf_proper( size_t size,  size_t index_non_obliv, obliv uint8_t **active_bl
 	  Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
 	  Return type is void.
 */
-void get_mpfss_vector(mpfss *mpfss, int *indices_notobliv, bool *vector){
-  //int memblocksize=BLOCKSIZE*block_no;
-  size_t size=mpfss->size;
-  int t=mpfss->t;
-  debug("t %d\n", t );
-  obliv size_t index;
+void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uint8_t **mpfss_value_output, bool *mpfss_bit_output){
+	size_t size=mpfss->size;
+  	int t=mpfss->t;
+  	debug("t %d\n", t );
+  	obliv size_t index;
+
+	OcCopy cpy = ocCopyIntN(1);
+	obliv int *list=calloc(t,sizeof(obliv int));
+	for (int i = 0; i <t; ++i){
+		list[i]=indices_notobliv[i];
+	}
+
+	osort_batcher(&cpy, (void *) list, (size_t)t, cmp_alphas);
+
+	int * indices_notobliv_sorted=calloc(t, sizeof(int));
+	for (int i = 0; i < t; ++i){
+		int value=0;
+		revealOblivInt(&value, list[i],1);
+		indices_notobliv_sorted[i]=value;
+	}
+
+	obliv uint8_t **share1=calloc(t, sizeof(obliv uint8_t *));
+	for (int i = 0; i < t; ++i){	
+		obliv uint8_t *share1_part=calloc(memblocksize, sizeof(obliv uint8_t));
+		feedOblivLLongArray((obliv uint64_t *)share1_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 1);
+		share1[i]=share1_part;
+	}
+
+	obliv uint8_t **share2=calloc(t, sizeof(obliv uint8_t *));
+	for (int i = 0; i < t; ++i){	
+		obliv uint8_t *share2_part=calloc(memblocksize, sizeof(obliv uint8_t));
+		feedOblivLLongArray((obliv uint64_t *)share2_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 2);
+		share2[i]=share2_part;
+	}
+
+
+	obliv uint8_t **shareXor=calloc(t, sizeof(obliv uint8_t*));
+	for (int i = 0; i < t; ++i){
+		obliv uint8_t *shareXor_temp=calloc(memblocksize,  sizeof(obliv uint8_t));
+		shareXor[i]=shareXor_temp;
+		for (int j = 0; j < memblocksize; ++j){
+			shareXor[i][j]=share1[i][j]^share2[i][j];
+		}
+	}
+	for (int i = 0; i < t; ++i){
+		free(share1[i]);
+		free(share2[i]);
+	}
+	free(share1);
+	free(share2);
+
+	#ifdef DEBUG
+		debug("betas\n");
+		for (int i = 0; i < t; ++i){
+			for (int j = 0; j < memblocksize; ++j){
+				int val;
+				revealOblivInt(&val, shareXor[i][j],0);
+				printf("%d ", val);
+			}
+			printf("\n");
+		}
+	#endif
+
   
-  for (int j=0; j<t;j++){
 
-	  obliv uint8_t *active_block_delta_ret;
-	  bool *local_bit_output_ret;
-	  uint8_t *local_output_ret;
-	  int index_non_obliv=indices_notobliv[j];
-	  bool cprg_set=false;
-	  /*dpf_proper(	(size_t) size,  
-	  				(size_t) index_non_obliv, 
-	  				&active_block_delta_ret, 
-	  				j,  
-	  				&local_bit_output_ret, 
-	  				&local_output_ret, 
-	  				cprg_set);*/
+  	for (int j=0; j<t;j++){
 
-	  obliv uint8_t *beta=calloc(memblocksize, sizeof(obliv uint8_t));
-	  beta[0]=8;
-	  dpf_with_beta( 		(size_t) size, 
+	  	bool *local_bit_output_ret;
+	  	uint8_t *local_output_ret;
+	  	int index_non_obliv=indices_notobliv_sorted[j];
+	  	bool cprg_set=false;
+
+	  	dpf_with_beta( 		(size_t) size, 
 							(size_t) index_non_obliv,
-							beta, 
+							shareXor[j], 
 							j,  
 							&local_bit_output_ret, 
 	  						&local_output_ret, 
 							cprg_set);
 
-	  for (int i = 0; i < size; i++){
-		vector[i]=vector[i]^local_bit_output_ret[i];
-	  }
+	  	for (int i = 0; i < size; i++){
+			mpfss_bit_output[i]=mpfss_bit_output[i]^local_bit_output_ret[i];
+			for (int ii = 0; ii < memblocksize ; ii++){
+				mpfss_value_output[i][ii]=mpfss_value_output[i][ii]^local_output_ret[ii];
+			}
+	  	}
 
-		//Debug
-	  #ifdef DEBUG
-		debug("Debug get_mpfss_vector()\n",j );
-
+	  	#ifdef DEBUG
+			debug("Debug get_mpfss_vector()\n",j );
 		
-		obliv bool *v1= calloc(size, sizeof(obliv bool));
-		obliv bool *v2= calloc(size, sizeof(obliv bool));
-		feedOblivBoolArray(v1, local_bit_output_ret, size, 1);
-		feedOblivBoolArray(v2, local_bit_output_ret, size, 2);
+			obliv bool *v1= calloc(size, sizeof(obliv bool));
+			obliv bool *v2= calloc(size, sizeof(obliv bool));
+			feedOblivBoolArray(v1, local_bit_output_ret, size, 1);
+			feedOblivBoolArray(v2, local_bit_output_ret, size, 2);
 
-		obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
-		for(int i = 0; i <size ; i++) {
-			dpf_obliv[i]=v1[i]^v2[i]; 
-		}
+			obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+			for(int i = 0; i <size ; i++) {
+				dpf_obliv[i]=v1[i]^v2[i]; 
+			}
 
-		bool *vdpf2= calloc(size, sizeof(bool ));
-		revealOblivBoolArray(vdpf2, dpf_obliv, size, 0);
+			bool *vdpf2= calloc(size, sizeof(bool ));
+			revealOblivBoolArray(vdpf2, dpf_obliv, size, 0);
 
-		char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
-		sprintf(buff, "vector round #%d:               ", j);  
-		for(int i = 0; i <size ; i++) {
-			char r[1+ sizeof(int)];
-			sprintf(r, " %d", vdpf2[i]);		
-		  strcat(buff, r );  
-		}
-		debug("%s\n",buff);
-		free(buff);
+			char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
+			sprintf(buff, "mpfss_bit_output round #%d:               ", j);  
+			for(int i = 0; i <size ; i++) {
+				char r[1+ sizeof(int)];
+				sprintf(r, " %d", vdpf2[i]);		
+		  		strcat(buff, r );  
+			}
+			debug("%s\n",buff);
+			free(buff);
+			free(vdpf2);
 
-		feedOblivBoolArray(v1, vector, size, 1);
-		feedOblivBoolArray(v2, vector, size, 2);
-		for(int i = 0; i <size ; i++) {
-			dpf_obliv[i]=v1[i]^v2[i]; 
-		}
+			feedOblivBoolArray(v1, mpfss_bit_output, size, 1);
+			feedOblivBoolArray(v2, mpfss_bit_output, size, 2);
+			for(int i = 0; i <size ; i++) {
+				dpf_obliv[i]=v1[i]^v2[i]; 
+			}
+			free(v1);
+			free(v2);
 
-		char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
-		sprintf(buff, "Zwischenergebnis:   		 	 ");  
+			char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
+			sprintf(buff, "Zwischenergebnis:   		 	 ");  
 
-		bool *vdpf3= calloc(size, sizeof(bool));
-		revealOblivBoolArray(vdpf3, dpf_obliv, size, 0);
-		for(int j=0; j<size; j++){  
+			bool *vdpf3= calloc(size, sizeof(bool));
+			revealOblivBoolArray(vdpf3, dpf_obliv, size, 0);
+			for(int j=0; j<size; j++){  
+				char r[1+ sizeof(int)];
+				sprintf(r, " %d", vdpf3[j]);		
+		  		strcat(buff, r );  
+			}
+			debug("%s\n",buff);
+			free(buff);
+			free(vdpf3);      
+			free(dpf_obliv);
 
-			char r[1+ sizeof(int)];
-			sprintf(r, " %d", vdpf3[j]);		
-		  strcat(buff, r );  
-		}
-		debug("%s\n",buff);
-		free(buff);
+	  	#endif
+		free(local_bit_output_ret);
+	  	free(local_output_ret);
 
-		free(vdpf3);      
-		free(vdpf2);
-		free(v1);
-		free(v2);
-		free(dpf_obliv);
-	  #endif
-
-
-	  free(local_bit_output_ret);
-	  free(local_output_ret);
-	  free(active_block_delta_ret);
-  }
+  	}
+  	for (int i = 0; i < t; ++i){
+		free(shareXor[i]);
+	}
+	free(shareXor);
+	free(indices_notobliv_sorted);
 }
 
 
@@ -622,25 +678,34 @@ void mpfss_naive(void* args){
 	mpfss *mpfss = (mpfss*) args;
 	int t=mpfss->t;
 	int size=mpfss->size;
+
+	uint8_t **beta_share=mpfss->beta_share;
 		/*Array of pointers: Length of pointers depend on system*/
-	bool *vector=calloc(size, sizeof(bool));
+	bool * mpfss_bit_output=calloc(size, sizeof(bool));
+	uint8_t **mpfss_value_output=calloc(size, sizeof(uint8_t *));
+	for (int i = 0; i < size; ++i){
+		uint8_t *value=calloc(memblocksize, sizeof(uint8_t));
+		mpfss_value_output[i]=value;
+	}
+
 	int *indices_notobliv = calloc(t, sizeof(int ));
-			
+
 		if(ocCurrentParty()==1){
 			create_indices( indices_notobliv, t , size);
 		}
 	
+	get_mpfss_vectors(mpfss, indices_notobliv,beta_share, mpfss_value_output, mpfss_bit_output);
 
-	//TODO: Write function that will return only a single vector !
-	get_mpfss_vector(mpfss, indices_notobliv, vector);
+	mpfss->mpfss_bit_vector=mpfss_bit_output;
+	mpfss->mpfss_value_vector=mpfss_value_output;
 
 	#ifdef DEBUG
-		debug("results\n");
+		debug("mpfss_bit_output Result\n");
 		
 		obliv bool *v1= calloc(size, sizeof(obliv bool));
 		obliv bool *v2= calloc(size, sizeof(obliv bool));
-		feedOblivBoolArray(v1, vector, size, 1);
-		feedOblivBoolArray(v2, vector, size, 2);
+		feedOblivBoolArray(v1, mpfss_bit_output, size, 1);
+		feedOblivBoolArray(v2, mpfss_bit_output, size, 2);
 
 		obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
 		for(int i = 0; i <size ; i++) {
@@ -659,15 +724,21 @@ void mpfss_naive(void* args){
 		}
 		debug("%s\n",buff);
 		free(buff);
-
 		free(vdpf2);
 		free(v1);
 		free(v2);
 		free(dpf_obliv);
+
+		debug("mpfss_value_output Result\n");
+
+		for (int i = 0; i < count; ++i){
+			uint8_t *value=calloc(memblocksize, sizeof(uint8_t));
+
+			obliv uint8_t *share1_part=calloc(memblocksize, sizeof(obliv uint8_t));
+			feedOblivLLongArray((obliv uint64_t *)share1_part, (uint64_t *) mpfss_value_output,  memblocksize/sizeof(uint64_t), 1);
+
+		}
+
 	#endif
-
-
-	free(mpfss); 	
-	free(vector);
 	free(indices_notobliv);
 }

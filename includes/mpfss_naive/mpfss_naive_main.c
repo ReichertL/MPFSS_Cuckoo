@@ -23,45 +23,10 @@ int main(int argc, char *argv[]) {
         // Initialize protocols and obtain connection information
         const char *remote_host = strtok(argv[1], ":");
         const char *port = strtok(NULL, ":");
-        ProtocolDesc pd;
-        
-        // Make connection between two shells
-        // Modified ocTestUtilTcpOrDie() function from obliv-c/test/oblivc/common/util.c
-        log_info("Connecting to %s on port %s ...\n", remote_host, port);
-        if(argv[2][0] == '1') {
-            if(protocolAcceptTcp2P(&pd,port)!=0) {
-                log_err("TCP accept from %s failed\n", remote_host);
-                exit(1);
-            }
-        } else {
-            if(protocolConnectTcp2P(&pd,remote_host,port)!=0) {
-                log_err("TCP connect to %s failed\n", remote_host);
-                exit(1);
-            }
-        }
-
-        // Final initializations before entering protocol
         cp = (argv[2][0]=='1'? 1 : 2);
-
-
-        log_info("-----Party %d-------\n", cp);
-        setCurrentParty(&pd, cp); // only checks for a '1'        
         int t = atoi(argv[3]);
         int size = atoi(argv[4]);
-
-        mpfss *m=new_mpfss_naive(t, size);
-        clock_t clock_time = clock();       
-
-         // Execute Yao's protocol and cleanup
-        execYaoProtocol(&pd, mpfss_naive, m);
-        cleanupProtocol(&pd);
-        clock_time = clock() - clock_time;
-        double runtime = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
-
-        // Print results and gate count
-        printf("Total time: %lf seconds\n", runtime);
-      
-        benchmark(runtime, size, t, cp, "Naive");
+        run_mpfss_naive(remote_host, port, cp, t, size);
            
    } else {
         printf("Usage: %s <hostname:port> <1|2> <t> <size> \n" 

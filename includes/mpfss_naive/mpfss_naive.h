@@ -7,6 +7,9 @@ int cp;
 typedef struct {
     int t; // number of points in mpfss
     size_t size; //size of input field
+    uint8_t *beta_share; 
+    bool * mpfss_bit_vector;
+	uint8_t **mpfss_value_vector;
 
 } mpfss;
 

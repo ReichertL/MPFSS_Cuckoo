@@ -4,7 +4,10 @@ cc_binary(
     name = "mpfss_naive_main",
     srcs = [
         "mpfss_naive_main.c",
+        "mpfss_naive.c",
+
     ],
+
 
     visibility = ["//visibility:public"],
 
@@ -37,6 +40,8 @@ oblivc_library(
         "//includes/fss-altered:fss_cprg_altered",
         "//includes/fss-altered:fss_altered",
         "@ack//:obig",
+        "@ack//:osort",
+
         "//includes:uint128_c",
 
     ],

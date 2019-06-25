@@ -11,7 +11,7 @@
 #include "includes/dbg.h"
 #include "mpfss_naive.h"
 
-
+int memblocksize=16;
 
 void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size) {
   // call a function in another file
@@ -40,6 +40,30 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
         setCurrentParty(&pd, cp); // only checks for a '1'        
 
         mpfss *m=new_mpfss_naive(t, size);
+        
+        uint8_t **beta_share=calloc(t, sizeof(uint8_t *));
+        BCipherRandomGen *random_gen= newBCipherRandomGen();    
+       
+        for (int i = 0; i < t; ++i){
+            uint8_t *beta_value=calloc(memblocksize, sizeof(uint8_t));
+            int rand= bcRandomInt(random_gen, (unsigned long long) size);
+            beta_value[memblocksize-1]=(uint8_t) rand;
+            beta_share[i]=beta_value;
+        }
+
+        #ifdef DEBUG
+        debug("beta share\n");
+        for (int i = 0; i < t; ++i){
+            for (int j = 0; j<memblocksize; ++j){
+                printf("%d ", beta_share[i][j]);
+            }
+            printf("\n");
+        }
+        #endif
+
+        releaseBCipherRandomGen(random_gen);
+        m->beta_share=beta_share;
+
         clock_t clock_time = clock();       
 
          // Execute Yao's protocol and cleanup
@@ -52,6 +76,17 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
         printf("t: %d\n", t);
         printf("size: %d\n", size);
         printf("runtime: %lf\n", runtime);
+
+        free(m->mpfss_bit_vector);
+        for (int i = 0; i < size; ++i){
+            free(m->mpfss_value_vector[i]);
+        }
+        free(m->mpfss_value_vector);
+        free(m);
+        for (int i = 0; i < t; ++i){
+            free(beta_share[i]);
+        }
+        free(beta_share);
       
            
 }
