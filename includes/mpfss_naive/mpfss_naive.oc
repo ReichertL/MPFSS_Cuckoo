@@ -595,7 +595,7 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 	  	for (int i = 0; i < size; i++){
 			mpfss_bit_output[i]=mpfss_bit_output[i]^local_bit_output_ret[i];
 			for (int ii = 0; ii < memblocksize ; ii++){
-				mpfss_value_output[i][ii]=mpfss_value_output[i][ii]^local_output_ret[ii];
+				mpfss_value_output[i][ii]=mpfss_value_output[i][ii]^local_output_ret[i*memblocksize+ii];
 			}
 	  	}
 
@@ -648,6 +648,24 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 			free(buff);
 			free(vdpf3);      
 			free(dpf_obliv);
+
+
+
+		debug("local_output_ret\n");
+
+		
+		for (int i = 0; i < size; ++i){
+
+			for (int j = 0; j < memblocksize; ++j){
+				obliv int part1=feedOblivInt((int) mpfss_value_output[i][j], 1);
+				obliv int part2=feedOblivInt((int) mpfss_value_output[i][j], 2);
+				obliv xor=part1^part2;
+				int value_no;
+				revealOblivInt(&value_no, xor, 0);
+				printf("%d ", value_no);
+			}
+			printf("\n");
+		}
 
 	  	#endif
 		free(local_bit_output_ret);
@@ -730,14 +748,20 @@ void mpfss_naive(void* args){
 		free(dpf_obliv);
 
 		debug("mpfss_value_output Result\n");
+		
+		for (int i = 0; i < size; ++i){
 
-		for (int i = 0; i < count; ++i){
-			uint8_t *value=calloc(memblocksize, sizeof(uint8_t));
-
-			obliv uint8_t *share1_part=calloc(memblocksize, sizeof(obliv uint8_t));
-			feedOblivLLongArray((obliv uint64_t *)share1_part, (uint64_t *) mpfss_value_output,  memblocksize/sizeof(uint64_t), 1);
-
+			for (int j = 0; j < memblocksize; ++j){
+				obliv int part1=feedOblivInt((int) mpfss_value_output[i][j], 1);
+				obliv int part2=feedOblivInt((int) mpfss_value_output[i][j], 2);
+				obliv xor=part1^part2;
+				int value_no;
+				revealOblivInt(&value_no, xor, 0);
+				printf("%d ", value_no);
+			}
+			printf("\n");
 		}
+		
 
 	#endif
 	free(indices_notobliv);
