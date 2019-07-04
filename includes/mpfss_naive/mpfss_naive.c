@@ -13,7 +13,7 @@
 
 int memblocksize=16;
 
-void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size) {
+void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size, bool cprg) {
   // call a function in another file
 
     // Check args
@@ -40,6 +40,7 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
         setCurrentParty(&pd, cp); // only checks for a '1'        
 
         mpfss *m=new_mpfss_naive(t, size);
+        m->cprg_set=cprg;
         
         uint8_t **beta_share=calloc(t, sizeof(uint8_t *));
         BCipherRandomGen *random_gen= newBCipherRandomGen();    

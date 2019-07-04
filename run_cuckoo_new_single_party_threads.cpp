@@ -25,10 +25,10 @@ int main(int argc, char *argv[]) {
 		int no_runs=2;
 		std::vector<int> v_threads{2};
     #else
-		vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
-		vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
-	  	//vector<int> t_vals{ 5205 }; 
-	    //vector<int> n_vals_pow{ 24};
+		//vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
+		//vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
+	  	vector<int> t_vals{74}; 
+	    vector<int> n_vals_pow{11};
 		int no_runs=10;
   		//int no_runs=3;
   		//std::vector<int> v_threads{1,2,4,8};

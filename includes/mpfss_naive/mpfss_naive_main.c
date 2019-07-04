@@ -26,7 +26,8 @@ int main(int argc, char *argv[]) {
         cp = (argv[2][0]=='1'? 1 : 2);
         int t = atoi(argv[3]);
         int size = atoi(argv[4]);
-        run_mpfss_naive(remote_host, port, cp, t, size);
+        bool cprg=true;
+        run_mpfss_naive(remote_host, port, cp, t, size, cprg);
            
    } else {
         printf("Usage: %s <hostname:port> <1|2> <t> <size> \n" 

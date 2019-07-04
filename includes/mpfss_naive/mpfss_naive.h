@@ -10,9 +10,10 @@ typedef struct {
     uint8_t *beta_share; 
     bool * mpfss_bit_vector;
 	uint8_t **mpfss_value_vector;
+	bool cprg_set;
 
 } mpfss;
 
 mpfss * new_mpfss_naive( int t, size_t size);
-void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size);
+void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size, bool cprg);
 void mpfss_naive(void* args);

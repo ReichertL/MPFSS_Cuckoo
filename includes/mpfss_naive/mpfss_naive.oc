@@ -20,6 +20,7 @@
 #include "util.h"
 #include "mpfss_naive.h"
 #include "mpfss_naive.oh"
+#include "parallel_dpf_naive.h"
 
 
 
@@ -497,94 +498,31 @@ obliv int8_t cmp_alphas(OcCopy *cpy, void *el1, void *el2) {
 	return ret;
 }
 
-/*  Interface for calling MPFSS. Tested. 
-	Creates a obliv multi-point function. 
-	Input: 
-	  mpfss *mpfss: Struct holing generall input information for the MPFSS
-	  obliv size_t *indices: Oblive array holding the indices (x values) for the multipoint function. Length of array: t.
-	  obliv bool **vector: Pointer to an array of obliv bool values. Length of array = size in mpfss struct.
-	  obliv uint8_t *values: Pointer to an array of obliv unit8_t values. Length of array = size in mpfss struct.
-	
-	Output:
-	  After function termination, vectors will hold a array of vectors which point to obliv bool values. 
-	  Each vector represents a non-obliv array with zeros everywhere, except when index equals to x of the dpf. At this position the non-obliv vector will hold a 1.
-	  Each vector from vectors represents one x value for a point of our multi-point function.  
-	  Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
-	  Return type is void.
-*/
-void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uint8_t **mpfss_value_output, bool *mpfss_bit_output){
-	size_t size=mpfss->size;
-  	int t=mpfss->t;
-  	debug("t %d\n", t );
-  	obliv size_t index;
 
-	OcCopy cpy = ocCopyIntN(1);
-	obliv int *list=calloc(t,sizeof(obliv int));
-	for (int i = 0; i <t; ++i){
-		list[i]=indices_notobliv[i];
-	}
-
-	osort_batcher(&cpy, (void *) list, (size_t)t, cmp_alphas);
-
-	int * indices_notobliv_sorted=calloc(t, sizeof(int));
-	for (int i = 0; i < t; ++i){
-		int value=0;
-		revealOblivInt(&value, list[i],1);
-		indices_notobliv_sorted[i]=value;
-	}
-
-	obliv uint8_t **share1=calloc(t, sizeof(obliv uint8_t *));
-	for (int i = 0; i < t; ++i){	
-		obliv uint8_t *share1_part=calloc(memblocksize, sizeof(obliv uint8_t));
-		feedOblivLLongArray((obliv uint64_t *)share1_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 1);
-		share1[i]=share1_part;
-	}
-
-	obliv uint8_t **share2=calloc(t, sizeof(obliv uint8_t *));
-	for (int i = 0; i < t; ++i){	
-		obliv uint8_t *share2_part=calloc(memblocksize, sizeof(obliv uint8_t));
-		feedOblivLLongArray((obliv uint64_t *)share2_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 2);
-		share2[i]=share2_part;
-	}
+void call_naive_dpf_threaded(void * params_less, int j, void * pd_void){
 
 
-	obliv uint8_t **shareXor=calloc(t, sizeof(obliv uint8_t*));
-	for (int i = 0; i < t; ++i){
-		obliv uint8_t *shareXor_temp=calloc(memblocksize,  sizeof(obliv uint8_t));
-		shareXor[i]=shareXor_temp;
-		for (int j = 0; j < memblocksize; ++j){
-			shareXor[i][j]=share1[i][j]^share2[i][j];
-		}
-	}
-	for (int i = 0; i < t; ++i){
-		free(share1[i]);
-		free(share2[i]);
-	}
-	free(share1);
-	free(share2);
+	void ** params = (void **) params_less;	
 
-	#ifdef DEBUG
-		debug("betas\n");
-		for (int i = 0; i < t; ++i){
-			for (int j = 0; j < memblocksize; ++j){
-				int val;
-				revealOblivInt(&val, shareXor[i][j],0);
-				printf("%d ", val);
-			}
-			printf("\n");
-		}
-	#endif
+	mpfss *mpfss_naive= (mpfss *)params[0];
+	int *indices_notobliv_sorted=(int *)params[1];
+	int8_t **shareXor=(int8_t **)params[2];
+	uint8_t **mpfss_value_output=(uint8_t **)params[3];
+	bool *mpfss_bit_output=(bool *)params[4];
 
-  
 
-  	for (int j=0; j<t;j++){
+	ProtocolDesc *pd=(ProtocolDesc *) pd_void;
+	if (pd != NULL) ocSetCurrentProto(pd);
 
-	  	bool *local_bit_output_ret;
-	  	uint8_t *local_output_ret;
-	  	int index_non_obliv=indices_notobliv_sorted[j];
-	  	bool cprg_set=false;
+	size_t size =mpfss_naive->size;
+	bool cprg_set=mpfss_naive->cprg_set;
 
-	  	dpf_with_beta( 		(size_t) size, 
+
+	bool *local_bit_output_ret;
+	uint8_t *local_output_ret;
+	int index_non_obliv=indices_notobliv_sorted[j];
+
+	dpf_with_beta( 			size , 
 							(size_t) index_non_obliv,
 							shareXor[j], 
 							j,  
@@ -592,14 +530,14 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 	  						&local_output_ret, 
 							cprg_set);
 
-	  	for (int i = 0; i < size; i++){
-			mpfss_bit_output[i]=mpfss_bit_output[i]^local_bit_output_ret[i];
-			for (int ii = 0; ii < memblocksize ; ii++){
-				mpfss_value_output[i][ii]=mpfss_value_output[i][ii]^local_output_ret[i*memblocksize+ii];
-			}
-	  	}
+	for (int i = 0; i < size; i++){
+		mpfss_bit_output[i]=mpfss_bit_output[i]^local_bit_output_ret[i];
+		for (int ii = 0; ii < memblocksize ; ii++){
+			mpfss_value_output[i][ii]=mpfss_value_output[i][ii]^local_output_ret[i*memblocksize+ii];
+		}
+	}
 
-	  	#ifdef DEBUG
+	#ifdef DEBUG
 			debug("Debug get_mpfss_vector()\n",j );
 		
 			obliv bool *v1= calloc(size, sizeof(obliv bool));
@@ -667,16 +605,125 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 			printf("\n");
 		}
 
-	  	#endif
-		free(local_bit_output_ret);
-	  	free(local_output_ret);
+	#endif
+	  	
+	free(local_bit_output_ret);
+	free(local_output_ret);
 
-  	}
+	if (pd != NULL) oflush(pd);
+}
+
+int comp (const void * elem1, const void * elem2) 
+{
+    int f = *((int*)elem1);
+    int s = *((int*)elem2);
+    if (f > s) return  1;
+    if (f < s) return -1;
+    return 0;
+}
+
+/*  Interface for calling MPFSS. Tested. 
+	Creates a obliv multi-point function. 
+	Input: 
+	  mpfss *mpfss: Struct holing generall input information for the MPFSS
+	  obliv size_t *indices: Oblive array holding the indices (x values) for the multipoint function. Length of array: t.
+	  obliv bool **vector: Pointer to an array of obliv bool values. Length of array = size in mpfss struct.
+	  obliv uint8_t *values: Pointer to an array of obliv unit8_t values. Length of array = size in mpfss struct.
+	
+	Output:
+	  After function termination, vectors will hold a array of vectors which point to obliv bool values. 
+	  Each vector represents a non-obliv array with zeros everywhere, except when index equals to x of the dpf. At this position the non-obliv vector will hold a 1.
+	  Each vector from vectors represents one x value for a point of our multi-point function.  
+	  Values will hold the y values for each point. The y value for the x value stored in the i-th vector is located in values[i].
+	  Return type is void.
+*/
+void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uint8_t **mpfss_value_output, bool *mpfss_bit_output){
+	size_t size=mpfss->size;
+  	int t=mpfss->t;
+  	debug("t %d\n", t );
+  	obliv size_t index;
+
+    qsort (indices_notobliv, t, sizeof(int), comp);
+
+	/*OcCopy cpy = ocCopyIntN(1);
+	obliv int *list=calloc(t,sizeof(obliv int));
+	for (int i = 0; i <t; ++i){
+		list[i]=indices_notobliv[i];
+	}
+
+	osort_batcher(&cpy, (void *) list, (size_t)t, cmp_alphas);
+
+	int * indices_notobliv_sorted=calloc(t, sizeof(int));
+	for (int i = 0; i < t; ++i){
+		int value=0;
+		revealOblivInt(&value, list[i],1);
+		indices_notobliv_sorted[i]=value;
+		printf("%d \n", value);
+	}*/
+
+	obliv uint8_t **share1=calloc(t, sizeof(obliv uint8_t *));
+	for (int i = 0; i < t; ++i){	
+		obliv uint8_t *share1_part=calloc(memblocksize, sizeof(obliv uint8_t));
+		feedOblivLLongArray((obliv uint64_t *)share1_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 1);
+		share1[i]=share1_part;
+	}
+
+	obliv uint8_t **share2=calloc(t, sizeof(obliv uint8_t *));
+	for (int i = 0; i < t; ++i){	
+		obliv uint8_t *share2_part=calloc(memblocksize, sizeof(obliv uint8_t));
+		feedOblivLLongArray((obliv uint64_t *)share2_part, (uint64_t *) share[i],  memblocksize/sizeof(uint64_t), 2);
+		share2[i]=share2_part;
+	}
+
+
+	obliv uint8_t **shareXor=calloc(t, sizeof(obliv uint8_t*));
+	for (int i = 0; i < t; ++i){
+		obliv uint8_t *shareXor_temp=calloc(memblocksize,  sizeof(obliv uint8_t));
+		shareXor[i]=shareXor_temp;
+		for (int j = 0; j < memblocksize; ++j){
+			shareXor[i][j]=share1[i][j]^share2[i][j];
+		}
+	}
+	for (int i = 0; i < t; ++i){
+		free(share1[i]);
+		free(share2[i]);
+	}
+	free(share1);
+	free(share2);
+
+	#ifdef DEBUG
+		debug("betas\n");
+		for (int i = 0; i < t; ++i){
+			for (int j = 0; j < memblocksize; ++j){
+				int val;
+				revealOblivInt(&val, shareXor[i][j],0);
+				printf("%d ", val);
+			}
+			printf("\n");
+		}
+	#endif
+
+  
+	void **params=calloc(5, sizeof(void *));
+	params[0]=(void *)mpfss;
+	params[1]=(void *)indices_notobliv;
+	params[2]=(void *)shareXor;
+	params[3]=(void *)mpfss_value_output;
+	params[4]=(void *)mpfss_bit_output;
+
+	ProtocolDesc ** list_pd_split=calloc(t, sizeof(ProtocolDesc *));
+	for (int i = 0; i < t; ++i){
+		ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
+		ocSplitProto(pd_split, ocCurrentProto());
+		list_pd_split[i]=pd_split;
+	}	
+	parallize_naive(call_naive_dpf_threaded, (void **) list_pd_split, t, (void *) params);
+
+
   	for (int i = 0; i < t; ++i){
 		free(shareXor[i]);
 	}
 	free(shareXor);
-	free(indices_notobliv_sorted);
 }
 
 

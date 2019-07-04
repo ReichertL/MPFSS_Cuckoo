@@ -26,12 +26,12 @@ oblivc_library(
     srcs = [
         
         "mpfss_naive.oc",
+        "mpfss_naive.c",
 
     ],
     hdrs = [
         "mpfss_naive.oh",
         "mpfss_naive.h",
-
     ],
     deps = [
         "//includes:util",
@@ -41,7 +41,7 @@ oblivc_library(
         "//includes/fss-altered:fss_altered",
         "@ack//:obig",
         "@ack//:osort",
-
+        ":parallel_naive",
         "//includes:uint128_c",
 
     ],
@@ -54,12 +54,13 @@ oblivc_library(
     srcs = [
         
         "mpfss_naive.oc",
+        "parallel_dpf_naive.c",
 
     ],
     hdrs = [
         "mpfss_naive.oh",
         "mpfss_naive.h",
-
+        "parallel_dpf_naive.h",
     ],
     deps = [
         "//includes:util",
@@ -69,11 +70,31 @@ oblivc_library(
         "//includes/fss-altered:fss_altered",
         "@ack//:obig",
         "//includes:uint128_c",
+        ":parallel_naive",
 
     ],
     visibility = ["//visibility:public"],
-    copts = ["-DOriginal_FSS"], 
+    copts = [   "-DOriginal_FSS",
+            ],  
 )
+
+cc_library(
+    name="parallel_naive",
+    srcs = [
+        "parallel_dpf_naive.c",
+    ],
+    hdrs = [
+        "parallel_dpf_naive.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//includes:dbg",
+    ],
+    copts = ["-fopenmp"], 
+    linkopts=["-fopenmp"],
+)
+
+
 
 cc_library(
     name = "mpfss_naive",

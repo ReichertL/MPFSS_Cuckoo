@@ -32,6 +32,8 @@ cc_binary(
     ],
 
     #copts = ["-DDEBUG"], 
+    copts = ["-fopenmp"], 
+    linkopts=["-fopenmp"],
 )
 
 cc_binary(

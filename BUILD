@@ -111,6 +111,33 @@ cc_binary(
     linkopts=["-fopenmp"],
 )
 
+#--------------------naive single party threads---------------------------------------------
+container_push(
+    name = "push_naive",
+    image = ":image_naive",
+    format = "Docker",
+    registry = "gitlab.informatik.hu-berlin.de:4567",
+    repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
+    tag= "threads_new"
+)
+
+cc_image(
+    name = "image_naive",
+    binary = ":naive",
+)
+
+cc_binary(
+    name = "naive",
+    srcs = [ "run_naive_threads.cpp" ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//includes/mpfss_naive:mpfss_naive",
+    ],
+
+    copts = ["-fopenmp"], 
+    linkopts=["-fopenmp"],
+)
+
 #--------------------dpf---------------------------------------------
 container_push(
    name = "push_dpf",

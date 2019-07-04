@@ -87,24 +87,26 @@ std::vector<ProtocolDesc> pd_vec;
 #endif
 
 void establish_connections(){
-    //#ifndef new_connect
+    /*#ifndef new_connect
         std::vector<ProtocolDesc> pd_temp(mc_args.b);
-        pd_temp.at(0)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
+        ProtocolDesc pd_first=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
+        pd_temp.at(0)=pd_first;
 
         for (int i = 1; i < mc_args.b; ++i){
             ProtocolDesc pd_split;
-            ocSplitProto(&pd_split, &pd_vec.at(0));
+            ocSplitProto(&pd_split, &pd_first);
             pd_temp.at(i)=pd_split;
         }
         pd_vec=pd_temp;
+        
         #ifdef DEBUG
-            ocSplitProto(&pd_dbg, &pd_vec.at(0));
+           ocSplitProto(&pd_dbg, &pd_first);
         #endif
-    /*#else
+    #else*/
 
         std::vector<ProtocolDesc> pd_temp(mc_args.b);
         for (int i = 0; i < mc_args.b; ++i){
-            printf("connection no %d/%d\n", i, mc_args.b );
+            debug("connection no %d/%d\n", i, mc_args.b );
             pd_temp.at(i)=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
             if(mc_args.cp==2){
                 this_thread::sleep_for(chrono::seconds(1));
@@ -115,7 +117,7 @@ void establish_connections(){
         #ifdef DEBUG
             pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port+1);
         #endif
-    #endif*/
+    //#endif
 }
 
 void create_buckets(){
@@ -191,7 +193,7 @@ void run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec)
     }
     mc_args.y_args_all=y_args_all;
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < mc_args.b; ++i){
         //printf("Work started by tid %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
         yao_arguments_new *y_args = y_args_all.at(i);
@@ -204,7 +206,7 @@ void run_exec_yao(uint8_t **beta_value_vector, std::vector<ProtocolDesc> pd_vec)
         y_args->bucket_no=i;
 
             
-        if(mc_args.print_stdout) log_info("Executing Yao Protocol\n");   
+        if(mc_args.print_stdout) log_info("Executing Yao Protocol %d\n", i);   
         execYaoProtocol(&pd_vec.at(i), mpfss_single_bucket, y_args);
         cleanupProtocol(&pd_vec.at(i));
 
