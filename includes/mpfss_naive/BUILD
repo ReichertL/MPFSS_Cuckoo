@@ -49,18 +49,18 @@ oblivc_library(
     #copts = ["-DDEBUG -g3"], 
 )
 
+
 oblivc_library(
     name = "mpfss_naive_obliv_original",
     srcs = [
         
         "mpfss_naive.oc",
-        "parallel_dpf_naive.c",
+        "mpfss_naive.c",
 
     ],
     hdrs = [
         "mpfss_naive.oh",
         "mpfss_naive.h",
-        "parallel_dpf_naive.h",
     ],
     deps = [
         "//includes:util",
@@ -69,14 +69,17 @@ oblivc_library(
         "//includes/fss-altered:fss_cprg_altered",
         "//includes/fss-altered:fss_altered",
         "@ack//:obig",
-        "//includes:uint128_c",
+        "@ack//:osort",
         ":parallel_naive",
+        "//includes:uint128_c",
 
     ],
     visibility = ["//visibility:public"],
-    copts = [   "-DOriginal_FSS",
-            ],  
+    #copts = ["-DDEBUG -g3"], 
+    copts = ["-DOriginal_FSS"], 
 )
+
+
 
 cc_library(
     name="parallel_naive",
