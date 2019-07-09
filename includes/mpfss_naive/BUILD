@@ -47,6 +47,8 @@ oblivc_library(
     ],
     visibility = ["//visibility:public"],
     #copts = ["-DDEBUG -g3"], 
+    #copts = ["-DOriginal_FSS"], 
+
 )
 
 
@@ -99,28 +101,28 @@ cc_library(
 
 
 
-cc_library(
-    name = "mpfss_naive",
-    srcs = [
-        "mpfss_naive.c",
-    ],
-
-    hdrs = [
-        "mpfss_naive.h",
-
-    ],
-
-    visibility = ["//visibility:public"],
-
-    deps = [
-        "//includes:util",
-        "//includes:dbg",
-        ":mpfss_naive_obliv",
-    ],
-
-    #copts = ["-DDEBUG -g3"], 
-    #copts = ["-DINFO"], 
-)
+#cc_library(
+#    name = "mpfss_naive",
+#    srcs = [
+#        "mpfss_naive.c",
+#    ],
+#
+#    hdrs = [
+#        "mpfss_naive.h",#
+#
+#    ],
+#
+#    visibility = ["//visibility:public"],
+#
+#    deps = [
+#        "//includes:util",
+#        "//includes:dbg",
+#        ":mpfss_naive_obliv",
+#    ],
+#
+#    #copts = ["-DDEBUG -g3"], 
+#    #copts = ["-DINFO"], 
+#)
 
 
 oblivc_library(

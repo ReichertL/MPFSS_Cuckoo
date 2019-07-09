@@ -131,6 +131,24 @@ fss_cprg * fss_cprg_new(size_t size, size_t blockmultiple) {
 			revealOblivLLong(&partR,this_tempR,2);
 			if(ocCurrentParty()==2) ((uint64_t  *)keyR)[ii]=partR;
 	}
+	/* Original code: adding flush did not help. Does not work in multithreaded code. 
+
+	if (ocCurrentParty() == 1) {
+		get_random_bytes(keyL, KEYSIZE);
+		get_random_bytes(keyR, KEYSIZE);
+		for (size_t ii=0; ii< KEYSIZE/sizeof(uint64_t);ii++) ocBroadcastLLong(((uint64_t *)keyL)[ii],1);
+		oflush(ocCurrentProto());
+		for (size_t ii=0; ii< KEYSIZE/sizeof(uint64_t);ii++) ocBroadcastLLong(((uint64_t *)keyR)[ii],1);
+		oflush(ocCurrentProto());
+
+	} else {
+		for (size_t ii=0; ii< KEYSIZE/sizeof(uint64_t);ii++) ((uint64_t *)keyL)[ii] = ocBroadcastLLong(NULL,1);
+		oflush(ocCurrentProto());
+		for (size_t ii=0; ii< KEYSIZE/sizeof(uint64_t);ii++) ((uint64_t *)keyR)[ii] = ocBroadcastLLong(NULL,1);
+		oflush(ocCurrentProto());
+
+	}*/
+
 	fss->fsso = fss_cprg_offline_new(size, fss->blockmultiple, keyL, keyR);
 	free(keyL);
 	free(keyR);

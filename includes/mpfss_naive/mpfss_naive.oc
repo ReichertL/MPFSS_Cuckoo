@@ -196,7 +196,7 @@ void dpf_with_beta( size_t size,
 		bool *dpf= calloc(size, sizeof(bool));
 
 		revealOblivBoolArray(dpf, dpf_obliv, size, 0);
-		char buff [(int)size * sizeof(int) + 100];
+		char buff  [(int)size * sizeof(int) + 100];
 		sprintf(buff, "\ndpf\n", j);  
 		for(int i = 0; i <size ; i++) {
 			char r[1+ sizeof(int)];
@@ -488,7 +488,7 @@ void dpf_proper( size_t size,  size_t index_non_obliv, obliv uint8_t **active_bl
 	free(beta_non_obliv);
 }
 
-obliv int8_t cmp_alphas(OcCopy *cpy, void *el1, void *el2) {
+/*obliv int8_t cmp_alphas(OcCopy *cpy, void *el1, void *el2) {
 	obliv char ret=1;
 
 	obliv if((obliv int) el1 <  (obliv int) el2){
@@ -496,7 +496,7 @@ obliv int8_t cmp_alphas(OcCopy *cpy, void *el1, void *el2) {
 	}
 
 	return ret;
-}
+}*/
 
 
 void call_naive_dpf_threaded(void * params_less, int j, void * pd_void){
@@ -510,14 +510,11 @@ void call_naive_dpf_threaded(void * params_less, int j, void * pd_void){
 	uint8_t **mpfss_value_output=(uint8_t **)params[3];
 	bool *mpfss_bit_output=(bool *)params[4];
 
-
 	ProtocolDesc *pd=(ProtocolDesc *) pd_void;
 	if (pd != NULL) ocSetCurrentProto(pd);
 
 	size_t size =mpfss_naive->size;
 	bool cprg_set=mpfss_naive->cprg_set;
-
-
 	bool *local_bit_output_ret;
 	uint8_t *local_output_ret;
 	int index_non_obliv=indices_notobliv_sorted[j];
@@ -538,62 +535,56 @@ void call_naive_dpf_threaded(void * params_less, int j, void * pd_void){
 	}
 
 	#ifdef DEBUG
-			debug("Debug get_mpfss_vector()\n",j );
+		debug("Debug get_mpfss_vector()\n",j );
 		
-			obliv bool *v1= calloc(size, sizeof(obliv bool));
-			obliv bool *v2= calloc(size, sizeof(obliv bool));
-			feedOblivBoolArray(v1, local_bit_output_ret, size, 1);
-			feedOblivBoolArray(v2, local_bit_output_ret, size, 2);
+		obliv bool *v1= calloc(size, sizeof(obliv bool));
+		obliv bool *v2= calloc(size, sizeof(obliv bool));
+		feedOblivBoolArray(v1, local_bit_output_ret, size, 1);
+		feedOblivBoolArray(v2, local_bit_output_ret, size, 2);
 
-			obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
-			for(int i = 0; i <size ; i++) {
-				dpf_obliv[i]=v1[i]^v2[i]; 
-			}
+		obliv bool *dpf_obliv= calloc(size, sizeof(obliv bool));
+		for(int i = 0; i <size ; i++) {
+			dpf_obliv[i]=v1[i]^v2[i]; 
+		}
 
-			bool *vdpf2= calloc(size, sizeof(bool ));
-			revealOblivBoolArray(vdpf2, dpf_obliv, size, 0);
+		bool *vdpf2= calloc(size, sizeof(bool ));
+		revealOblivBoolArray(vdpf2, dpf_obliv, size, 0);
 
-			char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
-			sprintf(buff, "mpfss_bit_output round #%d:               ", j);  
-			for(int i = 0; i <size ; i++) {
-				char r[1+ sizeof(int)];
-				sprintf(r, " %d", vdpf2[i]);		
-		  		strcat(buff, r );  
-			}
-			debug("%s\n",buff);
-			free(buff);
-			free(vdpf2);
+		char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
+		sprintf(buff, "mpfss_bit_output round #%d:               ", j);  
+		for(int i = 0; i <size ; i++) {
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", vdpf2[i]);		
+			strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+		free(vdpf2);
 
-			feedOblivBoolArray(v1, mpfss_bit_output, size, 1);
-			feedOblivBoolArray(v2, mpfss_bit_output, size, 2);
-			for(int i = 0; i <size ; i++) {
-				dpf_obliv[i]=v1[i]^v2[i]; 
-			}
-			free(v1);
-			free(v2);
+		feedOblivBoolArray(v1, mpfss_bit_output, size, 1);
+		feedOblivBoolArray(v2, mpfss_bit_output, size, 2);
+		for(int i = 0; i <size ; i++) {
+			dpf_obliv[i]=v1[i]^v2[i]; 
+		}
+		free(v1);
+		free(v2);
 
-			char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
-			sprintf(buff, "Zwischenergebnis:   		 	 ");  
+		char *buff= calloc(size, sizeof(int)*sizeof(char)+100);
+		sprintf(buff, "Zwischenergebnis:   		 	 ");  
+		bool *vdpf3= calloc(size, sizeof(bool));
+		revealOblivBoolArray(vdpf3, dpf_obliv, size, 0);
+		for(int j=0; j<size; j++){  
+			char r[1+ sizeof(int)];
+			sprintf(r, " %d", vdpf3[j]);		
+	  		strcat(buff, r );  
+		}
+		debug("%s\n",buff);
+		free(buff);
+		free(vdpf3);      
+		free(dpf_obliv);
 
-			bool *vdpf3= calloc(size, sizeof(bool));
-			revealOblivBoolArray(vdpf3, dpf_obliv, size, 0);
-			for(int j=0; j<size; j++){  
-				char r[1+ sizeof(int)];
-				sprintf(r, " %d", vdpf3[j]);		
-		  		strcat(buff, r );  
-			}
-			debug("%s\n",buff);
-			free(buff);
-			free(vdpf3);      
-			free(dpf_obliv);
-
-
-
-		debug("local_output_ret\n");
-
-		
+		debug("local_output_ret\n");		
 		for (int i = 0; i < size; ++i){
-
 			for (int j = 0; j < memblocksize; ++j){
 				obliv int part1=feedOblivInt((int) mpfss_value_output[i][j], 1);
 				obliv int part2=feedOblivInt((int) mpfss_value_output[i][j], 2);
@@ -604,7 +595,6 @@ void call_naive_dpf_threaded(void * params_less, int j, void * pd_void){
 			}
 			printf("\n");
 		}
-
 	#endif
 	  	
 	free(local_bit_output_ret);
@@ -638,7 +628,6 @@ int comp (const void * elem1, const void * elem2)
 	  Return type is void.
 */
 void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uint8_t **mpfss_value_output, bool *mpfss_bit_output){
-	size_t size=mpfss->size;
   	int t=mpfss->t;
   	debug("t %d\n", t );
   	obliv size_t index;
@@ -714,6 +703,7 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 	ProtocolDesc ** list_pd_split=calloc(t, sizeof(ProtocolDesc *));
 	for (int i = 0; i < t; ++i){
 		ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
+		ProtocolDesc *pd=ocCurrentProto();
 		ocSplitProto(pd_split, ocCurrentProto());
 		list_pd_split[i]=pd_split;
 	}	
@@ -739,6 +729,11 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 	  No return type.
 */
 void mpfss_naive(void* args){
+	#ifdef Original_FSS
+		debug("Original_FSS\n");
+	#else
+		debug("FSS FORK\n"); 
+	#endif
 
 	mpfss *mpfss = (mpfss*) args;
 	int t=mpfss->t;
@@ -812,4 +807,5 @@ void mpfss_naive(void* args){
 
 	#endif
 	free(indices_notobliv);
+ 	oflush(ocCurrentProto());
 }

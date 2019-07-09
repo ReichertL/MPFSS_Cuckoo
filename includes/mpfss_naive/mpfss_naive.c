@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <math.h>
 #include <time.h>
 
 #include <obliv.h>
@@ -14,21 +13,17 @@
 int memblocksize=16;
 
 void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size, bool cprg) {
-  // call a function in another file
-
-    // Check args
 
         ProtocolDesc pd;
         
-        // Make connection between two shells
-        // Modified ocTestUtilTcpOrDie() function from obliv-c/test/oblivc/common/util.c
-        log_info("Connecting to %s on port %s ...\n", remote_host, port);
         if(cp==1) {
+            log_info("Waiting for connection from %s on port %s ...\n", remote_host, port);
             if(protocolAcceptTcp2P(&pd,port)!=0) {
                 log_err("TCP accept from %s failed\n", remote_host);
                 exit(1);
             }
         } else {
+            log_info("Connecting to %s on port %s ...\n", remote_host, port);
             if(protocolConnectTcp2P(&pd,remote_host,port)!=0) {
                 log_err("TCP connect to %s failed\n", remote_host);
                 exit(1);
@@ -37,7 +32,7 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
 
 
         log_info("-----Party %d-------\n", cp);
-        setCurrentParty(&pd, cp); // only checks for a '1'        
+        setCurrentParty(&pd, cp);      
 
         mpfss *m=new_mpfss_naive(t, size);
         m->cprg_set=cprg;

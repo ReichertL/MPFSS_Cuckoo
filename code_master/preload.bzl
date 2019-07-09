@@ -58,4 +58,11 @@ def code_master_preload():
         strip_prefix = "rules_docker-0.7.0",
         urls = ["https://github.com/bazelbuild/rules_docker/archive/v0.7.0.tar.gz"],
         )
-        
+    
+    
+    
+    if "com_github_nelhage_rules_boost" not in native.existing_rules(): 
+        http_archive(
+        name = "boost_nelhage",
+        remote = "https://github.com/nelhage/rules_boost/archive/master.tar.gz",
+    )

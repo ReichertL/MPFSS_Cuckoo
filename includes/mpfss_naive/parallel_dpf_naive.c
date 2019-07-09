@@ -16,8 +16,6 @@ void parallize_naive(split_fn fn, void ** list_pd_split, int t, void * params){
         fn(params,i,list_pd_split[i]);
     }
 
-
-    //#pragma single   
     //printf("finisehd parallel  %d \n", omp_get_num_threads());
     
 }

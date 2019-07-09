@@ -18,8 +18,6 @@ extern "C" {
 #include "mpfss_cuckoo.h"
 using namespace std;
 
-
-
 ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port ){
 
         ProtocolDesc pd;

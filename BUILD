@@ -131,7 +131,7 @@ cc_binary(
     srcs = [ "run_naive_threads.cpp" ],
     visibility = ["//visibility:public"],
     deps = [
-        "//includes/mpfss_naive:mpfss_naive",
+        "//includes/mpfss_naive:mpfss_naive_obliv",
     ],
 
     copts = ["-fopenmp"], 
@@ -164,27 +164,6 @@ cc_binary(
 )
 
 
-
-
-
-#cc_image(
-#    name = "run_cuckoo_p1",
-#    binary = ":run_cuckoo_single_party",
-#   args = [
-#        "localhost:88888",
-#        "1"
-#   
-#    ],
-#)
-
-#cc_image(
-#    name = "run_cuckoo_p2",
-#    binary = ":run_cuckoo_single_party",
-#    args = [
-#        "localhost:88888",
-#        "2"   
-#    ],
-#)
 
 
 

@@ -7,8 +7,9 @@
 #include <math.h>       /* pow */
 #include <omp.h>
 
-#include "includes/mpfss_naive/mpfss_naive.h"
-
+extern "C" {
+	#include "includes/mpfss_naive/mpfss_naive.h"
+}
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -53,7 +54,9 @@ int main(int argc, char *argv[]) {
 					printf("cprg:%d\n",cprg );
 				
 					run_mpfss_naive(remote_host, port, cp, t, size,cprg);
-
+        			if (cp==2){
+						this_thread::sleep_for(chrono::seconds(2));        
+        			}
 				}
 			}
 		}
