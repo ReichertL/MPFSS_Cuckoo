@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
 
 #include <obliv.oh>
 
@@ -9,14 +10,14 @@
 #include "create_structs.h"
 #include "create_structs.oh"
 
-void call_dpf_threaded(void * params_less, int i, void * pd_void){
+void call_dpf_threaded(void * params_less, int min, int max, void * pd_void){
 
 
 
 	void ** params = (void **) params_less;
 	
 	match_ext ** matches_ext=(match_ext **)params[0];
-	
+		
 	bool **dpf_vectors = (bool **) params[1];
 	uint8_t *** dpf_value_vectors= (uint8_t ***) params[2];
 	int * bucket_lenghts=(int *)params[3];
@@ -25,29 +26,42 @@ void call_dpf_threaded(void * params_less, int i, void * pd_void){
 	ProtocolDesc *pd=(ProtocolDesc *) pd_void;
 	if (pd != NULL) ocSetCurrentProto(pd);
 
-
-	match_ext *me = matches_ext[i];
-	int index_non_obliv;  		
-	if(ocCurrentParty()==1){
-  		index_non_obliv=(size_t)me->this_m->index_in_bucket;
-  		if(index_non_obliv==-1){
-  			debug("index in batch %d: %d, empty batch!\n",i,  index_non_obliv);
-  		}else{
-  			debug("index in batch %d: %d\n",i,  index_non_obliv);
+	for (int i = min; i < max; ++i){
+		match_ext *me = matches_ext[i];
+		int index_non_obliv;  		
+		if(ocCurrentParty()==1){
+	  		index_non_obliv=(size_t)me->this_m->index_in_bucket;
+	  		if(index_non_obliv==-1){
+	  			debug("index in batch %d: %d, empty batch!\n",i,  index_non_obliv);
+	  		}else{
+	  			debug("index in batch %d: %d\n",i,  index_non_obliv);
+			}
 		}
+
+	  	bool *local_bit_output;
+	  	uint8_t *local_output;
+
+	  	#ifdef MesDPF
+	    	clock_t clock_time = clock();  
+	    #endif
+		dpf_with_beta( 		(size_t) bucket_lenghts[i],
+							index_non_obliv, 
+							me->beta, 
+							i,  									
+							&local_bit_output,
+							&local_output,
+							cprg);
+		#ifdef MesDPF
+			oflush(ocCurrentProto());
+			clock_time = clock() - clock_time;
+		    double runtime_call_dpf = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
+		    printf("runtime_dpf: %lf\n", runtime_call_dpf);
+	    #endif
+
+		dpf_vectors[i]=local_bit_output;
+		dpf_value_vectors[i]=local_output;
+
 	}
-
-  	bool *local_bit_output;
-  	uint8_t *local_output;
-	dpf_with_beta( 		(size_t) bucket_lenghts[i],
-						index_non_obliv, 
-						me->beta, 
-						i,  									
-						&local_bit_output,
-						&local_output,
-						cprg);	 	
-	dpf_vectors[i]=local_bit_output;
-	dpf_value_vectors[i]=local_output;
-
 	if (pd != NULL) oflush(pd);
+
 }

@@ -8,6 +8,7 @@
 #include <thread>
 #include <ctime> 
 #include <boost/math/distributions/normal.hpp>
+#include <omp.h>
 
 extern "C" {
     #include "obliv.h" 
@@ -36,6 +37,7 @@ struct  mpfss_cuckoo_args{
 	bool do_benchmark; //needs to be set
 	bool print_stdout=true; 
     bool cprg;
+    int threads;
 
 	ProtocolDesc pd; //set either pd or port and host
 	const char *host;
@@ -95,6 +97,8 @@ void set_params(){
             mc_args.b=ceil(1.5*mc_args.t);
         }
 
+        mc_args.threads=omp_get_num_threads();
+
 }
 mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_output) {
 
@@ -112,7 +116,7 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         //Making max_loop dependent on the size of the input field
         //good value for max_loop: large so no accidental failures
         int max_loop=0.5*y.size();
-        mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,2, (int)mc_args.do_benchmark);
+        mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,2, (int)mc_args.do_benchmark, mc_args.threads);
         int (*func)( int, int)=hashfunc_absl;
         int memblocksize=16; //TODO
         int lim=memblocksize;
@@ -168,7 +172,7 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
 
     
     //--------------------Create Assignment----------------------------------------------------------------------
-        auto start_proto = std::chrono::system_clock::now();
+        auto start_assi = std::chrono::system_clock::now();
         if(mc_args.print_stdout) log_info("Creating Assignment\n");
                 
         match **matches = (match **) calloc(mc_args.b, sizeof(match*));
@@ -187,9 +191,10 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
 
         std::chrono::duration<double>  runtime_assignment;
         auto end_assi = std::chrono::system_clock::now();
-        runtime_assignment = end_assi-start_proto;
+        runtime_assignment = end_assi-start_assi;
         if(mc_args.print_stdout)log_info("Time to create Assignment : %lf seconds\n", runtime_assignment.count());
-
+   
+    auto start_proto = std::chrono::system_clock::now();
     yao_arguments *y_args= (yao_arguments *) calloc(1, sizeof(yao_arguments));
     y_args->m=m;
     y_args->bucket_lenghts=mc_args.bucket_lenghts;
@@ -321,7 +326,7 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         //Making max_loop dependent on the size of the input field
         //TODO: find good value for max_loop
         int max_loop=0.5*mc_args.size;
-        mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,1, (int)mc_args.do_benchmark);
+        mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,1, (int)mc_args.do_benchmark, mc_args.threads);
         int (*func)( int, int)=hashfunc_absl;
         int memblocksize=16; //TODO
         int lim=memblocksize;
@@ -388,7 +393,7 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
 
     
     //--------------------Create Assignment----------------------------------------------------------------------
-        auto start_proto = std::chrono::system_clock::now();
+        auto start_assi = std::chrono::system_clock::now();
         if(mc_args.print_stdout) log_info("Creating Assignment\n");
                 
         match **matches = (match **) calloc(mc_args.b, sizeof(match*));
@@ -402,8 +407,10 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
 
         std::chrono::duration<double>  runtime_assignment;
         auto end_assi = std::chrono::system_clock::now();
-        runtime_assignment = end_assi-start_proto;
+        runtime_assignment = end_assi-start_assi;
         if(mc_args.print_stdout)log_info("Time to create Assignment : %lf seconds\n", runtime_assignment.count());
+        
+    auto start_proto = std::chrono::system_clock::now();
 
     yao_arguments *y_args= (yao_arguments *) calloc(1, sizeof(yao_arguments));
     y_args->m=m;
@@ -419,17 +426,22 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         
         if(mc_args.print_stdout) log_info("Executing Yao Protocol\n");   
         execYaoProtocol(&mc_args.pd, mpfss_batch_cuckoo, y_args);
-        
-    //--------------------Print results----------------------------------------------------------------------
         auto end_proto = std::chrono::system_clock::now();
+        cleanupProtocol(&mc_args.pd);
+        auto end_proto2 = std::chrono::system_clock::now();
+
+    //--------------------Print results----------------------------------------------------------------------
         std::chrono::duration<double> runtime = end_proto-start_proto;
         if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
+        std::chrono::duration<double> runtime2 = end_proto2-start_proto;
+        if(mc_args.print_stdout)log_info("Time for proto+cleanup : %lf seconds\n", runtime.count());
 
         if (mc_args.do_benchmark){
-            std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
+            std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", 
+            "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", "runtime2" };
             std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
             to_string(max_loop), "no", to_string(evictions_logging),
-            to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
+            to_string(runtime_buckets.count()), to_string(runtime_assignment.count()),to_string(runtime2.count()) };
             benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
         }
                 
@@ -462,7 +474,7 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
 
     #ifdef DEBUG
 
-        int other_p;
+       /* int other_p;
         if (mc_args.cp==1){
             other_p=2;
         }else{
@@ -502,11 +514,11 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
             T v=mc_args.mpfss_output.at(i)^v_value_op.at(i);
             cout<<v<<" ";
         }
-        printf("\n");
+        printf("\n");*/
 
     #endif
 
-    cleanupProtocol(&mc_args.pd);
+
     free(m);
     for (int i = 0; i < mc_args.b; ++i){
         free(matches[i]);   

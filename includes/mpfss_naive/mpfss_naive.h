@@ -11,7 +11,8 @@ typedef struct {
     bool * mpfss_bit_vector;
 	uint8_t **mpfss_value_vector;
 	bool cprg_set;
-
+	int *indices_notobliv;
+	int threads;
 } mpfss;
 
 mpfss * new_mpfss_naive( int t, size_t size);

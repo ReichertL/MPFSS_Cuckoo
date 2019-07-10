@@ -164,7 +164,7 @@ cc_library(
         "//includes/create_structs:create_structs",
         "@mpc_utils//mpc_utils:status",
         "@abseil//absl/types:span",
-
+        "@boost//:random",
     ],
 
     #copts = ["-DDEBUG"], 

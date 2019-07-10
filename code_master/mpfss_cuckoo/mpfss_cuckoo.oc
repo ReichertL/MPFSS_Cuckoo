@@ -6,6 +6,7 @@
 #include <copy.oh>
 #include <obig.oh>
 #include <osort.oh>
+#include <time.h>
 
 
 #include "dbg.h"
@@ -118,52 +119,10 @@ void vole_call_dpf_from_matches(match **matches,bool **dpf_vectors,
 	}
 }
 
-/*void call_dpf_thread_entry(void * params_less){
-
-
-
-	void ** params = (void **) params_less;
-	
-	match_ext ** matches_ext=(match_ext **)params[0];
-	
-	bool **dpf_vectors = (bool **) params[1];
-	uint8_t *** dpf_value_vectors= (uint8_t ***) params[2];
-	int * bucket_lenghts=(int *)params[3];
-	bool cprg= (bool) params[4];
-	int i= (int) params[5];
-	ProtocolDesc *pd = (ProtocolDesc *) params[6];
-	if (pd != NULL) ocSetCurrentProto(pd);
-
-
-	match_ext *me = matches_ext[i];
-	int index_non_obliv;  		
-	if(ocCurrentParty()==1){
-  		index_non_obliv=(size_t)me->this_m->index_in_bucket;
-  		if(index_non_obliv==-1){
-  			debug("index in batch %d: %d, empty batch!\n",i,  index_non_obliv);
-  		}else{
-  			debug("index in batch %d: %d\n",i,  index_non_obliv);
-		}
-	}
-
-  	bool *local_bit_output;
-  	uint8_t *local_output;
-	dpf_with_beta( 		(size_t) bucket_lenghts[i],
-						index_non_obliv, 
-						me->beta, 
-						i,  									
-						&local_bit_output,
-						&local_output,
-						cprg);	 	
-	dpf_vectors[i]=local_bit_output;
-	dpf_value_vectors[i]=local_output;
-
-	if (pd != NULL) oflush(pd);
-}*/
 
 void call_dpf_from_matches(match_ext **matches_ext,bool **dpf_vectors,
 	uint8_t *** dpf_value_vectors, mpfss_cuckoo *m, int *bucket_lenghts, 
-	bool cprg){
+	bool cprg, ProtocolDesc ** list_pd_split){
 
 	//synchronize	
 	if(ocCurrentParty()==1){
@@ -182,30 +141,48 @@ void call_dpf_from_matches(match_ext **matches_ext,bool **dpf_vectors,
 	params[3]=(void *) bucket_lenghts;
 	params[4]=(void *) false; //TODO
 
-	ProtocolDesc ** list_pd_split=calloc(m->b, sizeof(ProtocolDesc *));
+	int threads= m->threads;
+	if (threads>1){
+		
+		parallize(call_dpf_threaded, (void **) list_pd_split, threads, m->b, (void *) params);
 
+	}else{
+		for (int i = 0; i < m->b; ++i){
+			match_ext *me = matches_ext[i];
+			int index_non_obliv;  		
+			if(ocCurrentParty()==1){
+		  		index_non_obliv=(size_t)me->this_m->index_in_bucket;
+		  		if(index_non_obliv==-1){
+		  			debug("index in batch %d: %d, empty batch!\n",i,  index_non_obliv);
+		  		}else{
+		  			debug("index in batch %d: %d\n",i,  index_non_obliv);
+				}
+			}
 
-	for (int i = 0; i < (m->b); ++i){
-		ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
-		ocSplitProto(pd_split, ocCurrentProto());
-		list_pd_split[i]=pd_split;
+		  	bool *local_bit_output;
+		  	uint8_t *local_output;
 
+		  	#ifdef MesDPF
+		    	clock_t clock_time = clock();  
+		    #endif
+			dpf_with_beta( 		(size_t) bucket_lenghts[i],
+								index_non_obliv, 
+								me->beta, 
+								i,  									
+								&local_bit_output,
+								&local_output,
+								cprg);
+			#ifdef MesDPF
+				oflush(ocCurrentProto());
+				clock_time = clock() - clock_time;
+			    double runtime_call_dpf = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
+			    printf("runtime_dpf: %lf\n", runtime_call_dpf);
+		    #endif
 
-  		/*pthread_t dpf_thread;
-		if(pthread_create(&dpf_thread, NULL, call_dpf_thread_entry, (void *)params)){
-			log_err("Error creating thread %d\n", i);
+			dpf_vectors[i]=local_bit_output;
+			dpf_value_vectors[i]=local_output;
 		}
-
-		if(pthread_join(dpf_thread, NULL)) {
-
-			log_err( "Error joining thread %d\n",i);
-	
-		}
-		call_dpf_thread_entry(params);*/
-	}	
-
-	parallize(call_dpf_threaded, (void **) list_pd_split, m->b, (void *) params);
-
+	}
 }
 
 
@@ -309,9 +286,29 @@ void mpfss_vole_batch_cuckoo(void* args){
 
 //more generall version: not nececarry for one  side to now beta  values
 void mpfss_batch_cuckoo(void* args){
-
 	yao_arguments *y_args= (yao_arguments *) args;
 	mpfss_cuckoo *m=(mpfss_cuckoo *) y_args->m;
+	ProtocolDesc ** list_pd_split=calloc(m->b, sizeof(ProtocolDesc *));
+
+
+	if(m->threads>1){
+	    #ifdef Mes
+	    	clock_t clock_time = clock();  
+	    #endif
+		for (int i = 0; i < (m->threads); ++i){
+			ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
+			ocSplitProto(pd_split, ocCurrentProto());
+			list_pd_split[i]=pd_split;
+		}	
+		#ifdef Mes
+			oflush(ocCurrentProto());
+			clock_time = clock() - clock_time;
+		    double runtime_splits = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
+		    printf("splits: %lf\n", runtime_splits);
+	    #endif
+	}
+
+
 	int b=m->b;
 	int size=m->size;
 	int *bucket_lenghts=(int *) y_args->bucket_lenghts;
@@ -328,14 +325,24 @@ void mpfss_batch_cuckoo(void* args){
 		uint8_t * val=calloc(1,memblocksize);
 		mpfss_value_vector[i]=val;
 	}
-
 	match_ext **matches_ext = calloc (m->b, sizeof(match_ext *));
-	create_beta_vals(m, matches, share, matches_ext, memblocksize );
-	
 
+
+    create_beta_vals(m, matches, share, matches_ext, memblocksize );
+
+    #ifdef Mes
+    	clock_t clock_time = clock();  
+    #endif
+    	
 	call_dpf_from_matches(	matches_ext,dpf_vectors,dpf_value_vectors, 
-							m, bucket_lenghts,y_args->cprg);
-
+							m, bucket_lenghts,y_args->cprg, list_pd_split);
+	
+	#ifdef Mes
+		oflush(ocCurrentProto());
+		clock_time = clock() - clock_time;
+	    double runtime_call_dpfs = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
+	    printf("runtime_call_dpfs: %lf\n", runtime_call_dpfs);
+    #endif
 
 	create_mpfss_vector_cuckoo(	mpfss_bit_vector, mpfss_value_vector, 
 								dpf_vectors, dpf_value_vectors, 
@@ -350,8 +357,11 @@ void mpfss_batch_cuckoo(void* args){
 	free(dpf_vectors);
 	free(dpf_value_vectors);
 	free(matches_ext);
+	free(list_pd_split);
 	y_args->mpfss_bit_output=mpfss_bit_vector;
 	y_args->mpfss_output=mpfss_value_vector;
+
+    oflush(ocCurrentProto());
 }
 
 

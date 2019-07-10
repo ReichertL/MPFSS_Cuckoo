@@ -31,12 +31,30 @@ void create_mpfss_vector_cuckoo(    bool *mpfss_bit_vector,uint8_t **mpfss_value
 }
 
 
-void parallize(split_fn fn, void ** list_pd_split, int b, void * params){
-        
+void parallize(split_fn fn, void ** list_pd_split, int threads, int b, void * params){
+
+    int base= b/threads;
+    int rest= b-base*threads; 
+    int *min_arr=calloc(threads,sizeof(int));
+    int *max_arr=calloc(threads,sizeof(int));
+
+    int min=0;
+    int max=0;
+    for (int i = 0; i < threads; ++i){
+        int max=max+base;
+        if(rest!=0){
+            max++;
+            rest--;
+        }
+        min_arr[i]=min;
+        max_arr[i]=max;
+        min=max;
+
+    }
 
     #pragma omp parallel for
-    for (int i = 0; i < b; ++i){
-        fn(params,i,list_pd_split[i]);
+    for (int i = 0; i < threads; ++i){
+        fn(params,min,max,list_pd_split[i]);
     }
 
 

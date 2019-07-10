@@ -28,5 +28,5 @@ bool **local_bit_output_ret,
 uint8_t **local_output_ret, 
 bool cprg);
 
-void call_naive_dpf_threaded(void * params, int j, void * pd_void);
-void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uint8_t **mpfss_value_output, bool *mpfss_bit_output);
+void call_naive_dpf_threaded(void * params, int threads, int t, void * pd_void);
+void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uint8_t **mpfss_value_output, bool *mpfss_bit_output, ProtocolDesc ** list_pd_split);

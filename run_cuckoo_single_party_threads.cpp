@@ -27,11 +27,11 @@ int main(int argc, char *argv[]) {
 	    vector<int> v_threads{1, 2, 4, 8};
     #else
 	   vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
-	    vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
-	  	//vector<int> t_vals{ 5205 }; 
-	    //vector<int> n_vals_pow{24 };
-	    //vector<int> v_threads{1, 2, 4, 8};
-	    vector<int> v_threads{8};
+	   vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
+		/*vector<int> t_vals{ 192,382,741,1422,5205 }; 
+	   	vector<int> n_vals_pow{ 14,16,18,20,24};*/
+	    vector<int> v_threads{1, 2, 4, 8};
+	    //vector<int> v_threads{8};
 		int no_runs=10;
   	#endif
 

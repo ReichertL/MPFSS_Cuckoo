@@ -118,7 +118,7 @@ container_push(
     format = "Docker",
     registry = "gitlab.informatik.hu-berlin.de:4567",
     repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
-    tag= "threads_new"
+    tag= "threads_naive"
 )
 
 cc_image(

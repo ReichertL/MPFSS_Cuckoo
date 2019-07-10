@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <omp.h>
 
 #include <obliv.h>
 #include "bcrandom.h"
@@ -30,13 +31,14 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
             }
         }
 
-
         log_info("-----Party %d-------\n", cp);
         setCurrentParty(&pd, cp);      
-
+        
+        int threads = omp_get_num_threads();
         mpfss *m=new_mpfss_naive(t, size);
         m->cprg_set=cprg;
-        
+        m->threads=threads;
+
         uint8_t **beta_share=calloc(t, sizeof(uint8_t *));
         BCipherRandomGen *random_gen= newBCipherRandomGen();    
        
@@ -59,20 +61,32 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
 
         releaseBCipherRandomGen(random_gen);
         m->beta_share=beta_share;
+        
+        int *indices_notobliv = calloc(t, sizeof(int ));
+
+        if(cp==1){
+            create_indices( indices_notobliv, t , size);
+        }
+        m->indices_notobliv=indices_notobliv;
 
         clock_t clock_time = clock();       
+    
 
          // Execute Yao's protocol and cleanup
         execYaoProtocol(&pd, mpfss_naive, m);
+        clock_t clock_time1 = clock() - clock_time;
         cleanupProtocol(&pd);
-        clock_time = clock() - clock_time;
-        double runtime = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
+        clock_t  clock_time2 = clock() - clock_time;
+        double runtime = ((double)clock_time1)/CLOCKS_PER_SEC; // in seconds 
+        double runtime2 = ((double)clock_time2)/CLOCKS_PER_SEC; // in seconds 
 
         // Print results and gate count
         printf("t: %d\n", t);
         printf("size: %d\n", size);
         printf("runtime: %lf\n", runtime);
-
+        printf("runtime2: %lf\n", runtime2);
+        
+        free(indices_notobliv);
         free(m->mpfss_bit_vector);
         for (int i = 0; i < size; ++i){
             free(m->mpfss_value_vector[i]);

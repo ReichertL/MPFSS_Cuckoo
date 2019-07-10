@@ -8,6 +8,7 @@ typedef struct {
     int b; //number of buckets
     int cp; //ocCurrentParty
     int do_benchmark;
+    int threads;
 } mpfss_cuckoo;
 
 typedef struct  {
@@ -33,4 +34,4 @@ typedef struct  {
 	
 } yao_arguments;
 
-mpfss_cuckoo * new_mpfss_cuckoo( int t, size_t size, int w, int b, int max_loop,int cp, int do_benchmark );
+mpfss_cuckoo * new_mpfss_cuckoo( int t, size_t size, int w, int b, int max_loop,int cp, int do_benchmark, int threads);
