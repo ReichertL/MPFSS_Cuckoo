@@ -23,19 +23,19 @@ int main(int argc, char *argv[]) {
 		bool cprg=true;
 
 	    #ifdef TESTING
-			vector<int> t_vals{ 2 }; 
+			vector<int> t_vals{ 4 }; 
 			vector<int> n_vals_pow{4}; 
 			int no_runs=2;
-			std::vector<int> v_threads{2};
+			std::vector<int> v_threads{2,4};
 	    #else
 			vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
 			vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
-		  //	vector<int> t_vals{74}; 
-		  //  vector<int> n_vals_pow{11};
+		  	//vector<int> t_vals{74}; 
+		    //vector<int> n_vals_pow{11};
 			int no_runs=10;
-	  		//int no_runs=3;
-	  		std::vector<int> v_threads{1,2,4,8};
-	  		//std::vector<int> v_threads{8};
+	  		//int no_runs=1;
+	  		std::vector<int> v_threads{8,4,2,1};
+	  		//std::vector<int> v_threads{2,4,8};
 	  	#endif
 
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 					printf("threads:%d\n", v_threads.at(k));
 					printf("cprg:%d\n",cprg );
 				
-					run_mpfss_naive(remote_host, port, cp, t, size,cprg);
+					run_mpfss_naive(remote_host, port, cp, t, size,cprg,v_threads.at(k));
         			if (cp==2){
 						this_thread::sleep_for(chrono::seconds(2));        
         			}

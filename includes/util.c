@@ -130,7 +130,13 @@ int create_indices(int *indices_notobliv, int t , int size){
     }
   }
   if(sanity>=limit){
-    debug("TEST_create_indices: Creation of distinct indices was not possible with t= %d and size =%d.", t, size);
+    rand= bcRandomInt(random_gen, (unsigned long long) size-1);
+    for (int j = 0; j < t; ++j){
+      int val=(rand+j)%(size-1);
+      indices_notobliv[j]=val;
+    }
+
+    debug("TEST_create_indices: Creation of distinct indices was not possible with t= %d and size =%d. Therfore took %d to %d.", t, size, indices_notobliv[0],indices_notobliv[t-1]);
     return 0;
   }
 

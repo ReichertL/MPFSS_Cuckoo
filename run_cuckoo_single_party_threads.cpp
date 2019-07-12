@@ -21,18 +21,19 @@ int main(int argc, char *argv[]) {
 	bool cprg=true;
 
     #ifdef TESTING
-		vector<int> t_vals{ 2 }; 
+		vector<int> t_vals{ 4 }; 
 		vector<int> n_vals_pow{4}; 
 		int no_runs=2;
-	    vector<int> v_threads{1, 2, 4, 8};
+	    vector<int> v_threads{ 4,6, 8};
     #else
-	   vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
-	   vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
-		/*vector<int> t_vals{ 192,382,741,1422,5205 }; 
-	   	vector<int> n_vals_pow{ 14,16,18,20,24};*/
-	    vector<int> v_threads{1, 2, 4, 8};
-	    //vector<int> v_threads{8};
+	   	//vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
+	   	//vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
+		vector<int> t_vals{ 741 }; 
+	   	vector<int> n_vals_pow{ 18};
+	    vector<int> v_threads{8,4,2,1};
+	    //vector<int> v_threads{2,4,8};
 		int no_runs=10;
+		//int no_runs=1;
   	#endif
 
 	for (int k = 0; k < (int)v_threads.size(); ++k){
@@ -65,7 +66,8 @@ int main(int argc, char *argv[]) {
 	    		printf("--------------------------------t %d, size %d, run %d----------------------------------------------------------------------\n", t, size, j);
 				printf("threads:%d\n", v_threads.at(k));
 				printf("cprg:%d\n", cprg);
-
+				
+				mc.mc_args.threads= v_threads.at(k);
 				if(j>0){
 					mc.mc_args.buckets_set=true;
 				}    		

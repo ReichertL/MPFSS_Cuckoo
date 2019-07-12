@@ -33,33 +33,42 @@ void create_mpfss_vector_cuckoo(    bool *mpfss_bit_vector,uint8_t **mpfss_value
 
 void parallize(split_fn fn, void ** list_pd_split, int threads, int b, void * params){
 
-    int base= b/threads;
-    int rest= b-base*threads; 
-    int *min_arr=calloc(threads,sizeof(int));
-    int *max_arr=calloc(threads,sizeof(int));
+    int * min_arr=calloc(b, sizeof(int));
+    int * max_arr=calloc(b, sizeof(int));
 
+    int last_max=0;
     int min=0;
-    int max=0;
-    for (int i = 0; i < threads; ++i){
-        int max=max+base;
-        if(rest!=0){
-            max++;
-            rest--;
+    int base=b/threads;
+    int rest=b-base*threads;
+
+    for (int i = 0; i <  b; ++i){
+        int val=base;
+        if(rest>0){
+            val=val+1;
+            rest=rest-1;
         }
+        int max=last_max+val;
         min_arr[i]=min;
         max_arr[i]=max;
         min=max;
+        last_max=max;
 
+    }
+
+    int used_threads=threads;
+    if(b<threads){
+        used_threads=b;
     }
 
     #pragma omp parallel for
-    for (int i = 0; i < threads; ++i){
-        fn(params,min,max,list_pd_split[i]);
+    for (int i = 0; i < used_threads; ++i){
+        if(min_arr[i]<max_arr[i]){
+            debug("share %d, %d \n",min_arr[i],max_arr[i] );
+            fn(params,min_arr[i],max_arr[i],list_pd_split[i]);
+        }
     }
-
-
-    //#pragma single   
-    //printf("finisehd parallel  %d \n", omp_get_num_threads());
+    free(min_arr);
+    free(max_arr);
     
 }
 

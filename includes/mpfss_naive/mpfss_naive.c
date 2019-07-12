@@ -13,7 +13,7 @@
 
 int memblocksize=16;
 
-void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size, bool cprg) {
+void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size, bool cprg, int threads) {
 
         ProtocolDesc pd;
         
@@ -34,7 +34,6 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
         log_info("-----Party %d-------\n", cp);
         setCurrentParty(&pd, cp);      
         
-        int threads = omp_get_num_threads();
         mpfss *m=new_mpfss_naive(t, size);
         m->cprg_set=cprg;
         m->threads=threads;
@@ -65,7 +64,8 @@ void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, i
         int *indices_notobliv = calloc(t, sizeof(int ));
 
         if(cp==1){
-            create_indices( indices_notobliv, t , size);
+            int ret= create_indices( indices_notobliv, t , size);
+
         }
         m->indices_notobliv=indices_notobliv;
 

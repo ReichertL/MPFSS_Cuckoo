@@ -16,5 +16,5 @@ typedef struct {
 } mpfss;
 
 mpfss * new_mpfss_naive( int t, size_t size);
-void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size, bool cprg);
+void run_mpfss_naive(const char *remote_host, const char *port, int cp, int t, int size, bool cprg, int threads);
 void mpfss_naive(void* args);

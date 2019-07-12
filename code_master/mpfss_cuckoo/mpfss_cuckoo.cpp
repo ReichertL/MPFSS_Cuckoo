@@ -18,29 +18,29 @@ extern "C" {
 #include "mpfss_cuckoo.h"
 using namespace std;
 
-ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port ){
+ProtocolDesc *prepare_connection(int cp,const char *remote_host, const char *port ){
 
-        ProtocolDesc pd;
+        ProtocolDesc *pd=(ProtocolDesc*)calloc(1,sizeof(ProtocolDesc));
         
         // Make connection between two shells
         // Modified ocTestUtilTcpOrDie() function from obliv-c/test/oblivc/common/util.c
         if(cp == 1) {
             log_info("Waiting for connection from %s on port %s ...\n", remote_host, port);
-            if(protocolAcceptTcp2P(&pd,port)!=0) {
+            if(protocolAcceptTcp2P(pd,port)!=0) {
                 log_err("TCP accept from %s failed\n", remote_host);
-                exit(1);
+                return NULL;
             }
         } else {
             log_info("Connecting to %s on port %s ...\n", remote_host, port);
-            if(protocolConnectTcp2P(&pd,remote_host,port)!=0) {
+            if(protocolConnectTcp2P(pd,remote_host,port)!=0) {
                 log_err("TCP connect to %s failed\n", remote_host);
-                exit(1);
+                return NULL;
             }
         }
 
         // Final initializations before entering protocol
 
-        setCurrentParty(&pd, cp); // only checks for a '1'   
+        setCurrentParty(pd, cp); // only checks for a '1'   
 
         return pd;
 
@@ -63,7 +63,7 @@ void free_mc_args( mpfss_cuckoo_args<int> *mc_args){
 
 void free_mc_args_content( mpfss_cuckoo_args<int> mc_args){
 
-    for (int i = 0; i < (int)mc_args.rands.size(); ++i){
+    for (int i = 0; i < mc_args.b; ++i){
         free(mc_args.all_buckets_array[i]);
     }
     free(mc_args.all_buckets_array);

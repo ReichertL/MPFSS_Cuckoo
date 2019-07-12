@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
     mc_args.print_stdout=true;
     mc_args.buckets_set=false;
     mc_args.cprg=true;
+    mc_args.threads=2;
     MPFSS_Cuckoo<int> mc;
     mc.mc_args=mc_args;
     absl::Span<int> span_output;

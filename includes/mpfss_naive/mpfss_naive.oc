@@ -208,57 +208,55 @@ void dpf_with_beta( size_t size,
 		free(dpf);
 
 		//------------------------------------------------------------
-		//TODO: GIVES Wrong result! 
-		/*uint64_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
-		uint64_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
-		for (int i = 0; i < size*memblocksize/sizeof(uint64_t); ++i){
-			feedOblivLLongArray((obliv uint64_t *)local_output_1, (uint64_t *) local_output,  size* memblocksize/sizeof(uint64_t), 1);
-			feedOblivLLongArray((obliv uint64_t *)local_output_2, (uint64_t *) local_output,  size* memblocksize/sizeof(uint64_t), 2);
+			//TODO: GIVES Wrong result! 
+			/*uint64_t *local_output_1=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+			uint64_t *local_output_2=calloc(1, size* memblocksize*sizeof(obliv uint8_t));
+			for (int i = 0; i < size*memblocksize/sizeof(uint64_t); ++i){
+				feedOblivLLongArray((obliv uint64_t *)local_output_1, (uint64_t *) local_output,  size* memblocksize/sizeof(uint64_t), 1);
+				feedOblivLLongArray((obliv uint64_t *)local_output_2, (uint64_t *) local_output,  size* memblocksize/sizeof(uint64_t), 2);
 
-		}
+			}
 
-		obliv uint64_t *dpf_with_beta_obliv=calloc(size, memblocksize*sizeof(obliv uint8_t));
-		for (size_t ii = 0; ii< size*memblocksize*sizeof(uint8_t)/sizeof(uint64_t); ii++) {
-			uint8_t xor=  local_output_1[ii]^ local_output_2[ii];
-			dpf_with_beta_obliv[ii ]=xor;
-		}
-		uint8_t *dpf_with_beta=calloc(size, memblocksize*sizeof(uint8_t));
-		for (int i = 0; i < size*memblocksize/sizeof(uint64_t); ++i){
-			revealOblivLLong(&((uint64_t *)dpf_with_beta)[i], dpf_with_beta_obliv[i], 2);
-		}
-	
-		free(local_output_1);
-		free(local_output_2);
+			obliv uint64_t *dpf_with_beta_obliv=calloc(size, memblocksize*sizeof(obliv uint8_t));
+			for (size_t ii = 0; ii< size*memblocksize*sizeof(uint8_t)/sizeof(uint64_t); ii++) {
+				uint8_t xor=  local_output_1[ii]^ local_output_2[ii];
+				dpf_with_beta_obliv[ii ]=xor;
+			}
+			uint8_t *dpf_with_beta=calloc(size, memblocksize*sizeof(uint8_t));
+			for (int i = 0; i < size*memblocksize/sizeof(uint64_t); ++i){
+				revealOblivLLong(&((uint64_t *)dpf_with_beta)[i], dpf_with_beta_obliv[i], 2);
+			}
+		
+			free(local_output_1);
+			free(local_output_2);
 
-		char *buff = (char *) calloc((int)size *memblocksize+100, sizeof(int));
-		sprintf(buff, "dpf_with_values %d\n", j);  
-		for(int i = 0; i <size ; i++) {
-			for (int j=0;j<memblocksize; ++j){
+			char *buff = (char *) calloc((int)size *memblocksize+100, sizeof(int));
+			sprintf(buff, "dpf_with_values %d\n", j);  
+			for(int i = 0; i <size ; i++) {
+				for (int j=0;j<memblocksize; ++j){
+					char r[1+ sizeof(int)];
+					sprintf(r, " %d", dpf_with_beta[i * memblocksize + j]);		
+				  	strcat(buff, r );  
+				}	
+				char *eof="\n";	
+				strcat(buff, eof );
+			}
+			debug("%s\n",buff);
+			free(buff);
+			free(dpf_with_beta);*/
+
+			//----------------------------------------------------------------------------------
+			/*char *buff = (char *) calloc( memblocksize+100, sizeof(int));
+			sprintf(buff, "activ_value \n");  
+			for (int i = 0; i < memblocksize; ++i){
+				int xx=0;
+				revealOblivInt(&xx, active_block_delta[i],0);
 				char r[1+ sizeof(int)];
-				sprintf(r, " %d", dpf_with_beta[i * memblocksize + j]);		
-			  	strcat(buff, r );  
-			}	
-			char *eof="\n";	
-			strcat(buff, eof );
-		}
-		debug("%s\n",buff);
-		free(buff);
-		free(dpf_with_beta);*/
-
-		//----------------------------------------------------------------------------------
-		/*char *buff = (char *) calloc( memblocksize+100, sizeof(int));
-		sprintf(buff, "activ_value \n");  
-		for (int i = 0; i < memblocksize; ++i){
-			int xx=0;
-			revealOblivInt(&xx, active_block_delta[i],0);
-			char r[1+ sizeof(int)];
-			sprintf(r, " %d", xx);		
-			strcat(buff, r );  
-		}
-		debug("%s\n",buff);
-		free(buff);*/
-
-
+				sprintf(r, " %d", xx);		
+				strcat(buff, r );  
+			}
+			debug("%s\n",buff);
+			free(buff);*/
 	#endif
 
 	free(active_block_delta);
@@ -525,6 +523,7 @@ void call_naive_dpf_threaded(void * params_less, int min, int max, void * pd_voi
 	  	#ifdef MesDPF
 	    	clock_t clock_time = clock();  
 	    #endif
+		log_info("calling dpf %d\n", j);
 
 		dpf_with_beta( 			size , 
 								(size_t) index_non_obliv,
@@ -694,6 +693,7 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 	free(share1);
 	free(share2);
 
+
 	#ifdef DEBUG
 		debug("betas\n");
 		for (int i = 0; i < t; ++i){
@@ -705,6 +705,7 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 			printf("\n");
 		}
 	#endif
+	oflush(ocCurrentProto());
 
   	//clock_time = clock(); 
 	void **params=calloc(5, sizeof(void *));
@@ -717,11 +718,11 @@ void get_mpfss_vectors(mpfss *mpfss, int *indices_notobliv, uint8_t **share, uin
 
 	int threads=mpfss->threads;
 	if(threads>1){
+		log_info("calling parallize_naive\n");
 
 		parallize_naive(call_naive_dpf_threaded, (void **) list_pd_split, threads,t, (void *) params);
 
 	}else{
-
 		for (int j = 0; j < t ; ++j){
 
 			size_t size =mpfss->size;
@@ -865,12 +866,18 @@ void mpfss_naive(void* args){
 	int threads=mpfss->threads; 
 	ProtocolDesc ** list_pd_split=calloc(t, sizeof(ProtocolDesc *));
 
+	log_info("splitting proto \n");
+	int used_threads=threads;
+    if(t<used_threads){
+        used_threads=t;
+    }
+
 	if(threads>1){	    
 	    #ifdef Mes
 	    	clock_t clock_time = clock();  
 	    #endif
 		
-		for (int i = 0; i < threads; ++i){
+		for (int i = 0; i < used_threads; ++i){
 			ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
 			ProtocolDesc *pd=ocCurrentProto();
 			ocSplitProto(pd_split, ocCurrentProto());
@@ -895,8 +902,9 @@ void mpfss_naive(void* args){
 	}
 
 	int *indices_notobliv = mpfss->indices_notobliv;
-	get_mpfss_vectors(mpfss, indices_notobliv,beta_share, mpfss_value_output, mpfss_bit_output, list_pd_split);
 
+	get_mpfss_vectors(mpfss, indices_notobliv,beta_share, mpfss_value_output, mpfss_bit_output, list_pd_split);
+	log_info("dpf_calls finished\n");
 	mpfss->mpfss_bit_vector=mpfss_bit_output;
 	mpfss->mpfss_value_vector=mpfss_value_output;
 

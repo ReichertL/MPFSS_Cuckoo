@@ -134,18 +134,19 @@ void call_dpf_from_matches(match_ext **matches_ext,bool **dpf_vectors,
 		}
 	}
 
-	void ** params=calloc(5, sizeof(void *));
-	params[0]=(void *)matches_ext;
-	params[1]=(void *)dpf_vectors;
-	params[2]=(void *) dpf_value_vectors;
-	params[3]=(void *) bucket_lenghts;
-	params[4]=(void *) false; //TODO
+	oflush(ocCurrentProto());
+
 
 	int threads= m->threads;
 	if (threads>1){
-		
+		void ** params=calloc(5, sizeof(void *));
+		params[0]=(void *)matches_ext;
+		params[1]=(void *)dpf_vectors;
+		params[2]=(void *) dpf_value_vectors;
+		params[3]=(void *) bucket_lenghts;
+		params[4]=(void *) false; //TODO
 		parallize(call_dpf_threaded, (void **) list_pd_split, threads, m->b, (void *) params);
-
+		free(params);
 	}else{
 		for (int i = 0; i < m->b; ++i){
 			match_ext *me = matches_ext[i];
@@ -289,13 +290,18 @@ void mpfss_batch_cuckoo(void* args){
 	yao_arguments *y_args= (yao_arguments *) args;
 	mpfss_cuckoo *m=(mpfss_cuckoo *) y_args->m;
 	ProtocolDesc ** list_pd_split=calloc(m->b, sizeof(ProtocolDesc *));
+    
+    int used_threads=m->threads;
+    if(m->b<used_threads){
+        used_threads=m->b;
+    }
 
 
 	if(m->threads>1){
 	    #ifdef Mes
 	    	clock_t clock_time = clock();  
 	    #endif
-		for (int i = 0; i < (m->threads); ++i){
+		for (int i = 0; i < used_threads; ++i){
 			ProtocolDesc* pd_split= calloc(1, sizeof(ProtocolDesc));
 			ocSplitProto(pd_split, ocCurrentProto());
 			list_pd_split[i]=pd_split;
@@ -330,34 +336,25 @@ void mpfss_batch_cuckoo(void* args){
 
     create_beta_vals(m, matches, share, matches_ext, memblocksize );
 
-    #ifdef Mes
-    	clock_t clock_time = clock();  
-    #endif
     	
 	call_dpf_from_matches(	matches_ext,dpf_vectors,dpf_value_vectors, 
 							m, bucket_lenghts,y_args->cprg, list_pd_split);
-	
-	#ifdef Mes
-		oflush(ocCurrentProto());
-		clock_time = clock() - clock_time;
-	    double runtime_call_dpfs = ((double)clock_time)/CLOCKS_PER_SEC; // in seconds 
-	    printf("runtime_call_dpfs: %lf\n", runtime_call_dpfs);
-    #endif
 
 	create_mpfss_vector_cuckoo(	mpfss_bit_vector, mpfss_value_vector, 
 								dpf_vectors, dpf_value_vectors, 
 								all_buckets_array, bucket_lenghts, size, b, memblocksize);
-
+	
 
 	for (int i = 0; i < b; ++i){
 		free(dpf_vectors[i]);
 		free(dpf_value_vectors[i]);
+		free(matches_ext[i]->beta);
 		free(matches_ext[i]);
 	}
 	free(dpf_vectors);
 	free(dpf_value_vectors);
 	free(matches_ext);
-	free(list_pd_split);
+	//free(list_pd_split);
 	y_args->mpfss_bit_output=mpfss_bit_vector;
 	y_args->mpfss_output=mpfss_value_vector;
 

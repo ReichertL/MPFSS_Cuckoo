@@ -22,10 +22,10 @@ void call_dpf_threaded(void * params_less, int min, int max, void * pd_void){
 	uint8_t *** dpf_value_vectors= (uint8_t ***) params[2];
 	int * bucket_lenghts=(int *)params[3];
 	bool cprg= (bool) params[4];
+	debug("here %d %d", min, max);
 
 	ProtocolDesc *pd=(ProtocolDesc *) pd_void;
 	if (pd != NULL) ocSetCurrentProto(pd);
-
 	for (int i = min; i < max; ++i){
 		match_ext *me = matches_ext[i];
 		int index_non_obliv;  		

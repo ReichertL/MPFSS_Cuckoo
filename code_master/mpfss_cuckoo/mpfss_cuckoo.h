@@ -39,7 +39,8 @@ struct  mpfss_cuckoo_args{
     bool cprg;
     int threads;
 
-	ProtocolDesc pd; //set either pd or port and host
+	ProtocolDesc *pd; //set either pd or port and host
+    ProtocolDesc *pd_dbg; //set either pd or port and host
 	const char *host;
     const char *port;
     bool connection_already_exists; //need to be set
@@ -54,12 +55,13 @@ struct  mpfss_cuckoo_args{
 	std::vector<bool> mpfss_bit_output;
 	uint8_t **mpfss_output_raw;
 	bool * mpfss_bit_output_raw;
+    absl::Span<T> span_output;
 	
 	int set_beta;	//need to be set, 0: no beta, 1: take beta from vector
 
 };
 
-ProtocolDesc prepare_connection(int cp,const char *remote_host, const char *port );
+ProtocolDesc *prepare_connection(int cp,const char *remote_host, const char *port );
 void run_mpfss_cuckoo(int t, int size, mpfss_cuckoo_args<int> *mc_args);
 void free_mc_args( mpfss_cuckoo_args<int> *mc_args);
 void free_mc_args_content( mpfss_cuckoo_args<int> mc_args);
@@ -68,8 +70,27 @@ void free_mc_args_content( mpfss_cuckoo_args<int> mc_args);
 template <class T>
 class MPFSS_Cuckoo {
 
+int memblocksize=16; //TODO
+
 public:
 mpfss_cuckoo_args<T> mc_args;
+
+void get_connection(){
+    if(mc_args.print_stdout)log_info("Party %d \n", mc_args.cp);
+    if(!mc_args.connection_already_exists){
+        mc_args.pd=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
+    }
+    #ifdef DEBUG
+        if(mc_args.cp!=1){
+            while(!mc_args.pd_dbg){
+                mc_args.pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
+                this_thread::sleep_for(chrono::seconds(2));
+            }
+        }else{   
+            mc_args.pd_dbg=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
+        }
+    #endif 
+}
 
 void set_params(){
         //following Angle et al. : PIR-PSI 
@@ -77,11 +98,11 @@ void set_params(){
         double lambda=40;
         double x=mc_args.t;
 
-        if(x <=512){
+        if(x >=512){
             double an=123.5;
             double bn=-130-log(x)/log(2);
             double e=lambda/an-bn/an;
-            mc_args.b=e*mc_args.t;
+            mc_args.b=ceil(e*mc_args.t);
         }else if(x>4){
             using boost::math::normal;
             normal dist1(6.3, 2.3);
@@ -96,21 +117,133 @@ void set_params(){
         }else{
             mc_args.b=ceil(1.5*mc_args.t);
         }
-
-        mc_args.threads=omp_get_num_threads();
-
 }
+
+void print_benchmark(std::chrono::duration<double>  runtime, 
+    std::chrono::duration<double>  runtime_assignment,
+    std::chrono::duration<double>  runtime_buckets,
+    int max_loop, int evictions_logging){
+        //--------------------Print results----------------------------------------------------------------------
+
+
+        if (mc_args.do_benchmark){
+            std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
+            std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
+            to_string(max_loop), "no", to_string(evictions_logging),
+            to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
+            benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
+        }
+            
+}
+
+void prepare_results(yao_arguments *y_args, int lim){
+
+  //--------------------Prepare results for c++----------------------------------------------------------------------    
+
+        std::vector<T> v(mc_args.size);
+        std::vector<bool> v_bit(mc_args.size);
+        for (int i = 0; i < mc_args.size; ++i){
+
+            uint8_t *this_value_vector=y_args->mpfss_output[i];
+            T value;
+
+            for (int ii = memblocksize-lim; ii < memblocksize; ++ii){
+                value = ((T)value << 8) | this_value_vector[ii];
+            }
+            
+            v.at(i)=value;
+            bool b =y_args->mpfss_bit_output[i];
+            v_bit.at(i)=b;
+
+        }
+        
+        mc_args.mpfss_output=v;
+        mc_args.mpfss_bit_output=v_bit;
+        mc_args.mpfss_output_raw=y_args->mpfss_output;
+        mc_args.mpfss_bit_output_raw=y_args->mpfss_bit_output;
+        mc_args.span_output=absl::Span<T>(v);
+
+
+    #ifdef DEBUG
+
+        int other_p;
+        if (mc_args.cp==1){
+            other_p=2;
+        }else{
+            other_p=1;
+        }
+
+        std::vector<bool> v_bit_op(mc_args.size);
+        std::vector<T> v_value_op(mc_args.size);
+
+        if(mc_args.cp==1){
+            for (int i = 0; i < mc_args.size; ++i){
+                bool b= mc_args.mpfss_bit_output.at(i);
+                osend(mc_args.pd_dbg,1,&b,sizeof(bool));
+            }
+
+            for (int i = 0; i < mc_args.size; ++i){
+                bool b;
+                orecv(mc_args.pd_dbg,2,&b,sizeof(bool));
+                v_bit_op.at(i)=b;
+            }
+            for (int i = 0; i < mc_args.size; ++i){
+                osend(mc_args.pd_dbg,1,&mc_args.mpfss_output.at(i),sizeof(T));
+            }
+
+            for (int i = 0; i < mc_args.size; ++i){
+                orecv(mc_args.pd_dbg,2,&v_value_op.at(i),sizeof(T));
+            }
+
+
+        }else{
+            for (int i = 0; i < mc_args.size; ++i){
+                bool b;
+                orecv(mc_args.pd_dbg,1 ,&b,sizeof(bool));
+                v_bit_op.at(i)=b;
+            }
+
+            for (int i = 0; i < mc_args.size; ++i){
+                bool b=mc_args.mpfss_bit_output.at(i);
+                osend(mc_args.pd_dbg,2,&b,sizeof(bool));
+            }
+
+            for (int i = 0; i < mc_args.size; ++i){
+                orecv(mc_args.pd_dbg,1 ,&v_value_op.at(i),sizeof(T));
+            }
+
+            for (int i = 0; i < mc_args.size; ++i){
+                osend(mc_args.pd_dbg,2,&mc_args.mpfss_output.at(i),sizeof(T));
+            }
+        }
+        //oflush(mc_args.pd);
+
+
+        printf("MPFSS bit results\n");
+        for (int i = 0; i < mc_args.size; ++i){
+            bool v=mc_args.mpfss_bit_output.at(i)^v_bit_op.at(i);
+            cout<<v<<" ";
+        }
+        printf("\n");
+
+
+
+        printf("MPFSS results\n");
+        for (int i = 0; i < mc_args.size; ++i){
+            T v=mc_args.mpfss_output.at(i)^v_value_op.at(i);
+            cout<<v<<" ";
+        }
+        printf("\n");
+
+        cleanupProtocol(mc_args.pd_dbg);
+
+    #endif
+}
+
+
 mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_output) {
 
-    //cp should be 2
-    if(mc_args.print_stdout)log_info("Party %d \n", mc_args.cp);
-    if(!mc_args.connection_already_exists){
-        mc_args.pd=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
-    }
-
-
-    //--------------------Setting Parameters ------------------------------------------------------
-
+    get_connection();
     set_params();
 
         //Making max_loop dependent on the size of the input field
@@ -118,7 +251,6 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         int max_loop=0.5*y.size();
         mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,2, (int)mc_args.do_benchmark, mc_args.threads);
         int (*func)( int, int)=hashfunc_absl;
-        int memblocksize=16; //TODO
         int lim=memblocksize;
         if((int)sizeof(T)<lim){
             lim=sizeof(T);
@@ -183,7 +315,7 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
         
         int evictions_logging=0;
         int succ=-1;
-        orecv(&mc_args.pd,1,&succ,sizeof(int));
+        orecv(mc_args.pd,1,&succ,sizeof(int));
 
         if(succ==-1 ){
             return mpc_utils::Status{mpc_utils::StatusCode::kFailedPrecondition, "Assignment could not be created."};
@@ -208,93 +340,17 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
     //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
         
         if(mc_args.print_stdout) log_info("Executing Yao Protocol\n");   
-        execYaoProtocol(&mc_args.pd, mpfss_batch_cuckoo, y_args);
+        execYaoProtocol(mc_args.pd, mpfss_batch_cuckoo, y_args);
         
-    //--------------------Print results----------------------------------------------------------------------
         auto end_proto = std::chrono::system_clock::now();
         std::chrono::duration<double> runtime = end_proto-start_proto;
         if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
 
-        if (mc_args.do_benchmark){
-            std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", };
-            std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
-            to_string(max_loop), "no", to_string(evictions_logging),
-            to_string(runtime_buckets.count()), to_string(runtime_assignment.count()) };
-            benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
-        }
-                
+        print_benchmark(runtime, runtime_assignment,runtime_buckets,max_loop, evictions_logging);
+    prepare_results(y_args, lim);
 
-    //--------------------Prepare results for c++----------------------------------------------------------------------     
+    cleanupProtocol(mc_args.pd);
 
-        std::vector<T> v(mc_args.size);
-        std::vector<bool> v_bit(mc_args.size);
-        for (int i = 0; i < mc_args.size; ++i){
-
-            uint8_t *this_value_vector=y_args->mpfss_output[i];
-            T value;
-            
-            for (int ii = memblocksize-lim; ii < memblocksize; ++ii){
-                value = ((T)value << 8) | this_value_vector[ii];
-            }
-            
-            v.at(i)=value;
-            bool b =y_args->mpfss_bit_output[i];
-            v_bit.at(i)=b;
-
-        }
-    
-        span_output=absl::Span<T>(v);
-        mc_args.mpfss_output=v;
-        mc_args.mpfss_bit_output=v_bit;
-        mc_args.mpfss_output_raw=y_args->mpfss_output;
-        mc_args.mpfss_bit_output_raw=y_args->mpfss_bit_output;
-        
-    #ifdef DEBUG
-       
-        int other_p;
-        if (mc_args.cp==1){
-            other_p=2;
-        }else{
-            other_p=1;
-        }
-        std::vector<bool> v_bit_op(mc_args.size);
-        for (int i = 0; i < mc_args.size; ++i){
-            bool b;
-            orecv(&mc_args.pd,1 ,&b,sizeof(bool));
-            v_bit_op.at(i)=b;
-        }
-
-        for (int i = 0; i < mc_args.size; ++i){
-            bool b=mc_args.mpfss_bit_output.at(i);
-            osend(&mc_args.pd,2,&b,sizeof(bool));
-        }
-
-        printf("MPFSS bit results\n");
-        for (int i = 0; i < mc_args.size; ++i){
-            bool v=mc_args.mpfss_bit_output.at(i)^v_bit_op.at(i);
-            cout<<v<<" ";
-        }
-        printf("\n");
-
-        std::vector<T> v_value_op(mc_args.size);
-        for (int i = 0; i < mc_args.size; ++i){
-            orecv(&mc_args.pd,1 ,&v_value_op.at(i),sizeof(T));
-        }
-
-        for (int i = 0; i < mc_args.size; ++i){
-            osend(&mc_args.pd,2,&mc_args.mpfss_output.at(i),sizeof(T));
-        }
-
-        printf("MPFSS results \n");
-        for (int i = 0; i < mc_args.size; ++i){
-            T v=mc_args.mpfss_output.at(i)^v_value_op.at(i);
-            cout<<v<<" ";
-        }
-        printf("\n");
-
-    #endif
-
-    cleanupProtocol(&mc_args.pd);
     free(m);
     for (int i = 0; i < mc_args.b; ++i){
         free(matches[i]);   
@@ -313,11 +369,7 @@ mpc_utils::Status RunValueProvider(absl::Span<const T> y, absl::Span<T> span_out
 mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64_t> indices, absl::Span<T> span_output){
 
 
-    if(mc_args.print_stdout)log_info("Party %d \n", mc_args.cp);
-    if(!mc_args.connection_already_exists){
-        mc_args.pd=prepare_connection(mc_args.cp, mc_args.host, mc_args.port);
-    }
-
+    get_connection();
 
     //--------------------Setting Parameters ------------------------------------------------------
 
@@ -328,7 +380,6 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         int max_loop=0.5*mc_args.size;
         mpfss_cuckoo *m=new_mpfss_cuckoo(mc_args.t, mc_args.size, mc_args.w, mc_args.b, max_loop,1, (int)mc_args.do_benchmark, mc_args.threads);
         int (*func)( int, int)=hashfunc_absl;
-        int memblocksize=16; //TODO
         int lim=memblocksize;
         if((int)sizeof(T)<memblocksize){
             lim=sizeof(T);
@@ -348,17 +399,6 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
             beta_value_vector[i]=this_beta;
         }
 
-        /*for (int i = 0; i < mc_args.size; ++i)
-        {
-            uint8_t * this_beta=beta_vector[i];
-            printf("%d : ", i );
-            for (int j = 0; j < memblocksize; ++j)
-            {
-                printf("%d ", this_beta[j]);
-            }
-            printf("\n\n");
-        }*/
-    
     //--------------------Create Buckets----------------------------------------------------------------------
         auto start_buckets = std::chrono::system_clock::now();
 
@@ -399,8 +439,8 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
         match **matches = (match **) calloc(mc_args.b, sizeof(match*));
         int evictions_logging=0;
         int succ=create_assignement(m, indices_no, matches, func, mc_args.all_buckets, &evictions_logging, mc_args.rands );
-        osend(&mc_args.pd,1,&succ,sizeof(int));
-        oflush(&mc_args.pd);
+        osend(mc_args.pd,1,&succ,sizeof(int));
+        oflush(mc_args.pd);
         if(succ==-1 ){
             return mpc_utils::Status{mpc_utils::StatusCode::kFailedPrecondition, "Assignment could not be created."};
         }
@@ -425,98 +465,20 @@ mpc_utils::Status RunIndexProvider(absl::Span<const T> y, absl::Span<const int64
     //--------------------Execute Yao's protocol and cleanup----------------------------------------------------------------------
         
         if(mc_args.print_stdout) log_info("Executing Yao Protocol\n");   
-        execYaoProtocol(&mc_args.pd, mpfss_batch_cuckoo, y_args);
+        execYaoProtocol(mc_args.pd, mpfss_batch_cuckoo, y_args);
         auto end_proto = std::chrono::system_clock::now();
-        cleanupProtocol(&mc_args.pd);
-        auto end_proto2 = std::chrono::system_clock::now();
 
     //--------------------Print results----------------------------------------------------------------------
         std::chrono::duration<double> runtime = end_proto-start_proto;
         if(mc_args.print_stdout)log_info("Time to execute Yao Protocol : %lf seconds\n", runtime.count());
-        std::chrono::duration<double> runtime2 = end_proto2-start_proto;
-        if(mc_args.print_stdout)log_info("Time for proto+cleanup : %lf seconds\n", runtime.count());
 
-        if (mc_args.do_benchmark){
-            std::vector<string> list_of_names={"runtime","t","size","no_buckets", "no_hashfunctions", 
-            "max_loop", "max_loop_reached", "evictions","runtime_buckets", "runtime_assignment", "runtime2" };
-            std::vector<string> list_of_values={to_string(runtime.count()),to_string(mc_args.t),to_string(mc_args.size),to_string(mc_args.b),to_string(mc_args.w),
-            to_string(max_loop), "no", to_string(evictions_logging),
-            to_string(runtime_buckets.count()), to_string(runtime_assignment.count()),to_string(runtime2.count()) };
-            benchmark_list("cuckoo", list_of_names.size(), list_of_names, list_of_values);
-        }
-                
-    
-    //--------------------Prepare results for c++----------------------------------------------------------------------    
 
-        std::vector<T> v(mc_args.size);
-        std::vector<bool> v_bit(mc_args.size);
-        for (int i = 0; i < mc_args.size; ++i){
+        print_benchmark(runtime, runtime_assignment,runtime_buckets,max_loop, evictions_logging);
 
-            uint8_t *this_value_vector=y_args->mpfss_output[i];
-            T value;
+    //--------------------Prepare results for c++----------------------------------------------------------------------          
+    prepare_results(y_args, lim);
 
-            for (int ii = memblocksize-lim; ii < memblocksize; ++ii){
-                value = ((T)value << 8) | this_value_vector[ii];
-            }
-            
-            v.at(i)=value;
-            bool b =y_args->mpfss_bit_output[i];
-            v_bit.at(i)=b;
-
-        }
-        
-        span_output=absl::Span<T>(v);
-        mc_args.mpfss_output=v;
-        mc_args.mpfss_bit_output=v_bit;
-        mc_args.mpfss_output_raw=y_args->mpfss_output;
-        mc_args.mpfss_bit_output_raw=y_args->mpfss_bit_output;
-    
-
-    #ifdef DEBUG
-
-       /* int other_p;
-        if (mc_args.cp==1){
-            other_p=2;
-        }else{
-            other_p=1;
-        }
-
-        for (int i = 0; i < mc_args.size; ++i){
-            bool b= mc_args.mpfss_bit_output.at(i);
-            osend(&mc_args.pd,1,&b,sizeof(bool));
-        }
-
-        std::vector<bool> v_bit_op(mc_args.size);
-        for (int i = 0; i < mc_args.size; ++i){
-            bool b;
-            orecv(&mc_args.pd,2,&b,sizeof(bool));
-            v_bit_op.at(i)=b;
-        }
-
-        printf("MPFSS bit results\n");
-        for (int i = 0; i < mc_args.size; ++i){
-            bool v=mc_args.mpfss_bit_output.at(i)^v_bit_op.at(i);
-            cout<<v<<" ";
-        }
-        printf("\n");
-
-        for (int i = 0; i < mc_args.size; ++i){
-            osend(&mc_args.pd,1,&mc_args.mpfss_output.at(i),sizeof(T));
-        }
-
-        std::vector<T> v_value_op(mc_args.size);
-        for (int i = 0; i < mc_args.size; ++i){
-            orecv(&mc_args.pd,2,&v_value_op.at(i),sizeof(T));
-        }
-
-        printf("MPFSS results\n");
-        for (int i = 0; i < mc_args.size; ++i){
-            T v=mc_args.mpfss_output.at(i)^v_value_op.at(i);
-            cout<<v<<" ";
-        }
-        printf("\n");*/
-
-    #endif
+    cleanupProtocol(mc_args.pd);
 
 
     free(m);
