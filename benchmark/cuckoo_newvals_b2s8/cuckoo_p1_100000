@@ -1,0 +1,26 @@
+--------------------------------t 100000, size 1000000, run 0----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:80420.356668
+t:100000
+size:1000000
+no_buckets:151101
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:135236
+runtime_buckets:0.341824
+runtime_assignment:0.063904
+--------------------------------t 100000, size 1000000, run 1----------------------------------------------------------------------
+threads:8
+cprg:1
+runtime:82380.614225
+t:100000
+size:1000000
+no_buckets:151101
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:134405
+runtime_buckets:0.000000
+runtime_assignment:0.062679

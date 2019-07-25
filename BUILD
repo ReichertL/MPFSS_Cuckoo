@@ -158,7 +158,7 @@ cc_binary(
     srcs = [ "run_dpf.cpp" ],
     visibility = ["//visibility:public"],
     deps = [
-        "//includes/mpfss_naive:mpfss_naive"
+        "//includes/mpfss_naive:mpfss_naive_obliv"
 
     ],
 )

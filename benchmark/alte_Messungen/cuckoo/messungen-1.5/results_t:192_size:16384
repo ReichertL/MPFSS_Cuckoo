@@ -1,0 +1,3 @@
+Current Time,runtime,t,size,no_buckets b,no_hashfunctions w,max_loop,max_loop_reached,evictions
+01.05.2019-21:47,156.363556,192,16384,288,3,8192,no,169
+01.05.2019-21:50,174.470207,192,16384,288,3,8192,no,128

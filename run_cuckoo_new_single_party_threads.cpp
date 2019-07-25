@@ -27,12 +27,12 @@ int main(int argc, char *argv[]) {
     #else
 		//vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
 		//vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
-	  	vector<int> t_vals{74}; 
-	    vector<int> n_vals_pow{11};
+	  	<int> t_vals{741,1422,5205}; 
+	    vector<int> n_vals_pow{18,20,24};
 		int no_runs=10;
   		//int no_runs=3;
   		//std::vector<int> v_threads{1,2,4,8};
-  		std::vector<int> v_threads{8};
+  		std::vector<int> v_threads{4};
   	#endif
 
 

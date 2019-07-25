@@ -1,0 +1,5 @@
+Current Time,runtime,t,size,no_buckets b,no_hashfunctions w,max_loop,max_loop_reached,evictions,runtime_buckets,runtime_assignment
+18.06.2019-16:45,1.487900,2,20,3,3,10,no,0,0.000379,0.000184
+18.06.2019-17:09,1.680323,2,20,3,3,10,no,0,0.000300,0.000160
+20.06.2019-12:25,1.602862,2,20,3,3,1,no,0,0.000363,0.003578
+20.06.2019-12:26,1.554779,2,20,3,3,1,no,0,0.000387,0.005644

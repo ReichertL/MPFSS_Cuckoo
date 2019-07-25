@@ -28,12 +28,16 @@ int main(int argc, char *argv[]) {
     #else
 	   	//vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
 	   	//vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
-		vector<int> t_vals{ 741 }; 
-	   	vector<int> n_vals_pow{ 18};
-	    vector<int> v_threads{8,4,2,1};
-	    //vector<int> v_threads{2,4,8};
+	   	vector<int> t_vals{ 200,250}; 
+	   	//vector<int> n_vals_pow{ 24}; 
+		//vector<int> t_vals{3,4,5,6,7,8,9,10,15,21,30,3000}; 
+		//vector<int> t_vals{300}; 
+		//double scale= 0.0003;
+	   	//vector<int> n_vals_pow{ 24};
+	    vector<int> v_threads{8};
+	    //vector<int> v_threads{2};
+		//int no_runs=10;
 		int no_runs=10;
-		//int no_runs=1;
   	#endif
 
 	for (int k = 0; k < (int)v_threads.size(); ++k){
@@ -41,7 +45,10 @@ int main(int argc, char *argv[]) {
 		omp_set_num_threads(v_threads.at(k));
 	    for (int i = 0; i < (int) t_vals.size(); ++i){
 	    	int t= t_vals.at(i);
-	    	int size=pow(2,n_vals_pow.at(i));
+	    	//int size=pow(2,n_vals_pow.at(i));
+	    	int size=1000000;
+	    	//int size=n_vals_pow.at(i);
+	    	//int size=ceil((double)t_vals.at(i)/scale);
 
 		    mpfss_cuckoo_args<int> mc_args;
 		    mc_args.cp=cp;
@@ -112,7 +119,6 @@ int main(int argc, char *argv[]) {
 			        printf("\n");
 			        #endif	
         			mpc_utils::Status stat=mc.RunIndexProvider(y, indices, span_output);
-					this_thread::sleep_for(chrono::seconds(cp*1));
 				}else{
 					#ifdef DEBUG
 			        printf("beta: ");
@@ -128,7 +134,7 @@ int main(int argc, char *argv[]) {
 					y=absl::Span<const int>(v_y);
         			mpc_utils::Status stat=mc.RunValueProvider(y, span_output);
 
-					this_thread::sleep_for(chrono::seconds(cp*1));
+					this_thread::sleep_for(chrono::seconds(cp*5));
 				}
 			}
 		}	

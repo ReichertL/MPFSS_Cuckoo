@@ -1,0 +1,2 @@
+no changes due to using --copt="-D_OPENMP"
+sudo bazel run //:push_dpf --compilation_mode=opt --copt="-D_OPENMP"

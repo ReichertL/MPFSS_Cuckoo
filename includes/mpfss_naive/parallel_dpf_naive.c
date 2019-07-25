@@ -38,7 +38,7 @@ void parallize_naive(split_fn fn, void ** list_pd_split, int threads, int t, voi
     }
 
 
-   //	#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < used_threads; ++i){
     	if(min_arr[i]<max_arr[i]){
             log_info("min %d max %d\n", min_arr[i], max_arr[i]);

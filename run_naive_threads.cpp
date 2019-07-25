@@ -28,14 +28,18 @@ int main(int argc, char *argv[]) {
 			int no_runs=2;
 			std::vector<int> v_threads{2,4};
 	    #else
-			vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
-			vector<int> n_vals_pow{ 11,14,16,18,20,24}; 
-		  	//vector<int> t_vals{74}; 
-		    //vector<int> n_vals_pow{11};
-			int no_runs=10;
-	  		//int no_runs=1;
-	  		std::vector<int> v_threads{8,4,2,1};
-	  		//std::vector<int> v_threads{2,4,8};
+			//vector<int> t_vals{ 74,192,382,741,1422,5205 }; 
+			//vector<int> t_vals{3,9,15,21,30,300}; 
+			//vector<int> t_vals{3,4,5,6,7,8,9,10,15,21,30,300}; 
+			//double scale= 0.0003;
+	   	vector<int> t_vals{10,15}; 
+
+		   	//vector<int> n_vals_pow{ 24}; 
+			//vector<int> t_vals{3,30,300,3000}; 
+			//int no_runs=10;
+	  		int no_runs=10;
+	  		//std::vector<int> v_threads{8};
+	  		std::vector<int> v_threads{8};
 	  	#endif
 
 
@@ -45,8 +49,9 @@ int main(int argc, char *argv[]) {
 
 		    for (int i = 0; i < (int) t_vals.size(); ++i){
 		    	int t= t_vals.at(i);
-		    	int size=pow(2,n_vals_pow.at(i));
-
+		    	//int size=pow(2,n_vals_pow.at(i));
+	    		int size=1000000;
+		    	//int size=ceil((double)t_vals.at(i)/scale);
 
 		    	for (int j = 0; j < no_runs; ++j){
 		    		printf("--------------------------------t %d, size %d, run %d----------------------------------------------------------------------\n", t, size, j);
