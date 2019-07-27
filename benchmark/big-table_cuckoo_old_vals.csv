@@ -1,4 +1,5 @@
 threads,cprg,runtime,t,size,no_buckets,no_hashfunctions,max_loop,max_loop_reached,evictions,runtime_buckets,runtime_assignment
+8,1,29.101305,74,2048,106,3,1024,no,76,0.000204,0.000135
 8,1,29.009939,74,2048,106,3,1024,no,49,0.000000,0.000089
 8,1,71.358770,192,16384,277,3,8192,no,271,0.001296,0.000128
 8,1,71.860213,192,16384,277,3,8192,no,314,0.000000,0.000232

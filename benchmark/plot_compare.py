@@ -20,6 +20,7 @@ except:
 	print(str(caption))
 
 threads=8
+lim=0;
 
 
 no_filename1=path1.split(".")[0]
@@ -86,7 +87,8 @@ test1=df_means1.merge(df1_count, left_on='t', right_on='t')
 print(test1)
 
 for i in range(0,len(test1.index)):
-    ax.annotate(test1["count"].loc[i], 
+    if test1["count"].loc[i]<lim:
+    	ax.annotate(test1["count"].loc[i], 
     	(test1["t"].loc[i], test1['mean_runtime'].loc[i]),
 		xytext=(6, 5),
     	 textcoords='offset pixels'
@@ -105,11 +107,12 @@ test2=df_means2.merge(df2_count, left_on='t', right_on='t')
 print(test2)
 
 for i in range(0,len(test2.index)):
-    ax.annotate(test2["count"].loc[i], 
-    	(test2["t"].loc[i], test2['mean_runtime'].loc[i]),
-		xytext=(6, 5),
-    	 textcoords='offset pixels'
-    	)
+	if test2["count"].loc[i]<lim:
+	    ax.annotate(test2["count"].loc[i], 
+	    	(test2["t"].loc[i], test2['mean_runtime'].loc[i]),
+			xytext=(6, 5),
+	    	 textcoords='offset pixels'
+	    	)
 
 plt.legend()
 plt.savefig(img_path+strftime("%Y-%m-%d_%H:%M:%S", gmtime())+"_mean-runtime-vs-t_ compare_"+meas_type1+"_"+meas_type2)

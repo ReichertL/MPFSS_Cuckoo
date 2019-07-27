@@ -21,7 +21,7 @@ except:
 	print(str(caption))
 
 threads=8
-
+lim=0
 no_filename1=path1.split(".")[0]
 splits1=no_filename1.split("_")
 meas_type1=splits1[1]
@@ -115,13 +115,14 @@ ax.set_xscale("log")#, nonposx='clip')
 ax.set_yscale("log", nonposy='clip')
 
 plt.errorbar(df_means1["t"], df_means1['mean_runtime'], yerr=df_means1['std_runtime'], marker='x',  color='blue', label=lable1)
-
+print(df1_count)
 for i, txt in enumerate(df1_count):
-    ax.annotate(txt, 
-    	(df_means1["t"].loc[i], df_means1['mean_runtime'].loc[i]),
-		xytext=(6, 5),
-    	 textcoords='offset pixels'
-    	)
+	if(txt<=lim):
+	    ax.annotate(txt, 
+	    	(df_means1["t"].loc[i], df_means1['mean_runtime'].loc[i]),
+			xytext=(6, 5),
+	    	 textcoords='offset pixels'
+	    	)
 
 plt.ylabel('Mean Runtime in Seconds')
 plt.xlabel('Number Indices t')
@@ -134,20 +135,24 @@ plt.title(titel)
 
 
 plt.errorbar(df_means2["t"], df_means2['mean_runtime'], yerr=df_means2['std_runtime'], marker='x',  color='green', label=lable2)
+print(df2_count)
 for i, txt in enumerate(df2_count):
-    ax.annotate(txt, 
-    	(df_means2["t"].loc[i], df_means2['mean_runtime'].loc[i]),
-		xytext=(6, 5),
-    	 textcoords='offset pixels')
+	if txt <=lim:
+	    ax.annotate(txt, 
+	    	(df_means2["t"].loc[i], df_means2['mean_runtime'].loc[i]),
+			xytext=(6, 5),
+	    	 textcoords='offset pixels')
 
 plt.errorbar(df_means3["t"], df_means3['mean_runtime'], yerr=df_means3['std_runtime'], marker='x',  color='red', label=lable3)
+print(df3_count)
 for i, txt in enumerate(df3_count):
-    ax.annotate(txt, 
-    	(df_means3["t"].loc[i], df_means3['mean_runtime'].loc[i]),
-		xytext=(6, 5),
-    	 textcoords='offset pixels')
+	if txt <=lim:
+	    ax.annotate(txt, 
+	    	(df_means3["t"].loc[i], df_means3['mean_runtime'].loc[i]),
+			xytext=(6, 5),
+	    	 textcoords='offset pixels')
 
 
-plt.legend()
+plt.legend(loc='upper left')
 plt.savefig(img_path+strftime("%Y-%m-%d_%H:%M:%S", gmtime())+"_mean-runtime-vs-t_ compare_"+meas_type1+"_"+meas_type2)
 plt.show()

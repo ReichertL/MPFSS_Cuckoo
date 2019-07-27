@@ -21,6 +21,7 @@ except:
 	print(str(caption))
 
 threads=8
+lim=20
 
 no_filename1=path1.split(".")[0]
 splits1=no_filename1.split("_")
@@ -68,21 +69,21 @@ if caption=="2":
 	ticks=df_means2["t"]	
 	titel='Precentage of Indices to n (n='+str(n)+') \ncompared to Mean Runtime '
 	if threads != "-1":
-		titel=titel+" - threads: "+str(threads)
+		titel=titel+" - Threads: "+str(threads)
 if caption=="3":
 	lable1="MPFSS Naive"
 	lable2="MPFSS Cuckoo"
 	ticks=df_means2["t"]
 	titel='Number of Indices to Mean Runtime'
 	if threads != "-1":
-		titel=titel+" - threads: "+str(threads)
+		titel=titel+" - Threads: "+str(threads)
 else:
 	lable1=no_filename1
 	lable2=no_filename2
 	ticks=df_means1["t"]
 	titel='Number of Indices to Mean Runtime'
 	if threads != "-1":
-		titel=titel+" - threads: "+str(threads)
+		titel=titel+" - Threads: "+str(threads)
 
 
 
@@ -99,17 +100,19 @@ test1=df_means1.merge(df1_count, left_on='t', right_on='t')
 print(test1)
 
 for i in range(0,len(test1.index)):
-    ax.annotate(test1["count"].loc[i], 
+	if test1["count"].loc[i]<lim:
+
+	    ax.annotate(test1["count"].loc[i], 
     	(test1["t"].loc[i], test1['mean_runtime'].loc[i]),
-		xytext=(6, 5),
+		xytext=(-20,5),
     	 textcoords='offset pixels'
     	)
 
 plt.ylabel('Mean Runtime in Seconds')
 plt.xlabel('Number Indices t')
 #plt.xticks(ticks)
-ax.set_xticks(ticks)
-ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+#ax.set_xticks(ticks)
+#ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 plt.margins(0.05, 0.1)
 plt.title(titel)
 
@@ -121,13 +124,14 @@ test2=df_means2.merge(df2_count, left_on='t', right_on='t')
 print(test2)
 
 for i in range(0,len(test2.index)):
-    ax.annotate(test2["count"].loc[i], 
+	if test2["count"].loc[i]<lim:
+	    ax.annotate(test2["count"].loc[i], 
     	(test2["t"].loc[i], test2['mean_runtime'].loc[i]),
-		xytext=(6, 5),
+		xytext=(-20, 5),
     	 textcoords='offset pixels'
     	)
 
 
-plt.legend()
+plt.legend(loc="upper left")
 plt.savefig(img_path+strftime("%Y-%m-%d_%H:%M:%S", gmtime())+"_mean-runtime-vs-t_ compare_"+meas_type1+"_"+meas_type2)
 plt.show()

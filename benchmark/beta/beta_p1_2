@@ -1,0 +1,420 @@
+--------------------------------t 500, size 1000000, run 0----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.691542
+runtime:5.917196
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:845
+runtime_buckets:0.068458
+runtime_assignment:0.003522
+--------------------------------t 500, size 1000000, run 1----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.658170
+runtime:5.895816
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:753
+runtime_buckets:0.000000
+runtime_assignment:0.009170
+--------------------------------t 500, size 1000000, run 2----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.702419
+runtime:5.852500
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:744
+runtime_buckets:0.000000
+runtime_assignment:0.007687
+--------------------------------t 500, size 1000000, run 3----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.678199
+runtime:5.871842
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:607
+runtime_buckets:0.000000
+runtime_assignment:0.005969
+--------------------------------t 500, size 1000000, run 4----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.633768
+runtime:5.799535
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:815
+runtime_buckets:0.000000
+runtime_assignment:0.006369
+--------------------------------t 500, size 1000000, run 5----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.658948
+runtime:5.859744
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:595
+runtime_buckets:0.000000
+runtime_assignment:0.006441
+--------------------------------t 500, size 1000000, run 6----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.626827
+runtime:5.782419
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:787
+runtime_buckets:0.000000
+runtime_assignment:0.008440
+--------------------------------t 500, size 1000000, run 7----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.633564
+runtime:5.800550
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:711
+runtime_buckets:0.000000
+runtime_assignment:0.006000
+--------------------------------t 500, size 1000000, run 8----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.550284
+runtime:5.665481
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:622
+runtime_buckets:0.000000
+runtime_assignment:0.006139
+--------------------------------t 500, size 1000000, run 9----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 2.619495
+runtime:5.758978
+t:500
+size:1000000
+no_buckets:725
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:663
+runtime_buckets:0.000000
+runtime_assignment:0.005758
+--------------------------------t 750, size 1000000, run 0----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.401874
+runtime:7.865393
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1208
+runtime_buckets:0.066019
+runtime_assignment:0.002330
+--------------------------------t 750, size 1000000, run 1----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.463780
+runtime:7.917234
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1139
+runtime_buckets:0.000000
+runtime_assignment:0.006928
+--------------------------------t 750, size 1000000, run 2----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.293230
+runtime:7.740817
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1065
+runtime_buckets:0.000000
+runtime_assignment:0.003925
+--------------------------------t 750, size 1000000, run 3----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.351429
+runtime:7.822539
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1131
+runtime_buckets:0.000000
+runtime_assignment:0.004385
+--------------------------------t 750, size 1000000, run 4----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.255002
+runtime:7.706871
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1205
+runtime_buckets:0.000000
+runtime_assignment:0.004302
+--------------------------------t 750, size 1000000, run 5----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.346493
+runtime:7.849937
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1117
+runtime_buckets:0.000000
+runtime_assignment:0.004202
+--------------------------------t 750, size 1000000, run 6----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.493642
+runtime:7.959665
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:919
+runtime_buckets:0.000000
+runtime_assignment:0.003978
+--------------------------------t 750, size 1000000, run 7----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.289823
+runtime:7.800105
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1314
+runtime_buckets:0.000000
+runtime_assignment:0.004380
+--------------------------------t 750, size 1000000, run 8----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.516193
+runtime:7.986265
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1037
+runtime_buckets:0.000000
+runtime_assignment:0.004294
+--------------------------------t 750, size 1000000, run 9----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 4.365938
+runtime:7.826894
+t:750
+size:1000000
+no_buckets:1091
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1208
+runtime_buckets:0.000000
+runtime_assignment:0.004397
+--------------------------------t 1000, size 1000000, run 0----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.835326
+runtime:10.627725
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1605
+runtime_buckets:0.071450
+runtime_assignment:0.002638
+--------------------------------t 1000, size 1000000, run 1----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.779535
+runtime:10.549436
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1440
+runtime_buckets:0.000000
+runtime_assignment:0.009074
+--------------------------------t 1000, size 1000000, run 2----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.610512
+runtime:10.328093
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1650
+runtime_buckets:0.000000
+runtime_assignment:0.004685
+--------------------------------t 1000, size 1000000, run 3----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.461905
+runtime:10.254104
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1644
+runtime_buckets:0.000000
+runtime_assignment:0.004428
+--------------------------------t 1000, size 1000000, run 4----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.495448
+runtime:10.289062
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1592
+runtime_buckets:0.000000
+runtime_assignment:0.005021
+--------------------------------t 1000, size 1000000, run 5----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.871238
+runtime:10.658062
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1612
+runtime_buckets:0.000000
+runtime_assignment:0.004744
+--------------------------------t 1000, size 1000000, run 6----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.741857
+runtime:10.469418
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1594
+runtime_buckets:0.000000
+runtime_assignment:0.004960
+--------------------------------t 1000, size 1000000, run 7----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.575936
+runtime:10.347095
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1520
+runtime_buckets:0.000000
+runtime_assignment:0.005139
+--------------------------------t 1000, size 1000000, run 8----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.489250
+runtime:10.459666
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1635
+runtime_buckets:0.000000
+runtime_assignment:0.004560
+--------------------------------t 1000, size 1000000, run 9----------------------------------------------------------------------
+threads:8
+cprg:1
+create_beta_vals: 6.472627
+runtime:10.261539
+t:1000
+size:1000000
+no_buckets:1458
+no_hashfunctions:3
+max_loop:500000
+max_loop_reached:no
+evictions:1570
+runtime_buckets:0.000000
+runtime_assignment:0.004284
