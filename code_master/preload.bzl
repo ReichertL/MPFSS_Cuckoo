@@ -55,9 +55,8 @@ def code_master_preload():
     if "rules_python" not in native.existing_rules():
         http_archive(
             name = "rules_python",
-            url = "https://github.com/bazelbuild/rules_python/archive/32e964842b4139645417d0a8c24c807c163d7cfc.zip",
-            strip_prefix = "rules_python-32e964842b4139645417d0a8c24c807c163d7cfc",
-            sha256 = "6874ee36cd55a2ffacf956ca60f360e12acdbe8389de1a7a624a13916da00879",
+            url = "https://github.com/bazelbuild/rules_python/releases/download/0.1.0/rules_python-0.1.0.tar.gz",
+            sha256 = "b6d46438523a3ec0f3cead544190ee13223a52f6a6765a29eae7b7cc24cc83a0",
         )
 
     # New dependencies.
@@ -71,7 +70,6 @@ def code_master_preload():
     if "io_bazel_rules_docker" not in native.existing_rules():
         http_archive(
             name = "io_bazel_rules_docker",
-            strip_prefix = "rules_docker-2ae5f7f0c43b7efd32a4d7f927bb701f060972af",
-            urls = ["https://github.com/bazelbuild/rules_docker/archive/2ae5f7f0c43b7efd32a4d7f927bb701f060972af.zip"],
-            sha256 = "363a8b03f7af8bdd5b44a9d4e19566870b520f8c155fb72837f7fd4a3bdc2538",
+            strip_prefix = "rules_docker-cc45596d140b3b8651eb7b51b561f1bf72d1eea9",
+            urls = ["https://github.com/bazelbuild/rules_docker/archive/cc45596d140b3b8651eb7b51b561f1bf72d1eea9.zip"],
         )

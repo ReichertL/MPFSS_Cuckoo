@@ -1,7 +1,6 @@
 load("@io_bazel_rules_docker//cc:image.bzl", "cc_image")
-load(   "@io_bazel_rules_docker//container:container.bzl", "container_image",)
-load("@io_bazel_rules_docker//container:bundle.bzl", "container_bundle",)
-load( "@io_bazel_rules_docker//container:push.bzl", "container_push",)
+load("@io_bazel_rules_docker//container:container.bzl", "container_bundle")
+load("@io_bazel_rules_docker//container:push.bzl", "container_push")
 
 #-------standalone--------------------------------------------------
 container_push(
@@ -9,7 +8,7 @@ container_push(
    image = ":run_standalone_image",
    format = "Docker",
    registry = "gitlab.informatik.hu-berlin.de:4567",
-   repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
+   repository = "schopmaf/mpfss_cuckoo",
    tag= "run_standalone_image"
 )
 
@@ -35,7 +34,7 @@ container_push(
    image = ":test_standalone_image",
    format = "Docker",
    registry = "gitlab.informatik.hu-berlin.de:4567",
-   repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
+   repository = "schopmaf/mpfss_cuckoo",
    tag= "test_standalone_image"
 )
 
@@ -62,7 +61,7 @@ container_push(
    image = ":threads_single_party",
    format = "Docker",
    registry = "gitlab.informatik.hu-berlin.de:4567",
-   repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
+   repository = "schopmaf/mpfss_cuckoo",
    tag= "threads"
 )
 
@@ -88,7 +87,7 @@ container_push(
     image = ":threads_new_single_party",
     format = "Docker",
     registry = "gitlab.informatik.hu-berlin.de:4567",
-    repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
+    repository = "schopmaf/mpfss_cuckoo",
     tag= "threads_new"
 )
 
@@ -117,7 +116,7 @@ container_push(
     image = ":image_naive",
     format = "Docker",
     registry = "gitlab.informatik.hu-berlin.de:4567",
-    repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
+    repository = "schopmaf/mpfss_cuckoo",
     tag= "threads_naive"
 )
 
@@ -144,7 +143,7 @@ container_push(
    image = ":dpf_image",
    format = "Docker",
    registry = "gitlab.informatik.hu-berlin.de:4567",
-   repository = "ti/theses/student-content/reichert-leonie-ma/mpfss_cuckoo",
+   repository = "schopmaf/mpfss_cuckoo",
    tag= "dpf"
 )
 

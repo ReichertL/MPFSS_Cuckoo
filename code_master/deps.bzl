@@ -1,5 +1,14 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive",)
+load(
+    "@rules_foreign_cc//:workspace_definitions.bzl",
+    "rules_foreign_cc_dependencies",
+)
 load("@mpc_utils//mpc_utils:deps.bzl", "mpc_utils_deps")
+load(
+    "@io_bazel_rules_docker//repositories:repositories.bzl",
+    container_repositories = "repositories",
+)
+load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
 load( "@io_bazel_rules_docker//cc:image.bzl", _cc_image_repos = "repositories",)
 
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
@@ -10,7 +19,10 @@ def clean_dep(dep):
     return str(Label(dep))
 
 def code_master_deps():
+    rules_foreign_cc_dependencies()
     mpc_utils_deps()
+    container_repositories()
+    container_deps()
     _cc_image_repos()
     boost_deps()
 
