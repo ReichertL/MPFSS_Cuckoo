@@ -52,34 +52,34 @@ oblivc_library(
 )
 
 
-oblivc_library(
-    name = "mpfss_naive_obliv_original",
-    srcs = [
-        
-        "mpfss_naive.oc",
-        "mpfss_naive.c",
-
-    ],
-    hdrs = [
-        "mpfss_naive.oh",
-        "mpfss_naive.h",
-    ],
-    deps = [
-        "//includes:util",
-        "//includes:dbg",
-        #"@ack//:oram_fssl",
-        "//includes/fss-altered:fss_cprg_altered",
-        "//includes/fss-altered:fss_altered",
-        "@ack//:obig",
-        "@ack//:osort",
-        ":parallel_naive",
-        "//includes:uint128_c",
-
-    ],
-    visibility = ["//visibility:public"],
-    #copts = ["-DDEBUG -g3"], 
-    copts = ["-DOriginal_FSS"], 
-)
+#oblivc_library(
+#    name = "mpfss_naive_obliv_original",
+#    srcs = [
+#        
+#        "mpfss_naive.oc",
+#        "mpfss_naive.c",
+#
+#    ],
+#    hdrs = [
+#        "mpfss_naive.oh",
+#        "mpfss_naive.h",
+#    ],
+#    deps = [
+#        "//includes:util",
+#        "//includes:dbg",
+#        #"@ack//:oram_fssl",
+#        "//includes/fss-altered:fss_cprg_altered",
+#        "//includes/fss-altered:fss_altered",
+#        "@ack//:obig",
+#        "@ack//:osort",
+#        ":parallel_naive",
+#        "//includes:uint128_c",
+#
+#    ],
+#    visibility = ["//visibility:public"],
+#    #copts = ["-DDEBUG -g3"], 
+#    copts = ["-DOriginal_FSS"], 
+#)
 
 
 

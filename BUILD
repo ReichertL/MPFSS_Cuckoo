@@ -102,7 +102,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "//code_master/mpfss_new_cuckoo:mpfss_new_cuckoo_lib",
-        "@abseil//absl/types:span",
+        "@com_google_absl//absl/types:span",
 
     ],
 

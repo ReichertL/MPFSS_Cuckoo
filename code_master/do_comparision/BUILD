@@ -22,7 +22,7 @@ cc_binary(
         "//includes:dbg",
         "//code_master/mpfss_cuckoo:mpfss_cuckoo_lib",
         "@mpc_utils//mpc_utils:status",
-        "@abseil//absl/types:span",
+        "@com_google_absl//absl/types:span",
 
     ],
 

@@ -27,7 +27,7 @@ cc_binary(
         ":mpfss_cuckoo_obliv",
         "//includes/create_structs:create_structs",
         "@mpc_utils//mpc_utils:status",
-        "@abseil//absl/types:span",
+        "@com_google_absl//absl/types:span",
         "@boost//:random",
 
 
@@ -58,7 +58,7 @@ cc_binary(
         ":mpfss_cuckoo_obliv",
         "//includes/create_structs:create_structs",
         "@mpc_utils//mpc_utils:status",
-        "@abseil//absl/types:span",
+        "@com_google_absl//absl/types:span",
 
     ],
 
@@ -163,7 +163,7 @@ cc_library(
         ":mpfss_cuckoo_obliv",
         "//includes/create_structs:create_structs",
         "@mpc_utils//mpc_utils:status",
-        "@abseil//absl/types:span",
+        "@com_google_absl//absl/types:span",
         "@boost//:random",
     ],
 

@@ -27,10 +27,10 @@ int main(int argc, char *argv[]) {
 
     #else
 
-	  	vector<int> n_vals_pow{25}; 
+	  	vector<int> n_vals_pow{10, 12, 14, 16, 18, 20, 22, 24}; 
 	    //vector<int> thread_vals{ 8, 4,2};
-		vector<int> thread_vals{ 2};
-		int no_runs=4;
+		vector<int> thread_vals{1};
+		int no_runs=1;
   	#endif
 
 	for (int k = 0; k < (int) thread_vals.size(); ++k)
