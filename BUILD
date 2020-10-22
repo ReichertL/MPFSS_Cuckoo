@@ -14,6 +14,7 @@ container_push(
 
 cc_image(
     name = "run_standalone_image",
+    base = "@distroless_base//image",
     binary = ":run_cuckoo",
 )
 
@@ -40,6 +41,7 @@ container_push(
 
 cc_image(
     name = "test_standalone_image",
+    base = "@distroless_base//image",
     binary = ":run_cuckoo_test",
 )
 
@@ -67,6 +69,7 @@ container_push(
 
 cc_image(
     name = "threads_single_party",
+    base = "@distroless_base//image",
     binary = ":threads",
 )
 
@@ -93,6 +96,7 @@ container_push(
 
 cc_image(
     name = "threads_new_single_party",
+    base = "@distroless_base//image",
     binary = ":threads_new",
 )
 
@@ -122,6 +126,7 @@ container_push(
 
 cc_image(
     name = "image_naive",
+    base = "@distroless_base//image",
     binary = ":naive",
 )
 
@@ -148,6 +153,7 @@ container_push(
 )
 
 cc_image(
+    base = "@distroless_base//image",
     name = "dpf_image",
     binary = ":dpf",
 )

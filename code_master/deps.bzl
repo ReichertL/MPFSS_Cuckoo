@@ -10,6 +10,10 @@ load(
 )
 load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
 load( "@io_bazel_rules_docker//cc:image.bzl", _cc_image_repos = "repositories",)
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_pull",
+)
 
 load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
 
@@ -56,3 +60,11 @@ def code_master_deps():
 
 
 
+
+    # Something needs a recent GlibC, which is not included in standard distroless images.
+    container_pull(
+        name = "distroless_base",
+        digest = "sha256:c6f196cb2cd479d2ed2986dcb8365f52ebf6f22fc05d63aa77a51fc6725d082f",
+        registry = "index.docker.io",
+        repository = "schoppmp/distroless-arch",
+    )
