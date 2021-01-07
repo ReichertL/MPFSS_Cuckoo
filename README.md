@@ -54,12 +54,21 @@ Check my [master thesis](https://github.com/ReichertL/Masterthesis) or our [pape
 * To test MPFSS with Cuckoo hashing and multi-threading
 ```
     bazel build //:threads_new
+    bazel run //:threads_new localhost:5555 1
+    bazel run //:threads_new localhost:5555 2   #In a second shell
 ```
-To alter parameters (such as number of runs, size n of the multi-point function or number of threads)  check  `run_cuckoo_new_single_party_threads.cpp`. 
+In this example, the protocol is run over `localhost` and the two shells use port `5555` to communicate. 
+To take measurements using different host, simply change the `localhost` to the corresponding IP of the other party and change `5555` to the designated port of the other party. 
+The last argument allows the program to know if it needs to establish a new connection or wait for incoming connections. Always start party `1` before party `2`.
+To alter parameters used during execution(such as number of runs, size n of the multi-point function or number of threads)  check  `run_cuckoo_new_single_party_threads.cpp`. 
+
 
 * To test a naive version of MPFSS without Cuckoo Hashing.
 ```
     bazel build //:naive
+    bazel run //:naive localhost:5555 1
+    bazel run //:naive localhost:5555 2   #In a second shell
+    
 ``` 
 
 To alter parameters (such as number of runs, size n of the multi-point function or number of threads)  check  `run_naive_threads.cpp`. 
@@ -68,14 +77,46 @@ To alter parameters (such as number of runs, size n of the multi-point function 
 * To test the DPF of the Absentminded Crypto Library. 
 ```    
     bazel build //:dpf
+    bazel run //:dpf localhost:5555 1
+    bazel run //:dpf localhost:5555 2   #In a second shell
 ``` 
+
+
+
 To alter parameters (such as number of runs, size n of the multi-point function or number of threads)  check  `run_dpf.cpp`. 
 
 
 
-
+## Using the Container Registry
 To create Docker files, edit the `cc_image` statements in the top level `BUILD` file.
 To automatically push these images to a GitHub/GitLab Container Registry, alter the corresponding `container_push` statements. 
-Using the registry simplifies move containers to remote hosts. 
+Using the registry simplifies moving containers to servers for measurements. 
 
+
+* Pull image from gitlab registry:
+
+```
+sudo docker pull gitlab.informatik.hu-berlin.de:4567/path/to/repository/mpfss_cuckoo:test_cuckoo_single_party
+```
+
+* Execute docker and log using `standalone` as name for the container:
+
+```
+sudo docker run -it -d --name standalone gitlab.informatik.hu-berlin.de:4567/path/to/repository/mpfss_cuckoo:test_cuckoo_single_party 52.169.2.97:5555
+```
+
+* Expose docker ports on host to take measurements between two hosts:
+```
+sudo docker run -it -d --net host --name standalone gitlab.informatik.hu-berlin.de:4567/path/to/repository/mpfss_cuckoo:test_cuckoo_single_party 52.169.2.97:5555
+```
+
+* Show logs of container with name `standalone`:
+```
+sudo docker logs standalone
+```
+
+* Terminate docker container with name `standalone`:
+```
+sudo docker stop standalone
+```
 
