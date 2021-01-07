@@ -119,7 +119,7 @@ sudo docker logs standalone
 ```
 sudo docker stop standalone
 ```
-### Organisation of codes
+### Organisation of code
 
 The code in `code_master/mpfss_cuckoo` code does not allow multi-threading during execution, `code_master/mpfss_new_cuckoo` does however.
 The includes contain a library for cuckoo hashing, as well as useful data structures and an altered version of the DPF function from the Absentminded Crypto Library. This fork was necessary to ensure multi-threading works.
