@@ -1,17 +1,22 @@
-# Multipoint-Function Secret Sharing using Cuckoo Hashing
+# Multi-Point Function Secret Sharing using Cuckoo Hashing
 
 ## Tools and Dependecies
-* Absentminded Crypto Libaray for Function Secret Sharing 
+* Obliv-C as Multi-Party Computation framework
+* Absentminded Crypto Library for Distribute Point Functions (DPF) 
 * Bazel for building the project
+* Abseil Library for hashing
+
     
 ## Functionality 
-
+### Function Secret Sharing
 Function secret sharing (FSS) is a useful primitive for secure multi-party computation.
 It creates secret shares of functions over a domain with size n. In this two party
 protocol, each party receives a vector as final result. Combining these vectors gives
 the input function evaluated over [0, n]. So far, FSS implementations have focused on
 distributed point functions (DPF), which is the secret sharing of point functions. A
 point function is unequal to zero at exactly one location.
+
+### Multipoint Function Secret Sharing
 More complex is the creation of secret shares of multi-point functions, also called
 multi-point function secret sharing (MPFSS). MPFSS shares for example can be
 used as source of correlated randomness in vector oblivious linear-function evaluation
@@ -24,6 +29,8 @@ Then one DPF per bucket is called. To solve the assignment problem, the authors
 leverage the primitive of combinatorial batch codes. The basic idea of this optimization
 is saving costs by having more DPF runs on shorter domains. While the authors give
 estimates, they did not implement their protocol and evaluate its real world trade off.
+
+### Performance Improvments using Cuckoo Hashing
 This work focuses on a similar optimization with the main difference that instead of
 applying combinatorial batch codes, cuckoo hashing is used. Cuckoo hashing allows
 constant look-up time and sublinear insertion time even in the worst-case. A lot
@@ -42,4 +49,33 @@ Check my [master thesis](https://github.com/ReichertL/Masterthesis) or our [pape
 
 ## How to execute
 
-1. Install [Bazel](https://docs.bazel.build/versions/3.7.0/install.html) 
+* Install [Bazel](https://docs.bazel.build/versions/3.7.0/install.html) 
+
+* To test MPFSS with Cuckoo hashing and multi-threading
+```
+    bazel build //:threads_new
+```
+To alter parameters (such as number of runs, size n of the multi-point function or number of threads)  check  `run_cuckoo_new_single_party_threads.cpp`. 
+
+* To test a naive version of MPFSS without Cuckoo Hashing.
+```
+    bazel build //:naive
+``` 
+
+To alter parameters (such as number of runs, size n of the multi-point function or number of threads)  check  `run_naive_threads.cpp`. 
+    
+
+* To test the DPF of the Absentminded Crypto Library. 
+```    
+    bazel build //:dpf
+``` 
+To alter parameters (such as number of runs, size n of the multi-point function or number of threads)  check  `run_dpf.cpp`. 
+
+
+
+
+To create Docker files, edit the `cc_image` statements in the top level `BUILD` file.
+To automatically push these images to a GitHub/GitLab Container Registry, alter the corresponding `container_push` statements. 
+Using the registry simplifies move containers to remote hosts. 
+
+
