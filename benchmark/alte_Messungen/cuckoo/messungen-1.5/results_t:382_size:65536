@@ -1,3 +1,0 @@
-Current Time,runtime,t,size,no_buckets b,no_hashfunctions w,max_loop,max_loop_reached,evictions
-01.05.2019-22:02,682.960837,382,65536,573,3,32768,no,274
-01.05.2019-22:07,347.620133,382,65536,573,3,32768,no,231
