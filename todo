@@ -1,4 +1,0 @@
-LAN CUuckoo cprg, threads=1
-dpf für alle n {10,12,14,16,18,20,22,24}
-(eventuell mehr threads probieren später)
-mpfss n=2^20 , t > 200 in hunderterschritte bis 1500 
